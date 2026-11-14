@@ -1,0 +1,89 @@
+.briefing-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 50% 50%, #0f1b3d 0%, #0a0e1a 70%);
+  padding: var(--space-4);
+}
+
+.briefing-container {
+  max-width: 600px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  animation: fadeIn 0.5s ease-out;
+}
+
+.briefing-radio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.briefing-radio-icon {
+  font-size: 3rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.briefing-radio-label {
+  font-size: var(--text-sm);
+  color: var(--accent-amber);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.briefing-radio-static {
+  width: 200px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.briefing-message-box {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: var(--space-6);
+  width: 100%;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.briefing-text {
+  font-size: var(--text-lg);
+  line-height: 1.6;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.briefing-dots {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.briefing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  transition: all 0.3s;
+}
+
+.briefing-dot.active {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+}
+
+.briefing-dot.done {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  opacity: 0.5;
+}

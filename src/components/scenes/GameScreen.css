@@ -1,0 +1,83 @@
+.game-screen {
+  display: grid;
+  grid-template-columns: 220px 1fr 220px;
+  grid-template-rows: 1fr auto;
+  gap: var(--space-md);
+  height: 100vh;
+  padding: var(--space-md);
+  background-color: var(--bg-primary);
+  position: relative;
+  overflow: hidden;
+}
+
+.game-sidebar-left {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  overflow-y: auto;
+}
+
+.game-center {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  overflow-y: auto;
+}
+
+.game-sidebar-right {
+  grid-column: 3;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  overflow-y: auto;
+}
+
+.game-bottom {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+.station-view {
+  flex: 1;
+  min-height: 200px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  color: var(--text-secondary);
+  position: relative;
+  overflow: hidden;
+}
+
+.station-view::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+}
+
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.day-briefing {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  align-items: center;
+}
