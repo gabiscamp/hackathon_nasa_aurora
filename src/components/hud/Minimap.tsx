@@ -5,7 +5,7 @@ import { useCrewStore } from '../../stores/useCrewStore';
 import { CREW_ROLES } from '../../data/crew';
 
 /** Square region of the world (ship bounds) shown inside the round minimap. */
-const VIEW = { x: 290, y: -50, size: 1040 } as const;
+const VIEW = { x: 230, y: -225, size: 1240 } as const;
 
 /** Bottom-right HUD: round radar with room floors, crew dots and the player. */
 export function Minimap() {
