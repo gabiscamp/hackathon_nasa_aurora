@@ -121,10 +121,11 @@ export const BAKED_CHARACTER_PATCHES: readonly ImagePatch[] = [
 
 export const PLAYER_SPAWN = { x: 794, y: 470 } as const;
 
+/** Where each crew role works; keys match CrewRole in src/data/crew.ts. */
 export const NPC_SPAWNS = {
-  kira: { x: 1110, y: 620, room: 'engineering' },
-  leo: { x: 760, y: 610, room: 'medical' },
-  maya: { x: 1000, y: 310, room: 'lab' },
+  engineer: { x: 1110, y: 620, room: 'engineering' },
+  medic: { x: 760, y: 610, room: 'medical' },
+  scientist: { x: 1000, y: 310, room: 'lab' },
 } as const satisfies Record<string, { x: number; y: number; room: RoomId }>;
 
 export function isPointWalkable(x: number, y: number): boolean {

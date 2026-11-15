@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { gameEvents, EVENTS } from '../events';
+import { useCrewStore } from '../../stores/useCrewStore';
+import { CREW_ROLES } from '../../data/crew';
 import {
   SHIP_BG_KEY,
   WORLD_WIDTH,
@@ -44,9 +46,31 @@ export class GameScene extends Phaser.Scene {
     this.createShipBackground();
     this.createPlayer();
 
-    this.createNPC(NPC_SPAWNS.kira.x, NPC_SPAWNS.kira.y, 0xf5a623, 'Kira');
-    this.createNPC(NPC_SPAWNS.leo.x, NPC_SPAWNS.leo.y, 0x2ecc71, 'Leo');
-    this.createNPC(NPC_SPAWNS.maya.x, NPC_SPAWNS.maya.y, 0x8b5cf6, 'Maya');
+    // Pause menu (React) freezes the world while it is open.
+    const onMenuOpened = () => this.scene.pause();
+    const onMenuClosed = () => {
+      // Keys released during the pause would otherwise stay "down".
+      this.input.keyboard?.resetKeys();
+      this.scene.resume();
+    };
+    gameEvents.on(EVENTS.MENU_OPENED, onMenuOpened);
+    gameEvents.on(EVENTS.MENU_CLOSED, onMenuClosed);
+    // Phaser fires DESTROY (not SHUTDOWN) when React unmounts the game, so remove on both.
+    const removeMenuListeners = () => {
+      gameEvents.off(EVENTS.MENU_OPENED, onMenuOpened);
+      gameEvents.off(EVENTS.MENU_CLOSED, onMenuClosed);
+    };
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, removeMenuListeners);
+    this.events.once(Phaser.Scenes.Events.DESTROY, removeMenuListeners);
+
+    // Crew comes from the crew chosen on the home screen.
+    const crew = useCrewStore.getState().crew;
+    for (const role of CREW_ROLES) {
+      const member = crew[role];
+      const spawn = NPC_SPAWNS[role];
+      const firstName = member.name.replace(/^Dr\.\s*/, '').split(' ')[0];
+      this.createNPC(spawn.x, spawn.y, Phaser.Display.Color.HexStringToColor(member.color).color, firstName);
+    }
 
     // Input — WASD and arrows work simultaneously
     this.cursors = this.input.keyboard!.createCursorKeys();

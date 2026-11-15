@@ -7,11 +7,12 @@ interface EndingScreenProps {
   playerName: string;
   resources: { energy: number; oxygen: number; shielding: number };
   onReplay: () => void;
+  onOpenCredits: () => void;
 }
 
 const ENDING_ICONS = { good: '🎉', medium: '😮‍💨', bad: '💪' };
 
-export function EndingScreen({ playerName, resources, onReplay }: EndingScreenProps) {
+export function EndingScreen({ playerName, resources, onReplay, onOpenCredits }: EndingScreenProps) {
   const endingType = calculateEnding(resources);
   const ending = ENDINGS.find((e) => e.id === endingType)!;
   const avg = Math.round((resources.energy + resources.oxygen + resources.shielding) / 3);
@@ -57,6 +58,9 @@ export function EndingScreen({ playerName, resources, onReplay }: EndingScreenPr
           <p className="ending-source">
             Data sources: NASA DONKI, NASA ECLSS, NASA OSDR
           </p>
+          <button type="button" className="ending-credits" onClick={onOpenCredits}>
+            See credits &amp; NASA sources
+          </button>
         </div>
 
         <Button variant="primary" size="lg" icon="🔄" onClick={onReplay}>

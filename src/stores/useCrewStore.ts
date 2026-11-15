@@ -1,51 +1,67 @@
 import { create } from 'zustand';
-import { CREW_DEFINITIONS, type CrewMember } from '../data/crew';
+import { persist } from 'zustand/middleware';
+import { CREW_ROLES, type CrewMember, type CrewRole } from '../data/crew';
+import { DEFAULT_TEAM_ID, getTeam } from '../data/crews';
 import { clamp } from '../utils/clamp';
 
-type CrewRecord = Record<string, CrewMember>;
+type CrewRecord = Record<CrewRole, CrewMember>;
 
 interface CrewState {
+  /** Which pre-defined crew (src/data/crews.ts) is on board. */
+  teamId: string;
   crew: CrewRecord;
 
+  /** Puts a crew on board with full health and morale. */
+  selectTeam: (teamId: string) => void;
   updateCrew: (id: string, partial: Partial<CrewMember>) => void;
   dailyMoraleTick: (resources: { energy: number; oxygen: number; shielding: number }) => void;
   reset: () => void;
 }
 
-function buildInitialCrew(): CrewRecord {
-  const record: CrewRecord = {};
-  for (const def of CREW_DEFINITIONS) {
-    record[def.id] = { ...def, health: 100, morale: 100 };
+function buildInitialCrew(teamId: string): CrewRecord {
+  const team = getTeam(teamId);
+  const record = {} as CrewRecord;
+  for (const role of CREW_ROLES) {
+    record[role] = { ...team.members[role], health: 100, morale: 100 };
   }
   return record;
 }
 
-export const useCrewStore = create<CrewState>()((set) => ({
-  crew: buildInitialCrew(),
+function isRole(id: string): id is CrewRole {
+  return (CREW_ROLES as readonly string[]).includes(id);
+}
 
-  updateCrew: (id, partial) =>
-    set((state) => ({
-      crew: {
-        ...state.crew,
-        [id]: { ...state.crew[id], ...partial },
-      },
-    })),
+// Saved in the browser so "Continue mission" keeps the crew and their health.
+export const useCrewStore = create<CrewState>()(
+  persist(
+    (set) => ({
+      teamId: DEFAULT_TEAM_ID,
+      crew: buildInitialCrew(DEFAULT_TEAM_ID),
 
-  dailyMoraleTick: (resources) =>
-    set((state) => {
-      const avg = (resources.energy + resources.oxygen + resources.shielding) / 3;
-      if (avg >= 50) return state;
+      selectTeam: (teamId) => set({ teamId, crew: buildInitialCrew(teamId) }),
 
-      const decay = avg < 20 ? -3 : -1;
-      const updated: CrewRecord = {};
-      for (const [id, member] of Object.entries(state.crew)) {
-        updated[id] = {
-          ...member,
-          morale: clamp(member.morale + decay, 0, 100),
-        };
-      }
-      return { crew: updated };
+      updateCrew: (id, partial) =>
+        set((state) => {
+          if (!isRole(id)) return state;
+          return { crew: { ...state.crew, [id]: { ...state.crew[id], ...partial } } };
+        }),
+
+      dailyMoraleTick: (resources) =>
+        set((state) => {
+          const avg = (resources.energy + resources.oxygen + resources.shielding) / 3;
+          if (avg >= 50) return state;
+
+          const decay = avg < 20 ? -3 : -1;
+          const updated = {} as CrewRecord;
+          for (const role of CREW_ROLES) {
+            const member = state.crew[role];
+            updated[role] = { ...member, morale: clamp(member.morale + decay, 0, 100) };
+          }
+          return { crew: updated };
+        }),
+
+      reset: () => set((state) => ({ crew: buildInitialCrew(state.teamId) })),
     }),
-
-  reset: () => set({ crew: buildInitialCrew() }),
-}));
+    { name: 'aurora-crew-store', version: 2 },
+  ),
+);
