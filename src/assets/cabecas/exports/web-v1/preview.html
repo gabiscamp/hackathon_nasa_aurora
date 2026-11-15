@@ -1,0 +1,41 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Astronautas modulares</title>
+<style>body{margin:0;background:#0b1026;color:#e8ecff;font-family:system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px}
+#stage{position:relative;width:820px;height:300px;border-radius:12px;overflow:hidden;background:#8c8fa3;border:10px solid #c9c4b8}
+#stage.fora{background:radial-gradient(circle at 20% 30%,#fff 1px,transparent 2px) 0 0/70px 70px,#141a3d;border-color:#2b3260}
+.astro{position:absolute;bottom:20px}.astro div{position:absolute;image-rendering:pixelated;background-repeat:no-repeat}
+button{background:#f08a24;border:0;border-radius:8px;padding:8px 14px;font-weight:600;color:#1d1a2b;cursor:pointer}
+.hud{display:flex;gap:8px}</style></head><body>
+<h2>Astronautas modulares: 1 uniforme + cabeças trocáveis</h2>
+<div id="stage"></div>
+<div class="hud"><button id="cap">Capacete: não (E)</button><button id="vista">Vista: andando de lado</button></div>
+<small>Cada astronauta usa o mesmo sprite do uniforme; só a cabeça muda. Escala 3x.</small>
+<script>
+const D = {"body": {"size": {"w": 146, "h": 155}, "frames": [{"frame": {"x": 3, "y": 3, "w": 32, "h": 47}, "duration": 500}, {"frame": {"x": 39, "y": 3, "w": 32, "h": 47}, "duration": 500}, {"frame": {"x": 75, "y": 3, "w": 32, "h": 47}, "duration": 100}, {"frame": {"x": 111, "y": 3, "w": 32, "h": 47}, "duration": 100}, {"frame": {"x": 3, "y": 54, "w": 32, "h": 47}, "duration": 100}, {"frame": {"x": 39, "y": 54, "w": 32, "h": 47}, "duration": 100}, {"frame": {"x": 75, "y": 54, "w": 32, "h": 47}, "duration": 100}, {"frame": {"x": 111, "y": 54, "w": 32, "h": 47}, "duration": 100}, {"frame": {"x": 3, "y": 105, "w": 32, "h": 47}, "duration": 100}, {"frame": {"x": 39, "y": 105, "w": 32, "h": 47}, "duration": 100}], "tags": {"idle_down": [0, 0], "idle_right": [1, 1], "walk_right": [2, 9]}}, "anchors": [{"view": "front", "x": 16, "y": 22, "name": "front-stand"}, {"view": "side", "x": 17, "y": 22, "name": "side-stand"}, {"view": "side", "x": 17, "y": 22, "name": "side-walk-0"}, {"view": "side", "x": 17, "y": 23, "name": "side-walk-1"}, {"view": "side", "x": 17, "y": 22, "name": "side-walk-2"}, {"view": "side", "x": 17, "y": 22, "name": "side-walk-3"}, {"view": "side", "x": 17, "y": 22, "name": "side-walk-4"}, {"view": "side", "x": 17, "y": 23, "name": "side-walk-5"}, {"view": "side", "x": 17, "y": 22, "name": "side-walk-6"}, {"view": "side", "x": 17, "y": 22, "name": "side-walk-7"}], "heads": {"schema": "astro-game.heads.v1", "frame": [32, 26], "pin": {"front": [16, 22], "side": [17, 22]}, "note": "Draw a head at (anchor.x - pin.x, anchor.y - pin.y) over the uniform frame; anchors come from uniforme-nasa-head-anchors.json.", "order": ["capacete", "cabeca-1", "cabeca-2", "cabeca-3", "cabeca-4"], "heads": {"capacete": {"front": {"x": 0, "y": 0, "w": 32, "h": 26}, "side": {"x": 32, "y": 0, "w": 32, "h": 26}}, "cabeca-1": {"front": {"x": 0, "y": 26, "w": 32, "h": 26}, "side": {"x": 32, "y": 26, "w": 32, "h": 26}}, "cabeca-2": {"front": {"x": 0, "y": 52, "w": 32, "h": 26}, "side": {"x": 32, "y": 52, "w": 32, "h": 26}}, "cabeca-3": {"front": {"x": 0, "y": 78, "w": 32, "h": 26}, "side": {"x": 32, "y": 78, "w": 32, "h": 26}}, "cabeca-4": {"front": {"x": 0, "y": 104, "w": 32, "h": 26}, "side": {"x": 32, "y": 104, "w": 32, "h": 26}}}}}, S = 3, stage = document.getElementById('stage');
+let capacete = false, lado = true;
+const names = D.heads.order.filter(n => n !== 'capacete');
+const crew = names.map((n, k) => { const el = document.createElement('div'); el.className = 'astro';
+  el.innerHTML = '<div class="b"></div><div class="h"></div>'; stage.append(el);
+  return {n, el, x: 60 + k * 190, dir: k % 2 ? -1 : 1, i: 0, acc: k * 37}; });
+function toggle(){ capacete = !capacete; stage.classList.toggle('fora', capacete); document.getElementById('cap').textContent = 'Capacete: ' + (capacete ? 'sim' : 'não') + ' (E)'; }
+document.getElementById('cap').onclick = toggle; addEventListener('keydown', e => { if (e.key.toLowerCase() === 'e') toggle(); });
+document.getElementById('vista').onclick = () => { lado = !lado; document.getElementById('vista').textContent = 'Vista: ' + (lado ? 'andando de lado' : 'de frente, parado'); };
+let last = performance.now();
+function loop(now){ const dt = now - last; last = now;
+  for (const c of crew){
+    const [from, to] = D.body.tags[lado ? 'walk_right' : 'idle_down'];
+    if (c.i < from || c.i > to) c.i = from;
+    c.acc += dt; while (c.acc >= D.body.frames[c.i].duration){ c.acc -= D.body.frames[c.i].duration; c.i = c.i < to ? c.i + 1 : from; }
+    if (lado){ c.x += c.dir * dt * 0.05; if (c.x > 820 - 32*S) c.dir = -1; if (c.x < 0) c.dir = 1; }
+    const f = D.body.frames[c.i].frame, a = D.anchors[c.i], view = a.view, hd = D.heads.heads[capacete ? 'capacete' : c.n][view], pin = D.heads.pin[view];
+    const b = c.el.children[0], h = c.el.children[1];
+    c.el.style.left = c.x + 'px'; c.el.style.width = f.w*S + 'px'; c.el.style.height = f.h*S + 'px';
+    c.el.style.transform = lado && c.dir < 0 ? 'scaleX(-1)' : '';
+    Object.assign(b.style, {left: 0, top: 0, width: f.w*S+'px', height: f.h*S+'px', backgroundImage: 'url(uniforme-nasa.png)',
+      backgroundSize: D.body.size.w*S+'px '+D.body.size.h*S+'px', backgroundPosition: (-f.x*S)+'px '+(-f.y*S)+'px'});
+    Object.assign(h.style, {left: (a.x-pin[0])*S+'px', top: (a.y-pin[1])*S+'px', width: hd.w*S+'px', height: hd.h*S+'px', backgroundImage: 'url(cabecas.png)',
+      backgroundSize: (D.heads.frame[0]*2*S)+'px '+(D.heads.frame[1]*D.heads.order.length*S)+'px', backgroundPosition: (-hd.x*S)+'px '+(-hd.y*S)+'px'});
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script></body></html>

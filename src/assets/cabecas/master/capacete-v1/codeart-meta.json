@@ -1,0 +1,179 @@
+{
+  "schema": "codeart2d.codeart_meta.v1",
+  "art_source": "code",
+  "placeholder": false,
+  "disclosure": "code-drawn, no image model",
+  "generator": "render_pixelspec.py",
+  "spec_sha256": "a428c335056bd9eb51fe8e2e41296507d775a4f6ca6be923368606287009bcf5",
+  "renderer": {
+    "name": "codeart_core.render_pixelspec",
+    "version": "1.1"
+  },
+  "palette": {
+    "colors": {
+      "k": "#1b1d2a",
+      "W": "#f5f5f1",
+      "Q": "#ffffff",
+      "w": "#d3d7de",
+      "x": "#a4aab6",
+      "X": "#6c7381",
+      "y": "#f2c94c",
+      "Y": "#c99a2e",
+      "Z": "#7d5a14",
+      "q": "#fff4c2",
+      "L": "#fffbe0",
+      "l": "#d8d3b0",
+      "r": "#c8102e",
+      "R": "#8e0c22",
+      "b": "#0b3d91",
+      "B": "#4a7fd6"
+    },
+    "variants": {}
+  },
+  "outputs": [
+    {
+      "path": "base/frames/front.png",
+      "sha256": "69de7aa544f9155306195ae684ae62ecc40a33abd38ed8fbc7b2a9ac1d0b11e4",
+      "bytes": 533
+    },
+    {
+      "path": "base/frames/side.png",
+      "sha256": "98ec90a5b0f8da509f07f782d2ecf9d693210d6cbde631e4c0148362c1489ca8",
+      "bytes": 443
+    },
+    {
+      "path": "preview-x8.png",
+      "sha256": "d0e61b031c53b12d60ba9a391771cb5f41e2d44f34a12d98678f3717fa0a1e2f",
+      "bytes": 1692
+    }
+  ],
+  "qa": {
+    "status": "pass",
+    "method": "render_pixelspec.py: every published frame PNG is read back and measured with codeart_core.qa_pixels against the resolved palette of its variant (alpha census, exact palette lookup and, with an outline, 4-neighbour outline gaps and L-corners); each check is the worst frame against its gate in codeart_core.QA_PIXEL_GATES",
+    "notProven": [
+      "Readability, silhouette and appeal at game scale; check them on a review sheet (pixel_qa.py --review).",
+      "Motion, timing and spacing between frames; numbers do not judge animation quality.",
+      "That the art matches the brief and the intent of the spec."
+    ],
+    "checks": [
+      {
+        "id": "partial_alpha",
+        "status": "pass",
+        "value": 0,
+        "threshold": 0
+      },
+      {
+        "id": "off_palette",
+        "status": "pass",
+        "value": 0,
+        "threshold": 0
+      },
+      {
+        "id": "outline_gaps",
+        "status": "pass",
+        "value": 0,
+        "threshold": 0
+      },
+      {
+        "id": "l_corners",
+        "status": "pass",
+        "value": 0,
+        "threshold": 10
+      }
+    ],
+    "inputs": [
+      {
+        "path": "../../spec/capacete.pixelspec.json",
+        "sha256": "a428c335056bd9eb51fe8e2e41296507d775a4f6ca6be923368606287009bcf5",
+        "bytes": 2785
+      }
+    ],
+    "outputs": [
+      {
+        "path": "base/frames/front.png",
+        "sha256": "69de7aa544f9155306195ae684ae62ecc40a33abd38ed8fbc7b2a9ac1d0b11e4",
+        "bytes": 533
+      },
+      {
+        "path": "base/frames/side.png",
+        "sha256": "98ec90a5b0f8da509f07f782d2ecf9d693210d6cbde631e4c0148362c1489ca8",
+        "bytes": 443
+      }
+    ],
+    "tool": {
+      "name": "render_pixelspec.py",
+      "version": "0.6.0"
+    },
+    "frames": [
+      {
+        "file": "base/frames/front.png",
+        "variant": "base",
+        "frame": "front",
+        "visible": 456,
+        "partial_alpha": 0,
+        "off_palette": 0,
+        "colors": 11,
+        "orphans": 36,
+        "l_corners": 0,
+        "outline_gaps": 0,
+        "bbox": [
+          3,
+          1,
+          29,
+          25
+        ]
+      },
+      {
+        "file": "base/frames/side.png",
+        "variant": "base",
+        "frame": "side",
+        "visible": 455,
+        "partial_alpha": 0,
+        "off_palette": 0,
+        "colors": 11,
+        "orphans": 31,
+        "l_corners": 0,
+        "outline_gaps": 0,
+        "bbox": [
+          5,
+          1,
+          30,
+          25
+        ]
+      }
+    ]
+  },
+  "pixelspec": {
+    "name": "capacete",
+    "schema": "codeart2d.pixelspec.v1",
+    "canvas": [
+      32,
+      26
+    ],
+    "anchor_px": [
+      16,
+      24
+    ],
+    "outline": "solid",
+    "variants": {
+      "base": "base"
+    },
+    "frames": [
+      {
+        "index": 0,
+        "name": "front",
+        "file": "frames/front.png"
+      },
+      {
+        "index": 1,
+        "name": "side",
+        "file": "frames/side.png"
+      }
+    ],
+    "preview": {
+      "file": "preview-x8.png",
+      "scale": 8,
+      "layout": "rows are variants, columns are distinct frames"
+    }
+  }
+}
