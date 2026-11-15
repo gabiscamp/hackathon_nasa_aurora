@@ -34,6 +34,7 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
   const tick = useResourceStore((s) => s.tick);
 
   const [missionOpen, setMissionOpen] = useState(false);
+  const [alertPlayed, setAlertPlayed] = useState('');
 
   const { act, label: actLabel } = getAct(day);
 
@@ -47,13 +48,14 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
   }, [phase, day, act, completedMissions, currentMission, setMission]);
 
   useEffect(() => {
-    if (phase === 'decision' && currentMission) {
+    if (phase === 'decision' && currentMission && alertPlayed !== currentMission.id) {
       gameEvents.emit('SHOW_MISSION_MARKER', currentMission.room as RoomId);
+      setAlertPlayed(currentMission.id);
       playAlertSound();
       const timer = setTimeout(() => playAlertSound(), 3000);
       return () => clearTimeout(timer);
     }
-  }, [phase, currentMission]);
+  }, [phase, currentMission, alertPlayed]);
 
   useEffect(() => {
     const onMissionStart = () => {

@@ -31,19 +31,31 @@ export function playKeyTick() {
 }
 
 let alertAudio: HTMLAudioElement | null = null;
+let alertPlaying = false;
 
 export function playAlertSound() {
+  if (alertPlaying) return;
+  alertPlaying = true;
   try {
     if (!alertAudio) {
       alertAudio = new Audio('/sounds/alert.mp3');
-      alertAudio.volume = 0.07;
+      alertAudio.volume = 0.05;
+      alertAudio.loop = false;
     }
     alertAudio.currentTime = 0;
     alertAudio.play().catch(() => {
       playAlertFallback();
     });
+    setTimeout(() => {
+      if (alertAudio) {
+        alertAudio.pause();
+        alertAudio.currentTime = 0;
+      }
+      alertPlaying = false;
+    }, 2000);
   } catch {
     playAlertFallback();
+    alertPlaying = false;
   }
 }
 
