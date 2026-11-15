@@ -1,0 +1,830 @@
+Missoes Detalhadas — Textos Prontos pro Jogo
+Cada missao tem: o texto que a crianca le na tela, 2-3 escolhas com icones, e as consequencias de cada uma. Tudo em linguagem simples.
+Missao 1: O Filtro Quebrado
+Baseado em: Apollo 13, 1970
+O que aparece na tela:
+ALERTA! O filtro de CO2 quebrou. CO2 e um gas que se acumula quando voce respira. CO2 demais deixa voce tonto e com sono. Voce tem filtros reserva, mas eles tem formato errado — nao encaixam na maquina.
+Nivel de CO2: SUBINDO Tempo ate ficar perigoso: 6 horas
+Escolha A: "Construir um adaptador" Pedir pra engenheira montar um adaptador usando fita adesiva, sacos plasticos e papelao.
+Se funcionar (80% de chance): CO2 volta ao normal. Engenheira fica cansada e trabalha pior amanha.
+Se falhar (20% de chance): CO2 chega no nivel de alerta. Voce precisa escolher outra opcao rapido.
+Custo: Engenheira ocupada por 3 horas. CO2 continua subindo enquanto ela trabalha. Outros consertos atrasam.
+Escolha B: "Todo mundo descansa" Ordenar que toda a tripulacao deite e fique parada. Mexer menos = respirar menos = menos CO2.
+Resultado: CO2 sobe mais devagar, ganhando tempo. Mas NENHUM trabalho e feito por 6 horas. Qualquer outra coisa que precisava de atencao hoje atrasa.
+No dia seguinte voce ainda precisa consertar o filtro.
+Escolha C: "Usar velas de oxigenio de emergencia" Queimar uma vela de oxigenio pra colocar ar fresco enquanto alguem trabalha no filtro.
+Resultado: Ganha 4 horas extras. Mas as velas acabam pra sempre (voce so tem poucas). E NAO remove o CO2 — so dilui. E tem um pequeno risco de incendio.
+Custo: 1 vela usada do estoque limitado.
+Popup depois de escolher: "VOCE ACABOU DE VIVER A APOLLO 13! Em 1970, um tanque de oxigenio explodiu a 320.000 km da Terra. A tripulacao teve que usar o pequeno modulo lunar pra sobreviver. Os filtros de CO2 nao encaixavam, entao engenheiros na Terra inventaram um adaptador usando fita adesiva e sacos plasticos. Os astronautas montaram no espaco e isso salvou suas vidas."
+Baseado em: Apollo 13, 1970
+O que a crianca ve na tela:
+ALERT! The CO2 filter just broke. CO2 is a gas that builds up when you breathe. Too much CO2 makes you dizzy and sleepy. You have spare filters, but they are the wrong shape — they don't fit the machine.
+CO2 level: RISING Time before danger: 6 hours
+Escolha A: "Build an adapter" Ask your engineer to build an adapter using tape, plastic bags and cardboard.
+Consequence: Engineer is busy for 3 hours. CO2 keeps rising. Other repairs are delayed. But if it works, the filter is fixed for good.
+If it works (80% chance): CO2 drops back to safe. Engineer becomes tired (less effective tomorrow).
+If it fails (20% chance): CO2 reaches warning level. You must pick another option fast.
+Escolha B: "Everybody rest" Order the whole crew to lie down and stay very still. Moving less = breathing less = less CO2.
+Consequence: CO2 rises slower, buying time. But NO work gets done for 6 hours. Anything else that needed attention today is delayed.
+Result: CO2 stays at warning level but doesn't reach danger. Next day you still need to fix the filter.
+Escolha C: "Use emergency oxygen candles" Burn an oxygen candle to add fresh air while someone works on the filter.
+Consequence: Uses 1 candle from your limited supply (you only have a few). Adds oxygen but does NOT remove CO2 — it just dilutes it.
+Result: Buys 4 extra hours. But candles are gone forever. And there's a small fire risk.
+Popup after choosing: "YOU JUST LIVED THROUGH APOLLO 13! In 1970, an oxygen tank exploded 320,000 km from Earth. The crew had to use the small lunar lander to survive. The CO2 filters didn't fit, so engineers on Earth invented an adapter using duct tape and plastic bags. The astronauts built it in space and it saved their lives."
+
+Missao 2: Fogo na Estacao
+Baseado em: Estacao MIR, fevereiro 1997
+O que aparece na tela:
+EMERGENCIA! Uma vela de oxigenio pegou fogo! Essas velas normalmente produzem oxigenio, mas esta esta queimando sem controle. Fumaca esta enchendo a sala. O fogo esta bloqueando o caminho pra uma das capsulas de fuga.
+Status do fogo: SE ESPALHANDO Nivel de fumaca: ALTO Capsula de fuga 1: BLOQUEADA pelo fogo Capsula de fuga 2: ACESSIVEL
+Escolha A: "Combater o fogo" Mandar dois tripulantes com extintores pra apagar as chamas.
+Se conseguirem: Fogo apagado. Mas fumaca fica no ar por 3 dias — todo mundo fica com dor de cabeca e trabalha mais devagar. Saude dos dois bombeiros: -15.
+Custo: Os dois respiram fumaca toxica.
+Vantagem: Voce mantem acesso a TUDO — equipamentos e capsula de fuga 1.
+Escolha B: "Fechar a sala" Fechar a porta da sala em chamas. Sem ar = fogo morre.
+Resultado: Fogo para. Ninguem respira fumaca. Mas tudo que estava naquela sala e perdido — ferramentas, pecas de reposicao e acesso a capsula de fuga 1.
+Risco: Se outra emergencia precisar da capsula 1, voce esta em apuros.
+Escolha C: "Evacuar pro lado seguro" Todo mundo se move pra perto da capsula de fuga 2 e espera.
+Resultado: Mais seguro pra tripulacao. Mas o fogo pode se espalhar e danificar mais coisas antes de acabar o oxigenio daquela sala.
+Dano a estacao: aleatorio — pode ser pequeno ou destruir equipamento importante.
+Popup depois de escolher: "ISSO ACONTECEU DE VERDADE! Em fevereiro de 1997, uma vela de oxigenio pegou fogo na estacao MIR. As chamas queimaram por 14 minutos e bloquearam uma das duas capsulas de fuga. A tripulacao combateu o fogo com extintores. Ninguem morreu, mas a fumaca deixou o ar ruim por semanas."
+Baseado em: Estacao MIR, fevereiro 1997
+O que a crianca ve na tela:
+EMERGENCY! An oxygen candle caught fire! These candles normally make oxygen, but this one is burning out of control. Smoke is filling the room. The fire is blocking the path to one of the escape pods.
+Fire status: SPREADING Smoke level: HIGH Escape pod 1: BLOCKED by fire Escape pod 2: ACCESSIBLE
+Escolha A: "Fight the fire" Send two crew members with fire extinguishers to put out the flames.
+Consequence: Takes 10-15 minutes. The crew breathes toxic smoke. Their health drops. But if they succeed, you keep access to both escape pods and all equipment in that room.
+Result: Fire is out. Smoke stays in the air for 3 days — everyone gets headaches and works slower. Health: -15 for the two firefighters.
+Escolha B: "Seal the room" Close the door to the burning room. No air = fire dies.
+Consequence: Fire stops. Nobody breathes smoke. But everything in that room is lost — including tools, spare parts, and access to escape pod 1.
+Result: Safe, but you lose resources. If another emergency needs escape pod 1, you're in trouble.
+Escolha C: "Evacuate to the safe pod" Everyone moves to the section near escape pod 2 and waits.
+Consequence: Safest option for the crew. But the fire might spread and damage more of the station before it runs out of oxygen.
+Result: Crew is safe. Damage to the station is random — could be minor, could destroy important equipment.
+Popup after choosing: "THIS REALLY HAPPENED! In February 1997, an oxygen candle caught fire on the MIR space station. The flames burned for 14 minutes and blocked one of the two escape capsules. The crew fought the fire with extinguishers. Nobody died, but the smoke made the air bad for weeks."
+
+Missao 3: Colisao!
+Baseado em: Estacao MIR, junho 1997
+O que aparece na tela:
+IMPACTO! Uma nave de suprimentos bateu na estacao durante a aproximacao! Tem um buraco no Modulo de Energia. O ar esta vazando devagar. Os paineis solares daquele modulo foram destruidos.
+Pressao do ar: CAINDO DEVAGAR Energia: CAIU 30% (paineis destruidos) Tempo ate a pressao ficar perigosa: 2 horas
+Escolha A: "Fechar o modulo AGORA" Fechar a porta do modulo danificado imediatamente.
+Resultado: Vazamento para. Estacao segura. Mas voce perde os paineis solares e tudo dentro daquele modulo. Energia cai 30% pelo resto da missao.
+Consequencia: Com menos energia, voce tem que escolher o que ligar: maquina de oxigenio, aquecedor OU comunicacao? Nao da pra tudo a 100%.
+Escolha B: "Missao de resgate rapida" Mandar a engenheira dentro do modulo vazando pra pegar suprimentos importantes antes de fechar.
+Ela tem 30 minutos num modulo que esta perdendo ar. Ela pega pecas de reposicao e ferramentas.
+Sucesso (70%): Voce salva os suprimentos E fecha o modulo. Energia ainda cai 30%, mas voce tem pecas pra consertos futuros.
+Falha (30%): Engenheira fica tonta. Alguem precisa resgata-la. Porta fechada com atraso — mais ar perdido. Saude da engenheira: -25.
+Popup depois de escolher: "ISSO ACONTECEU DE VERDADE! Em junho de 1997, uma nave de suprimentos bateu no modulo Spektr da MIR. A tripulacao fechou a porta as pressas pra parar o vazamento de ar. Perderam os paineis solares daquele modulo e muita energia. Foi a pior colisao da historia das estacoes espaciais."
+Baseado em: Estacao MIR, junho 1997
+O que a crianca ve na tela:
+IMPACT! A supply ship hit the station during docking! There is a hole in the Energy Module. Air is leaking out slowly. The solar panels on that module are destroyed.
+Air pressure: SLOWLY DROPPING Energy: DOWN 30% (solar panels destroyed) Time before pressure is dangerous: 2 hours
+Escolha A: "Seal the module NOW" Close the door to the damaged module immediately.
+Consequence: Air leak stops. Station is safe. But you lose the solar panels and everything inside that module. Energy drops 30% for the rest of the mission.
+Result: Safe. But with less energy, you have to choose what to power: oxygen machine, heater, or communications? Can't do all three at full.
+Escolha B: "Quick rescue mission" Send the engineer inside the leaking module to grab critical supplies before sealing it.
+Consequence: Engineer has 30 minutes in a module that's losing air. She grabs important spare parts and tools. Risk: if she takes too long, air gets too thin and she faints.
+Result (success, 70%): You save the supplies AND seal the module. Energy still drops 30%, but you have spare parts for future repairs.
+Result (failure, 30%): Engineer gets dizzy. Someone has to rescue her. Door is sealed late — more air lost. Engineer's health: -25.
+Popup after choosing: "THIS REALLY HAPPENED! In June 1997, a supply ship crashed into the Spektr module of MIR. The crew slammed the door shut to stop the air leak. They lost the solar panels on that module and a lot of energy. It was the worst collision in space station history."
+
+Missao 4: O Vazamento Invisivel
+Baseado em: ISS, 2004
+O que aparece na tela:
+AVISO: A pressao do ar esta caindo bem devagar. Tem um vazamento pequeno em algum lugar da estacao, mas ninguem sabe onde. E tao pequeno que nao da pra ouvir nem ver.
+Pressao do ar: CAINDO DEVAGAR Local do vazamento: DESCONHECIDO Tempo ate virar problema: 2 dias
+Escolha A: "Trancar e procurar" Fechar as portas entre todos os modulos. Checar a pressao de cada um separado pra achar onde esta o vazamento.
+Resultado: Seguro e organizado. Demora 1 dia inteiro. A tripulacao fica presa em espacos menores enquanto voce testa cada secao. Alguns trabalhos nao podem ser feitos porque os modulos estao fechados.
+Voce acha o vazamento: era uma mangueira que alguem usou como apoio de mao e rachou a vedacao. Conserto facil depois de achado.
+Escolha B: "Escutar o vazamento" Mandar tripulantes pela estacao com detectores de vazamento pra achar o chiado.
+Mais rapido (algumas horas). Mas a tripulacao se espalha pela estacao. Se o vazamento piorar de repente, eles podem estar longe da zona segura.
+Sucesso (85%): Achado em 4 horas. Consertado rapido.
+Falha (15%): Nao acha hoje. Pressao cai mais. Amanha voce tem que fazer o lockdown completo, mas com menos ar.
+Escolha C: "Verificar por fora" Mandar alguem numa caminhada espacial pra inspecionar o casco do lado de fora.
+Usa oxigenio do traje EVA. Demora 5 horas de preparacao (respirar oxigenio puro pra evitar doenca). Caro, mas pode achar danos invisiveis de dentro.
+Resultado: Acha o vazamento E descobre dois outros pontos fracos no casco. Voce pode consertar antes que virem vazamentos. Mas o astronauta fica exausto e nao pode trabalhar amanha.
+Popup depois de escolher: "ISSO ACONTECEU DE VERDADE! Em 2004, um vazamento de ar lento foi detectado na ISS. Depois de dias procurando, descobriram o motivo — uma mangueira que os astronautas estavam usando como apoio de mao rachou uma vedacao. Algo tao simples quase causou uma emergencia seria."
+Baseado em: ISS, 2004
+O que a crianca ve na tela:
+WARNING: Air pressure is dropping very slowly. There is a small leak somewhere on the station, but nobody knows where. It's so small you can't hear it or see it.
+Air pressure: SLOWLY DROPPING Leak location: UNKNOWN Time before it becomes a problem: 2 days
+Escolha A: "Lock down and search" Close the doors between all modules. Check pressure in each one separately to find where the leak is.
+Consequence: Safe and methodical. Takes 1 full day. The crew is stuck in smaller spaces while you test each section. Some work can't be done because modules are sealed off.
+Result: You find the leak. It was a hose that someone grabbed as a handhold and cracked the seal. Easy fix once found.
+Escolha B: "Listen for it" Send crew members through the station with ultrasonic leak detectors to find the hiss.
+Consequence: Faster (a few hours). But the crew spreads out across the station. If the leak suddenly gets worse, they might be far from the safe zone.
+Result (success, 85%): Found in 4 hours. Fixed quickly.
+Result (failure, 15%): Can't find it today. Pressure drops more. Tomorrow you have to do the full lockdown anyway, but with less air.
+Escolha C: "Patch from outside" Send someone on a spacewalk to inspect the hull from the outside.
+Consequence: Uses EVA suit oxygen. Takes 5 hours of preparation (breathing pure oxygen to avoid decompression sickness). Expensive but might find damage invisible from inside.
+Result: Finds the leak AND finds two other spots that look weak. You can fix them before they become leaks too. But the astronaut is exhausted and can't work tomorrow.
+Popup after choosing: "THIS REALLY HAPPENED! In 2004, a slow air leak was detected on the ISS. After days of searching, they found it — a hose that astronauts had been using as a handhold had cracked a seal. Something that simple almost caused a serious emergency."
+Missao 5: Ar Toxico
+Baseado em: ISS, 2006
+O que aparece na tela:
+PERIGO! A maquina de oxigenio superaqueceu e esta soltando fumaca! O ar cheira a borracha queimada. Esta e a primeira emergencia da base.
+Maquina de oxigenio: DESLIGADA (superaqueceu) Qualidade do ar: FUMACA TOXICA Reserva de oxigenio: 2 dias
+Escolha A: "Mascaras e reiniciar" Todo mundo coloca mascaras de emergencia. A engenheira tenta reiniciar a maquina.
+Se funcionar (60%): Oxigenio volta em 1 hora. Mas maquina funciona a 70%. Precisa de conserto completo amanha.
+Se falhar (40%): Maquina nao liga. Agora voce PRECISA usar velas de emergencia.
+Custo: Tempo gasto tentando.
+Escolha B: "Desligar e usar velas" Desligar a maquina quebrada completamente. Acender velas de oxigenio de emergencia.
+Resultado: Seguro — sem mais fumaca. Mas cada vela so da oxigenio pra 1 pessoa por 1 dia. Voce tem 12 velas. Isso da 3 dias pra uma tripulacao de 4.
+Ar limpa em poucas horas. Mas o relogio esta correndo — voce precisa consertar a maquina antes das velas acabarem.
+Escolha C: "Ventilar e esperar" Usar os ventiladores de circulacao pra empurrar a fumaca pros filtros. Esperar limpar e depois olhar a maquina.
+Demora 8 horas pro ar limpar. Sem producao de oxigenio durante esse tempo. Mas quando voce finalmente olhar a maquina, ve o problema claramente.
+Resultado: Ar limpo. Voce acha o problema: um fio queimado. Conserto facil — mas voce passou um dia inteiro sem fazer oxigenio.
+Popup depois de escolher: "ISSO ACONTECEU DE VERDADE! Em 2006, o gerador de oxigenio da ISS superaqueceu e soltou fumaca toxica. Os 3 astronautas tiveram que colocar mascaras e luvas. Foi a primeira emergencia real em 8 anos de estacao espacial."
+Baseado em: ISS, 2006
+O que a crianca ve na tela:
+DANGER! The oxygen machine overheated and is smoking! The air smells like burning rubber. This is the first emergency your station has ever had.
+Oxygen machine: OFFLINE (overheated) Air quality: TOXIC SMOKE Oxygen reserve: 2 days
+Escolha A: "Masks on, restart the machine" Everybody puts on emergency masks. The engineer tries to restart the oxygen machine.
+Consequence: If restart works (60%), oxygen is back in 1 hour. If it fails, you wasted time and the machine might be damaged worse.
+Success: Machine works again but runs at 70% power. Needs full repair tomorrow.
+Failure: Machine won't start. Now you MUST use emergency candles.
+Escolha B: "Shut it down, use candles" Turn off the broken machine completely. Light emergency oxygen candles instead.
+Consequence: Safe — no more smoke. But each candle only gives oxygen for 1 person for 1 day. You have 12 candles. That's 3 days for a crew of 4.
+Result: Air clears in a few hours. But the clock is ticking — you need to fix the machine before the candles run out.
+Escolha C: "Ventilate and wait" Use the air circulation fans to push the smoke into the filters. Wait for it to clear, then check the machine.
+Consequence: Takes 8 hours for the air to clear. No oxygen production during that time. But when you can finally look at the machine, you can see the problem clearly.
+Result: Air is clean. You find the problem: a burned wire. Easy fix — but you spent a whole day without making oxygen.
+Popup after choosing: "THIS REALLY HAPPENED! In 2006, the oxygen generator on the ISS overheated and released toxic smoke. The 3 astronauts had to put on masks and gloves. It was the first real emergency in 8 years of the space station."
+
+Missao 6: O Problema Lento
+Baseado em: ISS, 2007-2017
+O que aparece na tela:
+AVISO: O sistema de refrigeracao tem um vazamento pequeno. Gotinhas de liquido refrigerante estao flutuando pro espaco. Nao e perigoso agora, mas vai piorar com o tempo.
+Sistema de refrigeracao: 95% funcionando Velocidade do vazamento: BEM DEVAGAR Tempo ate ficar serio: semanas
+Escolha A: "Consertar agora com caminhada espacial" Mandar um astronauta pra fora da estacao pra achar e consertar o vazamento.
+Caminhada espacial demora 6 horas. O astronauta usa oxigenio do traje (oxigenio que voce nao pode respirar dentro). Fica exposto a radiacao por 6 horas. Mas o vazamento e CONSERTADO.
+Resultado: Refrigeracao volta a 100%. Astronauta cansado e com mais radiacao acumulada. Nenhum outro conserto externo possivel por 3 dias (traje precisa recarregar).
+Escolha B: "Monitorar e esperar" Continuar vigiando o vazamento. Consertar depois quando for mais conveniente.
+Nenhum recurso gasto hoje. Refrigeracao cai 1% por semana. Em 3 semanas, voce comeca a ter que desligar equipamentos pra evitar superaquecimento.
+Resultado: Economiza recursos agora, mas o problema cresce. Em 3 semanas vira urgente e mais dificil de consertar.
+Escolha C: "Desviar o liquido" A engenheira desvia o liquido refrigerante por canos reserva, evitando a parte que esta vazando.
+Demora 4 horas de trabalho interno. Sem caminhada espacial. O vazamento continua mas nao importa porque o liquido agora passa por outros canos.
+Resultado: Refrigeracao funciona a 90% (canos reserva sao menores). O vazamento continua la — se os canos reserva tambem derem problema depois, voce esta em apuros.
+Popup depois de escolher: "ISSO ACONTECEU DE VERDADE! A ISS teve um vazamento lento de amonia no sistema de refrigeracao que levou 10 ANOS pra consertar completamente (2007 a 2017). Astronautas fizeram varias caminhadas espaciais ao longo dos anos tentando achar e consertar. As vezes a melhor resposta pra um problema lento e um conserto lento."
+Baseado em: ISS, 2007-2017
+O que a crianca ve na tela:
+NOTICE: The cooling system has a small leak. Tiny drops of coolant are floating away into space. It's not dangerous yet, but it will get worse over time.
+Cooling system: 95% working Leak speed: VERY SLOW Time before it becomes serious: weeks
+Escolha A: "Fix it now with a spacewalk" Send an astronaut outside to find and patch the leak.
+Consequence: Spacewalk takes 6 hours. The astronaut uses oxygen from the EVA suit (that's oxygen you can't breathe inside). Astronaut is exposed to radiation for 6 hours. But the leak is FIXED.
+Result: Cooling system back to 100%. Astronaut is tired and has higher radiation dose. No other outside repairs possible for 3 days (suit needs recharging).
+Escolha B: "Monitor and wait" Keep watching the leak. Fix it later when it's more convenient.
+Consequence: No resources spent today. Cooling drops 1% per week. In 3 weeks, you start having to turn off equipment to avoid overheating.
+Result: You save resources now but the problem grows. In 3 weeks, it becomes urgent and harder to fix.
+Escolha C: "Reroute the coolant" The engineer reroutes coolant through backup pipes, bypassing the leaky section.
+Consequence: Takes 4 hours of indoor work. No spacewalk needed. Leak continues but doesn't matter because coolant flows through different pipes now.
+Result: Cooling works at 90% (backup pipes are smaller). The leak is still there — if the backup pipes also develop a problem later, you're in trouble.
+Popup after choosing: "THIS REALLY HAPPENED! The ISS had a slow ammonia leak in its cooling system that took 10 YEARS to fully fix (2007-2017). Astronauts did multiple spacewalks over the years trying to find and repair it. Sometimes the best answer to a slow problem is a slow fix."
+
+Missao 7: O Banheiro Quebrou
+Baseado em: ISS, 2008
+O que aparece na tela:
+XI! O banheiro e o reciclador de agua quebraram. No espaco, o banheiro nao e so uma privada — e uma maquina que tambem recicla a agua do xixi. Sem ele, voce perde agua toda vez que alguem vai ao banheiro.
+Banheiro: QUEBRADO Reciclagem de agua: CAIU 40% Humor da tripulacao: IRRITADOS
+Escolha A: "Engenheira conserta hoje" A engenheira passa o dia inteiro consertando o sistema do banheiro.
+Nenhum outro conserto ou ciencia hoje. Mas banheiro e reciclador de agua voltam a funcionar de noite.
+Resultado: Tudo funciona de novo. Mas se alguma outra coisa precisava ser consertada hoje, atrasou.
+Escolha B: "Usar sacos de emergencia" Usar sacos descartaveis (como os astronautas antigos usavam) enquanto conserta o banheiro amanha.
+Funciona, mas e desagradavel. Humor da tripulacao cai. E o xixi nos sacos NAO pode ser reciclado — aquela agua e perdida pra sempre.
+Resultado: Humor: -20. Reserva de agua: -2% (xixi perdido). Banheiro consertado amanha.
+Escolha C: "Conserto parcial" A engenheira faz um conserto rapido — banheiro funciona mas o reciclador de agua continua quebrado.
+Demora 3 horas em vez do dia inteiro. Banheiro funciona pro conforto. Mas a agua do xixi continua nao sendo reciclada.
+Resultado: Humor ok. Mas voce continua perdendo agua todo dia ate o reciclador ser completamente consertado. Aquela agua viraria oxigenio!
+Popup depois de escolher: "ISSO ACONTECEU DE VERDADE! O vaso sanitario da ISS ja quebrou varias vezes. Em 2008, a NASA teve que mandar pecas de reposicao pela proxima nave de carga. Sem o reciclador do banheiro, a estacao nao consegue transformar xixi em agua limpa — e essa agua tambem e usada pra fazer oxigenio!"
+Baseado em: ISS, 2008
+O que a crianca ve na tela:
+UH OH! The toilet and water recycler broke down. In space, the toilet doesn't just flush — it's a machine that also recycles water from pee. Without it, you lose water every time someone goes to the bathroom.
+Toilet: BROKEN Water recycling: DOWN 40% Crew mood: ANNOYED
+Escolha A: "Engineer fixes it today" The engineer spends the whole day repairing the toilet system.
+Consequence: No other repairs or science today. But toilet and water recycler are back online by evening.
+Result: Everything works again. But if something else was supposed to be fixed today, it's now delayed.
+Escolha B: "Use backup bags" Use emergency waste bags (like astronauts used in the old days) while you fix the toilet tomorrow.
+Consequence: Works, but it's unpleasant. Crew mood drops. And the pee in the bags CAN'T be recycled — that water is lost forever.
+Result: Crew mood: -20. Water supply: -2% (lost pee). Toilet gets fixed tomorrow instead.
+Escolha C: "Partial repair" The engineer does a quick fix — toilet works but the water recycler stays broken.
+Consequence: Takes 3 hours instead of all day. Toilet works for comfort. But water from pee is still not being recycled.
+Result: Crew mood is okay. But you keep losing water every day until the recycler is fully fixed. That water would have become oxygen.
+Popup after choosing: "THIS REALLY HAPPENED! The ISS toilet has broken multiple times. In 2008, NASA had to send repair parts on the next cargo ship. Without the toilet's water recycler, the station can't turn pee back into clean water — and that water is also used to make oxygen!"
+
+Missao 8: Agua Suja
+Baseado em: ISS, 2009
+O que aparece na tela:
+ALERTA! O reciclador de agua esta produzindo agua suja. A maquina que limpa xixi, suor e umidade da respiracao pra virar agua potavel nao esta funcionando direito. A agua que sai tem coisas que nao deveriam estar la.
+Reciclador de agua: SAIDA CONTAMINADA Reserva de agua limpa: 5 dias Maquina de oxigenio precisa de: agua LIMPA somente
+Escolha A: "Usar a reserva limpa enquanto conserta" Beber e usar so a agua limpa de emergencia. Nao colocar agua suja na maquina de oxigenio.
+Seguro. Todo mundo bebe agua limpa. Maquina de oxigenio continua rodando. Mas a reserva diminui todo dia — voce tem 5 dias pra consertar o reciclador.
+Resultado: Relogio correndo. Se o conserto demorar mais de 5 dias, voce fica sem agua limpa E a producao de oxigenio para.
+Escolha B: "Filtrar a agua suja duas vezes" Passar a agua contaminada pelo reciclador duas vezes. Talvez fique limpa o suficiente.
+Usa energia extra (reciclador roda o dobro). Qualidade da agua melhora mas nao fica perfeita. Risco pequeno de danificar a maquina de oxigenio se a agua ainda tiver impurezas.
+Sucesso (80%): Agua limpa o suficiente. Maquina de oxigenio funciona. Custo extra de energia: 0,5 kW.
+Falha (20%): Agua ainda ruim. Filtro da maquina de oxigenio entope. Agora voce tem DUAS coisas pra consertar.
+Escolha C: "Consertar primeiro, racionar tudo" Parar todo uso de agua nao essencial. Todo mundo recebe metade da agua normal. Engenheira foca no reciclador.
+Tripulacao fica com sede e desconfortavel. Humor cai. Sem banho (nao que banho espacial seja la essas coisas). Mas a engenheira pode focar totalmente no conserto.
+Resultado: Reciclador consertado em 2 dias. Mas saude da tripulacao cai um pouco pela desidratacao. Humor: -15.
+Popup depois de escolher: "ISSO ACONTECEU DE VERDADE! Em 2009, o reciclador de agua da ISS quebrou durante uma missao lotada (o Onibus Espacial estava visitando). Sem ele, a estacao perde a capacidade de transformar agua reciclada em oxigenio. Numa missao a Marte, isso seria ainda mais assustador — nao tem nave de carga trazendo pecas novas."
+Baseado em: ISS, 2009
+O que a crianca ve na tela:
+ALERT! The water recycler is making dirty water. The machine that cleans pee, sweat and breath moisture into drinking water is not working right. The water coming out has stuff in it that shouldn't be there.
+Water recycler: CONTAMINATED OUTPUT Clean water reserve: 5 days Oxygen machine needs: CLEAN water only
+Escolha A: "Use clean reserves while we fix it" Drink and use only the emergency clean water supply. Don't put bad water in the oxygen machine.
+Consequence: Safe. Everyone drinks clean water. Oxygen machine keeps running. But reserves drop every day — you have 5 days to fix the recycler.
+Result: Clock is ticking. If the fix takes longer than 5 days, you run out of clean water AND oxygen production stops.
+Escolha B: "Double-filter the bad water" Run the contaminated water through the recycler twice. It might clean up enough.
+Consequence: Uses extra energy (the recycler runs double). Water quality improves but isn't perfect. Small risk of damaging the oxygen machine if the water still has impurities.
+Result (80%): Water is clean enough. Oxygen machine works. Extra energy cost: 0.5 kW.
+Result (20%): Water still bad. Oxygen machine filter gets clogged. Now you have TWO things to fix.
+Escolha C: "Fix the recycler first, ration everything" Stop all non-essential water use. Everyone gets half their normal water. Engineer focuses on the recycler.
+Consequence: Crew is thirsty and uncomfortable. Mood drops. No showers (not that space showers are great anyway). But the engineer can focus fully on the repair.
+Result: Recycler fixed in 2 days. But crew health drops slightly from dehydration. Mood: -15.
+Popup after choosing: "THIS REALLY HAPPENED! In 2009, the water recycler on the ISS broke during a crowded mission (the Space Shuttle was visiting). Without it, the station can't turn recycled water into oxygen. On a Mars mission, this would be even scarier — there's no cargo ship bringing spare parts."
+Missao 9: Quase Afogado no Espaco
+Baseado em: ISS EVA-23, julho 2013
+O que aparece na tela:
+EMERGENCIA! Sua astronauta esta fora da estacao fazendo um conserto. Ela acabou de relatar agua dentro do capacete! O sistema de refrigeracao do traje esta vazando. A agua esta flutuando em direcao aos olhos e nariz dela.
+Status da astronauta: FORA da estacao Agua no capacete: SUBINDO Progresso do conserto: 60% feito Tempo pra voltar pra dentro: 15 minutos
+Escolha A: "Voltar AGORA!" Ordenar que ela pare o conserto imediatamente e volte pro airlock.
+Ela volta em seguranca. Mas o conserto externo esta so 60% feito. O equipamento quebrado continua quebrado. Voce vai precisar de outra caminhada espacial depois (mais oxigenio gasto, mais risco).
+Resultado: Astronauta segura. Capacete limpo e seco. Mas o conserto tem que acontecer de novo outro dia.
+Escolha B: "Terminar rapido e voltar" Falar pra ela se apressar e terminar o conserto, depois voltar.
+Mais 5 minutos la fora. Agua continua subindo. Se cobrir o nariz, ela nao consegue respirar.
+Sucesso (50%): Conserto feito! Mas ela volta mal conseguindo ver, com agua perto do nariz. Saude: -20. Ela fica abalada e nao faz caminhadas espaciais por um tempo.
+Falha (50%): Agua cobre os olhos completamente. Ela nao ve pra achar o airlock. Outro tripulante tem que ir busca-la. Dois astronautas exaustos. Saude: -30. Conserto AINDA nao terminado.
+Escolha C: "Resgate com parceiro" Mandar outro astronauta pra fora pra ajuda-la a voltar enquanto ela inclina a cabeca pra manter a agua longe do nariz.
+Usa um segundo traje EVA (dobro do custo de oxigenio). Mas mais seguro — o parceiro guia ela de volta.
+Resultado: As duas voltam em seguranca. Dois trajes precisam recarregar. Dois astronautas cansados amanha. Conserto nao terminado.
+Popup depois de escolher: "ISSO ACONTECEU DE VERDADE! Em julho de 2013, o capacete do astronauta Luca Parmitano encheu de agua durante uma caminhada espacial. Ele nao conseguia ver, ouvir nem falar. Levou 23 minutos pra traze-lo pra dentro. Uma semana antes, o MESMO problema aconteceu mas foi diagnosticado errado como 'saco de agua furado'. A causa real era um filtro entupido no sistema de refrigeracao do traje."
+Baseado em: ISS EVA-23, julho 2013
+O que a crianca ve na tela:
+EMERGENCY! Your astronaut is outside the station doing a repair. She just reported water inside her helmet! The cooling system in her suit is leaking. Water is floating up toward her eyes and nose.
+Astronaut status: OUTSIDE the station Water in helmet: RISING Repair progress: 60% done Time to get back inside: 15 minutes
+Escolha A: "Come back NOW!" Order her to stop the repair immediately and get back to the airlock.
+Consequence: She comes back safely. But the repair outside is only 60% done. The broken equipment stays broken. You'll need another spacewalk later (more oxygen used, more risk).
+Result: Astronaut is safe. Helmet cleaned and dried. But the outside repair has to happen again another day.
+Escolha B: "Finish fast, then come back" Tell her to hurry up and finish the repair, then come back.
+Consequence: 5 more minutes outside. Water keeps rising. If it covers her nose, she can't breathe.
+Result (success, 50%): Repair done! But she comes back barely able to see, with water near her nose. Health: -20. She's shaken up and won't do spacewalks for a while.
+Result (failure, 50%): Water covers her eyes completely. She can't see to find the airlock. Another crew member has to go get her. Both astronauts are exhausted. Health: -30. Repair is STILL not done.
+Escolha C: "Buddy rescue" Send another astronaut out to help her back while she keeps her head tilted to keep water away from her nose.
+Consequence: Uses a second EVA suit (double the oxygen cost). But safer — the buddy guides her back.
+Result: Both come back safely. Two suits need recharging. Two astronauts are tired tomorrow. Repair not finished.
+Popup after choosing: "THIS REALLY HAPPENED! In July 2013, astronaut Luca Parmitano's helmet filled with water during a spacewalk. He couldn't see, hear, or speak. It took 23 minutes to get him inside. A week earlier, the SAME problem happened but was wrongly blamed on a leaky drink bag. The real cause was a clogged filter in the suit's cooling system."
+
+Missao 10: Dedo no Buraco
+Baseado em: ISS Soyuz MS-09, agosto 2018
+O que aparece na tela:
+ALERTA! Um buraco minusculo (2 milimetros — do tamanho da ponta de um lapis) foi achado na parede da estacao. O ar esta saindo devagar pro espaco com um chiado fino.
+Tamanho do buraco: 2 mm Pressao do ar: CAINDO DEVAGAR Local: Modulo lateral
+Escolha A: "Tampar rapido com epoxi" A engenheira coloca um pedaco de gaze medica encharcado de cola epoxi sobre o buraco.
+Conserto rapido — demora 30 minutos. Vazamento para. Mas epoxi e um remendo temporario. Pode aguentar semanas ou meses, mas pode nao resistir se a estacao vibrar forte (como durante uma acoplagem).
+Resultado: Vazamento selado. Pressao estabiliza. Mas voce deveria planejar um conserto permanente depois.
+Escolha B: "Conserto permanente por dentro" A engenheira corta a parte danificada e solda uma placa de metal por cima.
+Demora um dia inteiro. Ar vaza devagar enquanto ela trabalha. Voce perde um pouco de ar. Mas quando terminar, o conserto e permanente.
+Resultado: Pressao cai um pouco durante o conserto mas a solucao dura pra sempre. Engenheira ocupada o dia todo — nada mais e consertado.
+Escolha C: "Fechar o modulo e investigar" Fechar a porta do modulo com o buraco. Descobrir o que causou antes de consertar — foi um micrometeorito? Um defeito de fabricacao? Outra coisa?
+Seguro. Nenhum ar perdido da estacao principal. Mas voce perde acesso a tudo naquele modulo por 1-2 dias enquanto investiga.
+Resultado: Voce descobre que foi causado por uma pedrinha espacial. Tambem descobre outros dois pontos no casco que parecem finos. Agora voce sabe onde futuros vazamentos podem acontecer.
+Popup depois de escolher: "ISSO ACONTECEU DE VERDADE! Em agosto de 2018, um buraco de 2mm foi achado numa capsula Soyuz acoplada a ISS. O astronauta Alexander Gerst literalmente colocou o DEDO no buraco pra parar o ar de sair enquanto o cosmonauta Prokopyev preparava epoxi e gaze pra selar. O remendo funcionou!"
+Baseado em: ISS Soyuz MS-09, agosto 2018
+O que a crianca ve na tela:
+ALERT! A tiny hole (2 millimeters — the size of a pencil tip) was found in the station wall. Air is slowly hissing out into space. The pressure gauge is slowly going down.
+Hole size: 2 mm Air pressure: SLOWLY DROPPING Location: Side module
+Escolha A: "Quick patch with epoxy" The engineer puts a piece of medical gauze soaked in epoxy glue over the hole.
+Consequence: Fast fix — takes 30 minutes. Air leak stops. But epoxy is a temporary patch. It might hold for weeks or months, but might not survive if the station vibrates hard (like during docking).
+Result: Leak sealed. Pressure stabilizes. But you should plan a permanent repair later.
+Escolha B: "Permanent repair from inside" The engineer cuts out the damaged section and welds a metal patch over it.
+Consequence: Takes a full day. Air leaks slowly while she works. You lose some air. But when it's done, the repair is permanent.
+Result: Pressure drops a little during repair but the fix lasts forever. Engineer is busy all day — nothing else gets fixed.
+Escolha C: "Seal the module and investigate" Close the door to the module with the hole. Figure out what caused it before fixing it — was it a micrometeorite? A manufacturing defect? Something else?
+Consequence: Safe. No air lost from the main station. But you lose access to everything in that module for 1-2 days while you investigate.
+Result: You find out it was caused by a tiny space rock. You also find two other spots on the hull that look thin. Now you know where future leaks might happen.
+Popup after choosing: "THIS REALLY HAPPENED! In August 2018, a 2mm hole was found in a Soyuz capsule attached to the ISS. Astronaut Alexander Gerst literally put his FINGER over the hole to stop the air from escaping while cosmonaut Prokopyev prepared epoxy and gauze to seal it. The patch worked!"
+
+Missao 11: Chuva de Destrocos
+Baseado em: ISS, novembro 2021
+O que aparece na tela:
+ALERTA VERMELHO! Uma nuvem de destrocos espaciais (pedacos quebrados de um satelite) esta vindo na direcao da estacao. Milhares de pedacos, alguns do tamanho de uma bolinha de gude, voando a 28.000 km/h. Nessa velocidade, ate um pedaco pequeno pode furar a parede.
+Chegada dos destrocos: 90 MINUTOS Numero de pedacos: 1.500+ Velocidade: 28.000 km/h Chance de acertar: BAIXA mas nao zero
+Escolha A: "Todo mundo pras capsulas de fuga" Todos os tripulantes entram nas capsulas de fuga e fecham as escotilhas. Se algo acertar a estacao, podem desacoplar e voltar.
+Opcao mais segura. Mas todo mundo espera dentro das capsulas apertadas por 2 horas. Nenhum trabalho feito. Experimentos que precisavam de atencao hoje estragam. Tripulacao fica estressada.
+Resultado: Destrocos passam sem acertar. Todo mundo seguro mas 2 horas de trabalho perdidas. Um experimento de ciencia estraga porque ninguem podia cuidar dele.
+Escolha B: "Fechar escotilhas, ficar no nucleo" Fechar as portas entre modulos. Todo mundo fica no modulo central mais protegido mas continua trabalhando.
+Quase seguro — o centro da estacao tem mais blindagem. Mas se algo acertar um modulo externo, quem estiver perto pode se machucar.
+Normal (95%): Destrocos erram. Trabalho continua em velocidade reduzida (limitado a um modulo). Sem danos.
+Azar (5%): Um pedaco acerta um modulo externo. Queda pequena de pressao naquele modulo. Como a escotilha estava fechada, tripulacao esta bem, mas voce perde algum equipamento.
+Escolha C: "Mover a estacao" Usar os propulsores da estacao pra desviar da nuvem de destrocos.
+Usa combustivel. Muda a orbita. Demora 30 minutos de calculo cuidadoso do cientista. Se o calculo estiver certo, os destrocos erram completamente.
+Sucesso (90%): Desvio perfeito. Estacao se move pra orbita segura. Mas combustivel e limitado — nao da pra fazer isso sempre.
+Falha (10%): Desvio nao foi o suficiente. Um pedaco pequeno raspa num painel solar. Energia cai 5%.
+Popup depois de escolher: "ISSO ACONTECEU DE VERDADE! Em novembro de 2021, a Russia destruiu um satelite com um missil. Criou mais de 1.500 pedacos de destrocos que passaram perto da ISS. Todos os 7 astronautas tiveram que entrar nas capsulas de fuga (SpaceX Dragon e Soyuz) e esperar 2 horas. A NASA chamou de 'irresponsavel'."
+Baseado em: ISS, novembro 2021
+O que a crianca ve na tela:
+RED ALERT! A cloud of space debris (broken pieces of a satellite) is heading toward the station. Thousands of pieces, some as small as a marble, flying at 28,000 km/h. At that speed, even a tiny piece can punch through the wall.
+Debris arrival: 90 MINUTES Number of pieces: 1,500+ Speed: 28,000 km/h Chance of hit: LOW but not zero
+Escolha A: "Everybody to the escape pods" All crew members get into the escape capsules and close the hatches. If something hits the station, they can detach and fly home.
+Consequence: Safest option. But everyone waits inside the tiny capsules for 2 hours. No work gets done. Experiments that needed attention today are ruined. Crew is stressed.
+Result: The debris passes without hitting the station. Everyone is safe but 2 hours of work lost. One science experiment is ruined because nobody could check on it.
+Escolha B: "Close hatches, shelter in the core" Close the doors between modules. Everyone stays in the most protected central module but keeps working.
+Consequence: Mostly safe — the center of the station has the most shielding. But if something hits an outer module, anyone near it could be hurt.
+Result (95%): Debris misses. Work continues at half speed (limited to one module). No damage.
+Result (5%): A piece hits an outer module. Small pressure drop in that module. Since the hatch was closed, the crew is fine, but you lose some equipment.
+Escolha C: "Move the station" Use the station's thrusters to dodge the debris cloud.
+Consequence: Uses fuel. Changes the orbit. Takes 30 minutes of careful calculation by the scientist. If the calculation is right, the debris misses completely.
+Result (90%): Perfect dodge. Station moves to a safe orbit. But fuel is limited — can't do this often.
+Result (10%): The dodge wasn't quite enough. A small piece clips a solar panel. Energy drops 5%.
+Popup after choosing: "THIS REALLY HAPPENED! In November 2021, Russia destroyed a satellite with a missile. It created over 1,500 pieces of debris that passed near the ISS. All 7 astronauts had to get into their escape capsules (SpaceX Dragon and Soyuz) and wait for 2 hours. NASA called it 'irresponsible.'"
+
+Missao 12: Silencio Total
+Baseado em: CHAPEA, 2024-2026
+O que aparece na tela:
+COMUNICACAO PERDIDA. Voce nao consegue falar com a Terra. Nenhuma mensagem chegando. Nenhuma mensagem saindo. Voce nao sabe se o problema e do seu lado ou do lado da Terra. Voce esta sozinho.
+Comunicacao: FORA DO AR Ultima mensagem da Terra: 18 horas atras Causa: DESCONHECIDA Humor da tripulacao: NERVOSOS
+Escolha A: "Manter a calma, seguir a rotina" Falar pra tripulacao seguir o horario normal. Continuar trabalhando. A comunicacao provavelmente volta sozinha.
+Nenhuma energia desperdicada. Tripulacao fica ocupada, o que ajuda com a ansiedade. Mas voce nao sabe se uma tempestade solar esta vindo e ninguem te avisou.
+Resultado: Comunicacao volta em 2 dias. Voce perdeu um aviso sobre uma tempestade solar, mas por sorte era pequena. Humor: -10 (nervosos mas ok).
+Escolha B: "Aumentar a potencia da antena" Redirecionar energia de outros sistemas pra antena de comunicacao. Tentar falar com a Terra.
+Usa energia extra. Maquina de oxigenio funciona mais devagar. Aquecedor funciona mais fraco. Mas voce PODE conseguir contato com a Terra e receber informacao importante.
+Sucesso (70%): Voce fala com a Terra! Eles dizem que foi um problema tecnico do lado deles. Tudo bem.
+Falha (30%): Sem contato ainda. Voce usou energia extra a toa. Tripulacao fica mais fria e producao de oxigenio foi mais lenta por um dia.
+Escolha C: "Protocolo de emergencia" Pensar no pior. Mover todo mundo pra area blindada. Reduzir todos os sistemas nao essenciais. Se preparar pra uma emergencia desconhecida.
+Muito seguro mas muito desperdicador. Se nao tinha emergencia nenhuma, voce perdeu um dia inteiro de trabalho e usou recursos extras a toa. Humor cai por causa do medo.
+Resultado: Era so um problema tecnico. Tudo estava bem. Mas a tripulacao agora esta assustada e trabalha mais devagar amanha. Humor: -15.
+Popup depois de escolher: "ISSO ACONTECEU NUMA SIMULACAO! Durante o experimento CHAPEA da NASA, a tripulacao de 4 pessoas ficou 2 SEMANAS inteiras sem NENHUMA comunicacao do mundo exterior. Eles tiveram que tomar todas as decisoes sozinhos. E assim que uma missao real a Marte seria — voce nao pode ligar pedindo ajuda."
+Baseado em: CHAPEA, 2024-2026
+O que a crianca ve na tela:
+COMMUNICATION LOST. You can't reach Earth. No messages coming in. No messages going out. You don't know if the problem is on your end or on Earth's end. You are alone.
+Communication: OFFLINE Last message from Earth: 18 hours ago Cause: UNKNOWN Crew mood: NERVOUS
+Escolha A: "Stay calm, keep routine" Tell the crew to follow the normal schedule. Keep working. Communication will probably come back on its own.
+Consequence: No energy wasted. Crew stays busy, which helps with anxiety. But you don't know if a solar storm is coming and nobody warned you.
+Result: Communication comes back in 2 days. You missed a warning about a solar storm, but luckily it was small. Crew mood: -10 (nervous but okay).
+Escolha B: "Boost the antenna" Redirect power from other systems to the communication antenna. Try to reach Earth.
+Consequence: Uses extra energy. Oxygen machine runs slower. Heater runs cooler. But you MIGHT reach Earth and get critical information.
+Result (70%): You reach Earth! They tell you a minor equipment problem on their end caused the blackout. Everything is fine.
+Result (30%): Still no contact. You used extra energy for nothing. Crew is colder and oxygen production was slower for a day.
+Escolha C: "Emergency protocol" Assume the worst. Move everyone to the shielded area. Reduce all non-essential systems. Prepare for an unknown emergency.
+Consequence: Very safe but very wasteful. If there was no real emergency, you lost an entire day of work and used extra resources for nothing. Crew mood drops because of fear.
+Result: It was just a technical glitch. Everything was fine. But the crew is now rattled and works slower tomorrow. Mood: -15.
+Popup after choosing: "THIS REALLY HAPPENED IN A SIMULATION! During NASA's CHAPEA Mars experiment, the 4-person crew went 2 full weeks without ANY communication from the outside. They had to make every decision on their own. This is what a real Mars mission would be like — you can't call for help."
+
+Missao 13: Comida Acabando
+Baseado em: CHAPEA, 2024-2026
+O que aparece na tela:
+AVISO: A comida esta acabando. As refeicoes embaladas estao indo mais rapido do que o planejado. A estufa esta produzindo comida, mas nao o suficiente pra alimentar todo mundo. Voce precisa tomar uma decisao sobre como esticar o estoque.
+Refeicoes embaladas restantes: 20 dias Reabastecimento: NENHUM CHEGANDO Producao da estufa: alimenta 1 pessoa por dia Tamanho da tripulacao: 4 pessoas
+Escolha A: "Reduzir as porcoes" Todo mundo come menos. 75% da porcao normal.
+Comida dura mais (27 dias em vez de 20). Mas todo mundo fica com fome. Cansam mais rapido e trabalham mais devagar. Humor cai. Com o tempo, saude tambem cai.
+Resultado: Comida dura. Mas desempenho da tripulacao: -25%. Humor: -20. Se continuar por muito tempo, pessoas comecam a ficar doentes.
+Escolha B: "Turbinar a estufa" Dar mais eletricidade e agua pra estufa pra ela crescer mais rapido. Luzes LED ligadas 20 horas por dia em vez de 12.
+Estufa produz comida pra 2 pessoas por dia (o dobro!). Tomates e alface frescos melhoram o humor! Mas custa energia extra e agua extra — agua que seria usada pra fazer oxigenio.
+Resultado: Mais comida e humor melhor. Mas producao de oxigenio cai 15% por causa da agua desviada pras plantas. Energia disponivel pra outras coisas tambem cai.
+Escolha C: "Comer a ciencia" O cientista estava cultivando plantas experimentais pra pesquisa. Comer elas.
+Comida extra imediata. Tripulacao come comida fresca hoje. Mas o experimento cientifico e destruido. Voce perde pontos e dados que a missao deveria coletar.
+Resultado: Barrigas cheias por 3 dias. Humor SOBE. Mas progresso cientifico perdido. No final da missao, sua pontuacao de ciencia e mais baixa.
+Popup depois de escolher: "ISSO ACONTECEU NUMA SIMULACAO! Durante a CHAPEA, o experimento de 378 dias em Marte da NASA, restricao de comida foi o MAIOR problema que a tripulacao relatou. Eles ficavam criativos — misturando pacotes diferentes pra criar sabores novos. A NASA considera 'comida insuficiente' um dos riscos mais altos pra uma missao real a Marte."
+Baseado em: CHAPEA, 2024-2026
+O que a crianca ve na tela:
+WARNING: Food is running low. The packed meals are going faster than planned. The greenhouse is growing food, but not enough to feed everyone. You need to make a choice about how to stretch the food supply.
+Packed meals left: enough for 20 days Days until resupply: NO RESUPPLY COMING Greenhouse production: feeds 1 person per day Crew size: 4 people
+Escolha A: "Cut rations for everyone" Everybody eats less. 75% of normal portions.
+Consequence: Food lasts longer (27 days instead of 20). But everyone is hungrier. They get tired faster and work slower. Mood drops. Over many days, health starts to drop too.
+Result: Food lasts. But crew performance: -25%. Mood: -20. If this goes on too long, people start getting sick.
+Escolha B: "Power up the greenhouse" Give the greenhouse more electricity and water so it grows faster. LED lights on 20 hours a day instead of 12.
+Consequence: Greenhouse produces food for 2 people per day (double!). Fresh tomatoes and lettuce boost crew mood! But it costs extra energy and extra water — water that would have been used for oxygen.
+Result: More food and better mood. But oxygen production drops 15% because of the water diverted to plants. Energy available for other things drops too.
+Escolha C: "Eat science" The scientist was growing experimental plants for research. Eat them instead.
+Consequence: Immediate food boost. Crew eats fresh food today. But the science experiment is destroyed. You lose points and data that the mission was supposed to collect.
+Result: Full bellies for 3 days. Mood goes UP. But science progress is lost. At the end of the mission, your science score is lower.
+Popup after choosing: "THIS REALLY HAPPENED IN A SIMULATION! During CHAPEA, NASA's 378-day Mars experiment, food restriction was the BIGGEST problem the crew reported. They got creative — mixing different packets together to make new flavors. NASA considers 'not enough good food' one of the highest risks for a real Mars mission."
+
+Tripulante doente, tripulantes médicos tem 2x mais chance de se recuperarem ou recuperarem outras pessoas: 
+O Tripulante doente fica em repouso sobre o cuidado de outro tripulantes, sobrecarrega os outros tripulantes
+O Tripulante tem uma chance de melhorar por dia e a chance aumenta diariamente. 45%/70%/90%/100%. A satisfação/ desgaste por dia dos tripulantes restantes é desgastada por dia por excesso de função. 1/2/3/5.
+Existe uma chance baixa de contaminação de outros tripulantes por dia em que o tripulante doente se encontra em repouso. 7% - 20%
+Chance de piorar. 0% - 2%; 
+O Tripulante doente fica em isolamento e demora mais para se recuperar.
+Chance de se recuperar aumenta diariamente. 25%/50%/70%/90%/100%.
+A chance de contaminar outros é inexistente.
+Chance de piorar. 2% - 5% (vira o problema 2) ; 
+O tripulante continua trabalhando por questões de emergência.
+Chance de se recuperar aumenta. 10%/20%/40%/60%/
+A chance de contaminar outros 15% - 45%
+Chance de piorar. 10% - 20%  (vira o problema 2);
+Tripulante terrivelmente doente,  tripulantes médicos tem 2x mais chance de se recuperarem ou recuperarem outras pessoas: 
+O tripulante é forçado a estar sob os cuidados de alguém e os gastos de O2/água/Alimento aumentam substancialmente com recuperação de 3 a 5 dias.
+O tripulante é forçado a estar sob os cuidados de alguém 
+A despensa da missão (Alimentação): a nave está sendo carregada antes da viagem.
+Levar mais comida desidratada.
+Comida começa em 100.
+Água −0,5 por dia, porque a comida precisa ser reidratada.
+Levar mais comida pronta.
+Comida começa em 80.
+Satisfação +10.
+A despensa vira escudo (Alimentação): a DONKI avisa que uma tempestade solar chega em 1 dia. Os sacos de comida podem virar parede do abrigo.
+Empilhar toda a comida em volta do abrigo.
+Dose da tempestade cai 80%.
+Perde 1 dia de tarefas arrumando tudo. Satisfação −5.
+Chance de rasgar pacotes na mudança: 10% (Comida −5).
+Empilhar só metade da comida.
+Dose da tempestade cai 50%.
+Perde meio dia de tarefas.
+Chance de rasgar pacotes: 5% (Comida −3).
+Usar comida e água juntas (junto com o problema 23).
+Dose da tempestade cai 90%.
+Perde 1 dia e meio de tarefas. Satisfação −8.
+Deixar a despensa no lugar.
+Dose normal: +10 em cada tripulante (tempestade fraca) ou +20 (forte).
+Depois de uma tempestade forte, chance de 15% de virar o problema 1.
+Comida antiga ou nova (Alimentação): a comida perde vitaminas com o tempo. Toda semana o capitão escolhe o que comer primeiro.
+Comer primeiro a mais antiga.
+Nada se perde.
+Saúde −1 por dia nessa semana.
+Chance de achar um pacote estragado: 10% por semana (Comida −3 e Saúde −5 para quem comer).
+Comer primeiro a mais nova.
+Saúde +1 por dia nessa semana.
+A comida antiga continua envelhecendo. Chance de estragar aumenta por semana: 10%/20%/35%/50% (Comida −5 cada vez).
+Misturar metade antiga e metade nova.
+Saúde não muda.
+Chance de estragar: 5% por semana (Comida −3).
+Pedir ao médico para examinar a despensa.
+O médico perde meio dia.
+Nenhum pacote estraga nas próximas 2 semanas.
+Se o médico estiver cuidando de alguém (problema 1), essa escolha some.
+Quanto comer por dia (Alimentação): a Comida começa em 100 e precisa durar até o fim da missão.
+Porção normal.
+Comida −1 por dia.
+Saúde e Satisfação não mudam.
+Se a Comida chegar a 0 antes do fim, vira crise de fome.
+Porção de 3/4.
+Comida −0,75 por dia.
+Satisfação −1 por dia.
+Chance de um tripulante falhar uma tarefa: 10% por dia.
+Meia porção.
+Comida −0,5 por dia.
+Saúde −1 e Satisfação −2 por dia.
+Chance de falhar uma tarefa aumenta por semana: 20%/30%/45%.
+Se a Saúde ficar abaixo de 30, vira o problema 1.
+Porção extra só para quem sai em caminhada.
+Comida −1,2 por dia.
+Chance de sucesso nas caminhadas +10%.
+Satisfação −3 dos outros tripulantes.
+Horta na sombra (Alimentação): a estação vai ficar 3 dias na sombra de Marte e as luzes da horta gastam energia.
+Manter a horta ligada o tempo todo.
+Energia −10 por dia de sombra.
+As plantas ficam 100% vivas.
+Se a Energia ficar abaixo de 20, vira o problema 30.
+Ligar só metade do tempo.
+Energia −5 por dia de sombra.
+Chance de as plantas morrerem: 20%.
+Se sobreviverem, a colheita (problema 8) atrasa 3 dias.
+Usar a bateria reserva só para a horta.
+Energia não muda agora.
+A bateria envelhece mais rápido: o problema 33 aparece 10 dias antes.
+Desligar a horta.
+Chance de as plantas morrerem aumenta por dia sem luz: 30%/60%/90%.
+Se morrerem: Comida −10, Satisfação −5 e o problema 8 não acontece.
+A primeira colheita (Alimentação): as alfaces cresceram. O que fazer com elas?
+Comer tudo agora.
+Satisfação +10 e Saúde +5.
+A horta fica vazia: a próxima colheita só em 30 dias.
+Comer metade e replantar metade.
+Satisfação +5 e Saúde +2.
+Comida +10 daqui a 15 dias.
+Replantar tudo.
+Satisfação −3 (ninguém provou).
+Comida +20 daqui a 15 dias.
+Chance de uma praga na horta: 15% (perde tudo).
+Guardar uma parte para a festa (problema 10).
+Na festa, a comida especial custa Comida −1 em vez de −3 e dá Satisfação +5 a mais.
+A alface guardada pode estragar: 10% por dia até a festa.
+Falta vitamina (Alimentação): o médico avisa que a tripulação está com pouca vitamina. Saúde −1 por dia até resolver.
+Suplementos para todos.
+Saúde +10 (se o médico aplicar, +15).
+O estoque só dá para 3 usos.
+Chance de o suplemento estar fraco aumenta a cada uso: 20%/35%/50% (aí só Saúde +3).
+Suplementos só para quem está pior.
+Saúde +10 para 1 tripulante; os outros continuam com Saúde −1 por dia.
+Gasta só meio uso do estoque.
+Aumentar a horta.
+Saúde +3 por dia durante 5 dias, começando no dia 3.
+Energia −5 e Água −5.
+Não fazer nada.
+Saúde −2 por dia.
+Chance de virar o problema 1 aumenta por dia: 5%/10%/20%/40%.
+Aniversário na base (Alimentação): é aniversário de um tripulante e a equipe quer comemorar.
+Festa com comida especial.
+Satisfação +15 para todos.
+Comida −3.
+Só metade das tarefas do dia é feita.
+Festa simples com bolo de pouches.
+Satisfação +8 para todos.
+Comida −1.
+Chamada de vídeo com a família do aniversariante.
+Satisfação +10 para ele e +3 para os outros.
+Energia −5.
+Se o rádio estiver desligado (problemas 30 ou 32), essa escolha some.
+Dia normal.
+Satisfação −5 para todos e −10 para o aniversariante.
+Chance de 25% de virar o problema 49.
+Quem come mais (Alimentação): a Comida está abaixo de 20 e o engenheiro vai fazer um conserto pesado.
+Dividir igual para todos.
+Satisfação não muda.
+Chance de o conserto falhar: 30% (o conserto volta no dia seguinte).
+Dar mais para o engenheiro.
+Chance de o conserto dar certo: 90%.
+Satisfação −10 dos outros.
+Chance de 20% de virar o problema 49.
+A tripulação vota.
+Perde meio dia de tarefas.
+Satisfação +5.
+Chance de o conserto falhar: 20%.
+O capitão dá a própria porção para o engenheiro.
+Chance de o conserto dar certo: 90%.
+Satisfação +8.
+Saúde do capitão −5; se ficar abaixo de 30, vira o problema 1.
+O lixo está acumulando (Alimentação): a cada 10 dias o lixo ocupa mais espaço e não existe nave para levar embora.
+Compactar o lixo.
+Energia −5 e Água +3 (recupera a água do lixo).
+Libera o problema 44.
+Chance de o compactador quebrar: 10% (Energia −5 e 1 dia do engenheiro).
+Guardar num módulo.
+Satisfação −1 por dia.
+Chance de contaminação aumenta por semana: 10%/25%/50% (vira o problema 22).
+Jogar no espaço.
+Água −2 e Satisfação −3.
+Chance de 10% de o lixo bater num painel depois (vira o problema 35).
+Separar e reaproveitar (embalagens viram vasos da horta).
+Perde 1 dia de tarefas.
+O lixo cai pela metade. Satisfação +3.
+Comida +3 na próxima colheita.
+Sobras de comida (Alimentação): sobrou comida no prato.
+Reaproveitar nas próximas refeições.
+Comida +2.
+Satisfação −3 (comida repetida).
+Descartar.
+Comida −2.
+Se for escolhido 3 vezes, vira o problema 12.
+O aquecedor da cozinha quebrou (Alimentação): não dá para aquecer nem reidratar a comida.
+Consertar.
+Energia −5.
+O engenheiro fica 1 dia no conserto.
+Comer comida fria e seca.
+Satisfação −5 por dia até consertar.
+Depois de 3 dias, vira o problema 49.
+A conta da despensa não bate (Alimentação): pode ter menos comida do que o planejado.
+Recontar tudo.
+Perde 1 dia de tarefas.
+Satisfação −3.
+Ignorar.
+No dia 80, Comida −10 de surpresa.
+Horta como lazer (Alimentação): os tripulantes querem cuidar das plantas no tempo livre.
+Liberar.
+Satisfação +5.
+Água −2.
+Não liberar.
+Nada muda.
+Beber ou fazer ar (Água): a água está baixa e a mesma água serve para beber e para fazer oxigênio.
+Mandar a água para o gerador de oxigênio.
+Oxigênio +10.
+Água −10 e Saúde −5.
+Se a Água ficar abaixo de 20, Saúde −2 por dia.
+Guardar a água para beber.
+Oxigênio −10.
+O reciclador de urina quebrou (Água): o aparelho que transforma xixi em água  parou.
+Detalhar melhor uma historinha aqui contar q o xixi e suor sao reaparoveitados de forma q sao totalmente filtrados e conseguem sem consumidos novamente como agua
+	Melhorar as escolhas e explicar sempre que as tarefas devem considerar os niveis atuais de recurso disponiveis
+Consertar agora. *  essa opçao pode ser mais detalhada mostrando um pouco sobre a sollucao em linguagem simples 
+Energia −10.
+Tarefas param por 1 dia.
+A reciclagem volta.
+Usar as bolsas reserva.
+Água −3 e Satisfação −2 por dia até consertar.
+Depois de 5 dias as bolsas acabam: Água −5 por dia.
+Banho hoje (Água): a tripulação quer se limpar depois de um dia pesado.
+Banho com toalha úmida para todos.
+Satisfação +5.
+Água −3.
+Pular o banho.
+Satisfação −5 e Saúde −2.
+Se pular 3 dias seguidos, chance de 25% de virar o problema 1.
+A água está sumindo devagar (Água): um pouco da água se perde em cada reciclagem.
+Ligar o processador de salmoura.
+A perda diária cai de −1 para −0,5.
+Energia −2 por dia.
+Deixar como está.
+Nada muda.
+A horta está com sede (Água): as plantas precisam de mais água.
+Regar normalmente.
+Água −3.
+Comida +10 daqui a 10 dias.
+Regar menos.
+Comida +4 daqui a 10 dias.
+Alerta de contaminação (Água): o sensor de pureza da água deu alerta.
+Parar e trocar os filtros.
+Energia −5.
+1 dia sem água reciclada: Satisfação −5.
+Continuar usando.
+Chance de 30% de virar o problema 1 em 1 a 3 dias.
+Água como escudo (Água): uma tempestade solar está chegando.
+Levar a água para o abrigo.
+Dose da tempestade cai 60%.
+Satisfação −5.
+Deixar no lugar.
+Dose normal da tempestade.
+Vazamento na sala de máquinas (Água): um cano da reciclagem está pingando.
+Fechar a válvula e consertar.
+Água −5 e Energia −5.
+Só secar e seguir.
+Água −1 por dia até consertar.
+Depois de 7 dias o cano estoura: Água −15 e Energia −5.
+Banheiro entupido (Água): o banheiro faz parte da reciclagem e parou.
+Consertar.
+Energia −3.
+O engenheiro fica 1 dia no conserto.
+Usar bolsas de emergência.
+Satisfação −5 e Água −1 por dia.
+Depois de 3 dias, vira o problema 49.
+Racionar água (Água): a água caiu abaixo de 40.
+Racionar.
+A perda diária cai para −0,5.
+Satisfação −2 e Saúde −1 por dia.
+Depois de 10 dias, chance de 40% de virar o problema 1.
+Manter o uso normal.
+Nada muda.
+A sombra de Marte está chegando (Energia): a bateria não dá para tudo. O que desligar?
+Desligar o laboratório.
+Energia +10.
+A ciência para por 1 dia.
+Desligar a horta.
+Energia +5.
+Comida −5 e Satisfação −3.
+Baixar o aquecimento.
+Energia +10.
+Satisfação −5 e Saúde −3 (frio).
+Escolher a usina (Energia): no começo da missão o capitão escolhe a fonte de energia.
+Painéis solares.
+Energia +15 no Sol e −15 na sombra.
+O problema 27 volta em toda sombra.
+Reator nuclear.
+Energia +5 todo dia, de dia e de noite.
+Gastar agora ou guardar (Energia): a bateria está cheia e o laboratório quer um experimento grande.
+Fazer o experimento.
++1 objetivo de ciência.
+Energia −20.
+Se a sombra chegar em até 3 dias, vira o problema 30.
+Guardar a energia.
+Nada muda.
+Modo de sobrevivência (Energia): a energia está muito baixa.
+Ativar.
+Energia +10 por dia durante 2 dias.
+Satisfação −10.
+Sem contato com a Terra por 2 dias (o problema 46 não aparece).
+Não ativar.
+Chance de 40% de a Energia chegar a 0: Oxigênio −10 por dia.
+Quais módulos aquecer (Energia): a noite está fria e não dá para aquecer tudo.
+Aquecer todos.
+Satisfação +5.
+Energia −15.
+Só as cabines e a sala de máquinas.
+Energia −5.
+Comida −5 (a horta esfria).
+Se for escolhido 3 vezes, vira o problema 9.
+O que vem primeiro (Energia): oxigênio, reciclagem e rádio querem energia ao mesmo tempo.
+Suporte à vida primeiro.
+Oxigênio e Água mantidos.
+1 dia sem contato com a Terra.
+Manter o rádio ligado.
+Oxigênio −10.
+33. A bateria envelheceu (Energia)
+No dia 60, a bateria passa a armazenar menos energia.
+a. Trocar pela bateria reserva
+i. Energia −10.
+ii. A bateria volta à capacidade normal.
+b. Aceitar a redução da capacidade
+i. Cada período de sombra passa a consumir 5 pontos adicionais de Energia.
+ii. Na próxima sombra, é ativado o problema 30 (Modo de sobrevivência).
+ 
+34. Turno extra no laboratório (Energia)
+Os cientistas querem trabalhar durante a noite para avançar nas pesquisas.
+a. Liberar o turno extra
+i. +1 objetivo de ciência.
+ii. Energia −10.
+iii. Satisfação −3.
+iv. Há 20% de chance de ativar o problema 47 (Cama emperrada) no dia seguinte.
+b. Negar o turno extra
+i. Nada muda.
+ 
+35. Painel solar travado (Energia)
+Um dos painéis solares travou e só pode ser consertado do lado de fora da estação.
+a. Fazer uma caminhada espacial para consertar
+i. A Energia volta ao normal.
+ii. Dose +3 para o tripulante que sair.
+iii. Se houver uma tempestade a caminho, ativa o problema 37 (Conserto do lado de fora).
+b. Permanecer dentro da estação
+i. Energia −5 por dia até que o painel seja consertado.
+ 
+36. Uma tempestade saiu do Sol (Radiação)
+A DONKI avisa que uma ejeção de massa coronal (CME) está vindo em direção a Marte.
+a. Montar o abrigo imediatamente
+i. A equipe perde 2 dias de tarefas para preparar o abrigo.
+ii. A Dose recebida durante a tempestade é reduzida em 80%.
+b. Montar o abrigo somente perto da chegada
+i. Há 70% de chance de a previsão estar correta: a Dose da tempestade é reduzida em 80%, sem perder dias de tarefas.
+ii. Há 30% de chance de a previsão estar errada: a Dose da tempestade é reduzida em apenas 40%.
+ 
+37. Conserto do lado de fora (Radiação)
+Uma peça da estação que fica do lado de fora quebrou, e uma tempestade solar está se aproximando.
+a. Sair imediatamente para consertar
+i. Dose +8 para o tripulante que realizar a caminhada espacial.
+ii. A peça volta a funcionar.
+b. Adiar o conserto
+i. Energia ou Água −3 por dia enquanto o reparo não for realizado.
+ii. O conserto fica pendente para depois.
+ 
+38. Um dia inteiro no abrigo (Radiação)
+A tempestade chegou e as máquinas precisam continuar recebendo cuidados durante o período de abrigo.
+a. Colocar todos os tripulantes no abrigo
+i. A Dose recebida pela equipe durante a tempestade é reduzida em 80%.
+ii. Oxigênio −5.
+iii. Água −5.
+b. Revezar os tripulantes nas tarefas
+i. A Dose é reduzida em 80% para os 3 tripulantes protegidos no abrigo.
+ii. Dose +10 para cada tripulante que sair para realizar o revezamento.
+iii. A escolha ativa o problema 39 (Perto do limite).
+ 
+39. Perto do limite (Radiação)
+Um dos tripulantes já recebeu uma quantidade elevada de radiação e está próximo do limite individual.
+a. Retirar o tripulante das tarefas externas
+i. Satisfação −5, pois os demais tripulantes precisam assumir mais tarefas.
+b. Manter a escala normal
+i. Dose +5 para o tripulante a cada caminhada espacial.
+ii. Saúde −5 para esse tripulante.
+iii. Se a Dose individual chegar a 100, o tripulante retorna à Terra.
+ 
+40. Sol calmo (Radiação)
+O período está seguro para realizar atividades do lado de fora da estação.
+a. Realizar todas as tarefas externas agora
+i. +1 objetivo de ciência.
+ii. Satisfação −8 devido ao cansaço da equipe.
+b. Distribuir as tarefas pelos próximos dias
+i. Há 30% de chance de ocorrer uma tempestade surpresa em 3 dias.
+ii. Se a tempestade surpresa ocorrer, ativa o problema 36 sem aviso prévio.
+ 
+41. O sensor de radiação quebrou (Radiação)
+O aparelho responsável por avisar quando a equipe deve entrar no abrigo parou de funcionar.
+a. Consertar o sensor
+i. Energia −5.
+ii. O alerta de radiação volta a funcionar.
+b. Confiar somente nos avisos enviados pela Terra
+i. Há 30% de chance de a equipe não conseguir entrar no abrigo a tempo em cada tempestade.
+ii. Essa chance permanece até que o sensor seja consertado.
+ 
+42. Raios cósmicos todo dia (Radiação)
+Mesmo quando não há tempestades solares, a Dose de radiação da equipe continua aumentando diariamente.
+a. Encurtar a missão, encerrando-a no dia 75
+i. Dose −7,5.
+ii. −1 objetivo de ciência.
+b. Permanecer até o fim da missão, no dia 90
+i. Nada muda.
+ 
+43. Quem sai para a caminhada (Radiação)
+É necessário realizar um conserto do lado de fora da estação, e o capitão precisa escolher quem fará a caminhada espacial.
+a. Enviar o engenheiro
+i. O conserto tem 100% de chance de ser concluído com sucesso.
+ii. Dose +8 para o engenheiro.
+b. Enviar o tripulante com a menor Dose acumulada
+i. Dose +8 para o tripulante escolhido.
+ii. Há 70% de chance de o conserto ser concluído com sucesso.
+iii. Se o conserto falhar, a tentativa será realizada novamente no dia seguinte.
+ 
+44. Parede de lixo (Radiação)
+Este problema só aparece se o lixo tiver sido compactado na escolha A do problema 12 (O lixo está acumulando, de Alimentação).
+a. Construir a parede de proteção com o material compactado
+i. Energia −5.
+ii. A Dose recebida nas próximas tempestades é reduzida em mais 10%.
+b. Não construir a parede
+i. Nada muda.
+ 
+45. Medir a tempestade (Radiação)
+Os cientistas querem deixar um instrumento do lado de fora para medir a tempestade.
+a. Realizar a medição
+i. +1 objetivo de ciência.
+ii. Energia −5.
+iii. Dose +3 para o tripulante que sair para instalar ou operar o instrumento.
+b. Não realizar a medição
+i. Nada muda.
+ 
+46. Mensagem da família (Satisfação)
+A tripulação quer enviar e receber vídeos de seus familiares durante a missão.
+a. Liberar a troca de vídeos
+i. Satisfação +10.
+ii. Energia −5.
+b. Permitir somente mensagens relacionadas ao trabalho
+i. Satisfação −5.
+ii. Se essa escolha for feita 2 vezes, ativa o problema 48 (O tédio chegou).
+
+
