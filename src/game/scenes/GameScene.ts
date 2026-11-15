@@ -96,6 +96,12 @@ export class GameScene extends Phaser.Scene {
   private frozen = false;
   private speechBubble: Phaser.GameObjects.Container | null = null;
   private speechTimer: Phaser.Time.TimerEvent | null = null;
+  /** Fires SPEECH_BUBBLE_DONE a moment after typing ends; cancelled when the bubble is skipped or hidden. */
+  private speechDoneTimer: Phaser.Time.TimerEvent | null = null;
+  /** Shows the whole bubble text at once (set while it is typing). */
+  private finishSpeech: (() => void) | null = null;
+  /** Window click listener that skips the typing; removed with the bubble. */
+  private speechSkipListener: ((e: MouseEvent) => void) | null = null;
 
   constructor() {
     super({ key: 'GameScene' });
@@ -217,6 +223,9 @@ export class GameScene extends Phaser.Scene {
       gameEvents.off('CAMERA_ZOOM_OUT', onZoomOut);
       gameEvents.off(EVENTS.SHOW_SPEECH_BUBBLE, onShowSpeech);
       gameEvents.off(EVENTS.HIDE_SPEECH_BUBBLE, onHideSpeech);
+      // A bubble still typing has a click listener on the window: drop it with the scene.
+      this.finishSpeech = null;
+      this.stopSpeechTyping();
     };
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, removeMissionListeners);
     this.events.once(Phaser.Scenes.Events.DESTROY, removeMissionListeners);
@@ -523,16 +532,40 @@ export class GameScene extends Phaser.Scene {
     });
 
     // Emit done event when typing finishes
-    this.time.delayedCall(fullText.length * 30 + 200, () => {
+    this.speechDoneTimer = this.time.delayedCall(fullText.length * 30 + 200, () => this.finishSpeech?.());
+
+    // Whole text now, then "done" (once): from the timer above, or from a click anywhere.
+    this.finishSpeech = () => {
+      this.finishSpeech = null;
+      this.stopSpeechTyping();
+      textObj.setText(fullText);
       gameEvents.emit('SPEECH_BUBBLE_DONE');
-    });
+    };
+    // Click anywhere while it types → skip to the end (the bubble sits under a React overlay,
+    // so listen on the window). That click only finishes the text, like the React typewriter.
+    this.speechSkipListener = (e: MouseEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      this.finishSpeech?.();
+    };
+    window.addEventListener('click', this.speechSkipListener, true);
+  }
+
+  /** Stops the typing timers and the skip-on-click listener (the bubble itself stays). */
+  private stopSpeechTyping() {
+    this.speechTimer?.destroy();
+    this.speechTimer = null;
+    this.speechDoneTimer?.destroy();
+    this.speechDoneTimer = null;
+    if (this.speechSkipListener) {
+      window.removeEventListener('click', this.speechSkipListener, true);
+      this.speechSkipListener = null;
+    }
   }
 
   private hideSpeechBubble() {
-    if (this.speechTimer) {
-      this.speechTimer.destroy();
-      this.speechTimer = null;
-    }
+    this.finishSpeech = null;
+    this.stopSpeechTyping();
     if (this.speechBubble) {
       this.speechBubble.destroy();
       this.speechBubble = null;
