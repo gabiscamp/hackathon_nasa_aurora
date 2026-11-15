@@ -123,7 +123,6 @@
   color: inherit;
   border: 2px solid currentColor;
   border-radius: 7px;
-  opacity: 0.85;
 }
 
 .gm-controls {
@@ -212,4 +211,298 @@
 /* global.css lifts every button on hover; keep this one centred. */
 .gm-menu-btn:hover {
   transform: translateX(-50%);
+}
+
+/* Menu + Help side by side at the top centre (Help always visible: IHC guide). */
+.gm-top-actions {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.gm-top-actions .gm-menu-btn,
+.gm-top-actions .gm-menu-btn:hover {
+  position: static;
+  transform: none;
+}
+
+.gm-help-badge {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0a0e27;
+  background: #4dc9f6;
+}
+
+/* ---------- How to play ---------- */
+.gm-card--help {
+  width: min(1040px, 100%);
+  padding: 22px 28px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  text-align: left;
+}
+
+.gm-card--help .gm-title {
+  text-align: center;
+}
+
+.gm-help {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  gap: 18px 32px;
+  margin: 8px 0 20px;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.gm-help__col {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+@media (max-width: 760px) {
+  .gm-help {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gm-help section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gm-help h3 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 700;
+  color: #f5a623;
+}
+
+.gm-help p,
+.gm-help ol {
+  margin: 0;
+}
+
+.gm-help ol {
+  padding-left: 24px;
+  list-style: decimal;
+}
+
+.gm-help .gm-controls {
+  margin: 0;
+}
+
+.gm-help__bang {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-weight: 800;
+  color: #f0ece4;
+  background: #e74c3c;
+}
+
+.gm-help__bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gm-help__bars li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.gm-help__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(10, 14, 32, 0.9);
+  border: 1px solid rgba(77, 201, 246, 0.25);
+}
+
+/* Narrow windows: the top centre is taken by the Station and Mission panels, so Menu/Help sit under the Mission panel. */
+@media (max-width: 1400px) {
+  .gm-top-actions {
+    top: 168px;
+    left: auto;
+    right: 16px;
+    transform: none;
+  }
+}
+
+/* ---------- Options ---------- */
+.gm-card--options {
+  width: min(560px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  text-align: left;
+}
+
+.gm-card--options .gm-title {
+  text-align: center;
+}
+
+.opt-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 8px 0 20px;
+}
+
+.opt-row {
+  margin: 0;
+  padding: 0;
+  border: none;
+  min-width: 0;
+}
+
+.opt-row__title {
+  margin-bottom: 4px;
+  padding: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #f5a623;
+}
+
+.opt-row__hint {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: #c9cfdb;
+}
+
+.opt-seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.opt-seg__item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 0;
+  min-width: 96px;
+  min-height: 48px;
+  padding: 6px 14px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #f0ece4;
+  background: #1b2440;
+  border: 2px solid #3a4666;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.opt-seg__item:hover {
+  border-color: #4dc9f6;
+}
+
+/* The real radio stays in the page for keyboard and screen readers, just invisible. */
+.opt-seg__item input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.opt-seg__item.is-on {
+  color: #0a0e27;
+  background: #4dc9f6;
+  border-color: #4dc9f6;
+}
+
+.opt-seg__item:has(input:focus-visible) {
+  outline: 3px solid #f5a623;
+  outline-offset: 2px;
+}
+
+.opt-note {
+  margin: 0;
+  font-size: 16px;
+  color: #c9cfdb;
+}
+
+@media (max-width: 960px) {
+  .gm-top-actions {
+    top: 8px;
+    right: 8px;
+  }
+
+  .gm-top-actions .gm-menu-btn {
+    min-height: 44px;
+    padding: 4px 12px;
+    font-size: 17px;
+  }
+
+  .gm-top-actions .gm-kbd {
+    display: none;
+  }
+}
+
+/* ---------- Read + Options (accessibility) ---------- */
+.a11y-dock {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  display: flex;
+  gap: 10px;
+}
+
+.a11y-dock .gm-menu-btn,
+.a11y-dock .gm-menu-btn:hover {
+  position: static;
+  transform: none;
+}
+
+.a11y-btn svg {
+  flex: none;
+  color: #4dc9f6;
+}
+
+/* Small screens: icon-only round buttons (they keep their aria-label), dock moves to the bottom-right corner. */
+@media (max-width: 760px) {
+  .a11y-dock {
+    top: auto;
+    bottom: 12px;
+    left: auto;
+    right: 12px;
+    transform: none;
+  }
+
+  .a11y-btn .a11y-btn__text,
+  .a11y-btn .gm-kbd {
+    display: none;
+  }
+
+  .a11y-btn {
+    min-width: 48px;
+    justify-content: center;
+    padding: 4px 10px !important;
+  }
 }

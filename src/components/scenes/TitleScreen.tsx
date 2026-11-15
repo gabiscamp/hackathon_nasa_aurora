@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { OptionsDialog } from '../ui/OptionsPanel';
+import { ReadButton } from '../ui/A11yDock';
 import { RoleIcon } from '../ui/RoleIcon';
-import { drawTeams, type CrewTeam } from '../../data/crews';
+import { TEAMS, type CrewTeam } from '../../data/crews';
 import type { SeatProfile } from '../../data/astronauts';
 import './TitleScreen.css';
 
@@ -32,17 +34,15 @@ function Portrait({ seat, size }: { seat: SeatProfile; size: 'lg' | 'sm' }) {
 }
 
 /**
- * Home: pick one of the two commanders from the team briefing (Anne McClain or
- * Neil Armstrong). Each commander's crew is drawn at random from real astronauts,
- * different between the two cards. Shortcuts: 1/2 choose, R new crews, Enter start.
+ * Home: pick one of the two crews from the team briefing, led by Anne McClain or
+ * Neil Armstrong (see crews.ts). Shortcuts: 1/2 choose, Enter start.
  */
 export function TitleScreen({ onStart, onOpenCredits, savedMission, onContinueMission, creditsOpen }: TitleScreenProps) {
-  const [teams, setTeams] = useState<CrewTeam[]>(() => drawTeams());
+  const teams = TEAMS;
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [confirmNew, setConfirmNew] = useState(false);
+  const [optionsOpen, setOptionsOpen] = useState(false);
   const selected = selectedIndex === null ? null : teams[selectedIndex];
-
-  const reshuffle = () => setTeams(drawTeams());
 
   // Starting over would replace a saved mission, so ask first (error prevention).
   const start = () => {
@@ -52,11 +52,10 @@ export function TitleScreen({ onStart, onOpenCredits, savedMission, onContinueMi
   };
 
   useEffect(() => {
-    if (creditsOpen || confirmNew) return;
+    if (creditsOpen || confirmNew || optionsOpen) return;
     const onKey = (e: KeyboardEvent) => {
       const index = ['1', '2'].indexOf(e.key);
       if (index >= 0) setSelectedIndex(index);
-      else if (e.key.toLowerCase() === 'r') reshuffle();
       else if (e.key === 'Enter' && !(e.target instanceof HTMLButtonElement)) {
         // Stop the same Enter from also clicking the dialog button that gets focus.
         e.preventDefault();
@@ -70,6 +69,25 @@ export function TitleScreen({ onStart, onOpenCredits, savedMission, onContinueMi
   return (
     <div className="title-screen">
       <div className="title-stars" aria-hidden="true" />
+
+      {/* Settings and credits as game-style corner buttons (not web links), always in view. */}
+      <nav className="title-topbar" aria-label="Game options">
+        <ReadButton className="title-top-btn" />
+        <button type="button" className="title-top-btn" onClick={() => setOptionsOpen(true)}>
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3.2" />
+            <path d="M12 2.5v3M12 18.5v3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M2.5 12h3M18.5 12h3M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1" />
+          </svg>
+          Options
+        </button>
+        <button type="button" className="title-top-btn" onClick={onOpenCredits}>
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z" />
+            <path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5" />
+          </svg>
+          Credits
+        </button>
+      </nav>
 
       <main className="title-content">
         <header className="title-header">
@@ -100,7 +118,7 @@ export function TitleScreen({ onStart, onOpenCredits, savedMission, onContinueMi
             <h2 className="title-choose" id="choose-crew">
               {savedMission ? 'Or start a new mission' : 'Choose your commander'}
             </h2>
-            <p className="title-hint">You play as the commander. The crew is picked at random from real astronauts.</p>
+            <p className="title-hint">You play as the commander. Each crew is made of real astronauts.</p>
           </div>
 
           <div className="title-crews" role="radiogroup" aria-labelledby="choose-crew">
@@ -152,13 +170,6 @@ export function TitleScreen({ onStart, onOpenCredits, savedMission, onContinueMi
           </div>
 
           <div className="title-actions">
-            <button type="button" className="title-shuffle" onClick={reshuffle}>
-              <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />
-              </svg>
-              New crew members
-              <kbd className="title-kbd">R</kbd>
-            </button>
             <button type="button" className="title-start" onClick={start} disabled={!selected}>
               {selected ? (
                 <>
@@ -173,12 +184,11 @@ export function TitleScreen({ onStart, onOpenCredits, savedMission, onContinueMi
         </section>
 
         <footer className="title-footer">
-          <button type="button" className="title-credits" onClick={onOpenCredits}>
-            Credits, photos &amp; NASA sources
-          </button>
           <p>Based on real NASA data. Not made or endorsed by NASA.</p>
         </footer>
       </main>
+
+      {optionsOpen && <OptionsDialog onClose={() => setOptionsOpen(false)} />}
 
       {confirmNew && selected && savedMission && (
         <ConfirmDialog

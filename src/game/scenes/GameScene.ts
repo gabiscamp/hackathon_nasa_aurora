@@ -1,13 +1,29 @@
 import Phaser from 'phaser';
 import { GAME_FONT } from '../../styles/theme';
+import { useSettingsStore } from '../../stores/useSettingsStore';
+import { speak } from '../../utils/speech';
+import { playFootstep } from '../../utils/sounds';
+
+/**
+ * The game uses pixelArt (nearest-neighbour) for sprites. Text scaled that way gets jagged
+ * edges that read like serifs, so text textures use smooth (linear) filtering: Lexend stays clean.
+ */
+function smoothText(t: Phaser.GameObjects.Text): Phaser.GameObjects.Text {
+  t.texture.setFilter(Phaser.Textures.FilterMode.LINEAR);
+  return t;
+}
 import { gameEvents, EVENTS } from '../events';
 import { useCrewStore } from '../../stores/useCrewStore';
 import { CREW_ROLES } from '../../data/crew';
 import { useGameStore } from '../../stores/useGameStore';
 import { useMissionStore } from '../../stores/useMissionStore';
+<<<<<<< HEAD
 import { useExplorationStore } from '../../stores/useExplorationStore';
 import { getTeam } from '../../data/crews';
 import { ASTRONAUTS, getAstronaut, type HeadId } from '../../data/astronauts';
+=======
+import { getTeam, type HeadId } from '../../data/crews';
+>>>>>>> origin/main
 import { ASTRO_ORIGIN_Y, astronautAnim, astronautTextureKey } from '../world/modularAstronaut';
 import {
   CHARACTER_SPRITES,
@@ -24,6 +40,7 @@ import {
   WALKABLE_AREAS,
   BLOCKED_AREAS,
   PLACEMENTS,
+  PIECES,
   STATION_SCALE,
   PLAYER_SPAWN,
   NPC_SPAWNS,
@@ -57,6 +74,8 @@ const FOLLOW_LERP = 0.25;
 const POSITION_EMIT_INTERVAL = 80;
 
 const INTERACT_DISTANCE = 80;
+/** Wall parts the crew walks under: above the player (10) and NPCs (9), below mission markers (15+). */
+const OVERHEAD_DEPTH = 11;
 /** Extra zoom when the camera flies to a mission spot. */
 const MISSION_ZOOM = 1.4;
 const ROBOT_SCALE = 0.24;
@@ -69,6 +88,8 @@ export class GameScene extends Phaser.Scene {
   private directionDot: Phaser.GameObjects.Graphics | null = null;
   private playerSprite: Phaser.GameObjects.Sprite | null = null;
   private spaceBackdrop: Phaser.GameObjects.Image | null = null;
+  /** Silhouette of the pressurized modules; characters are clipped to it (WebGL only). */
+  private stationMask: Phaser.Display.Masks.BitmapMask | null = null;
   private backdropFit = { w: 0, h: 0, zoom: 0 };
   private spriteKey = '';
   /** Set when the player uses the modular astronaut (body + head) instead of a full sheet. */
@@ -82,8 +103,13 @@ export class GameScene extends Phaser.Scene {
   private missionMarker: Phaser.GameObjects.Container | null = null;
   private missionGlow: Phaser.GameObjects.Graphics | null = null;
   private frozen = false;
+<<<<<<< HEAD
   private robot: Phaser.GameObjects.Sprite | null = null;
   private robotPatrol: Phaser.Tweens.Tween | null = null;
+=======
+  private speechBubble: Phaser.GameObjects.Container | null = null;
+  private speechTimer: Phaser.Time.TimerEvent | null = null;
+>>>>>>> origin/main
 
   constructor() {
     super({ key: 'GameScene' });
@@ -119,13 +145,14 @@ export class GameScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, removeMenuListeners);
     this.events.once(Phaser.Scenes.Events.DESTROY, removeMenuListeners);
 
-    // Crew comes from the crew chosen on the home screen.
+    // Crew comes from the crew chosen on the home screen; each seat has that crew's head.
     const crew = useCrewStore.getState().crew;
+    const heads = getTeam(useGameStore.getState().crewId).heads;
     for (const role of CREW_ROLES) {
       const member = crew[role];
       const spawn = NPC_SPAWNS[role];
       const firstName = member.name.replace(/^Dr\.\s*/, '').split(' ')[0];
-      const head = ASTRONAUTS.find((a) => a.name === member.name)?.head ?? null;
+      const head = heads[role];
       this.createNPC(spawn.x, spawn.y, Phaser.Display.Color.HexStringToColor(member.color).color, firstName, head);
     }
     this.createRobot();
@@ -176,8 +203,10 @@ export class GameScene extends Phaser.Scene {
 
     // Mission events from React (MissionOverlay / GameScreen). Removed when the scene ends:
     // otherwise a destroyed scene from an earlier visit keeps reacting after "Continue mission".
-    const onShowMarker = (room: RoomId) => this.showMissionMarker(room);
+    const onShowMarker = (room: RoomId, critical?: boolean) => this.showMissionMarker(room, critical);
     const onRemoveMarker = () => this.removeMissionMarker();
+    const onShowSpeech = (text: string) => this.showSpeechBubble(text);
+    const onHideSpeech = () => this.hideSpeechBubble();
     const onZoomIn = () => {
       this.frozen = true;
       const cam = this.cameras.main;
@@ -198,11 +227,15 @@ export class GameScene extends Phaser.Scene {
     gameEvents.on('REMOVE_MISSION_MARKER', onRemoveMarker);
     gameEvents.on('CAMERA_ZOOM_IN', onZoomIn);
     gameEvents.on('CAMERA_ZOOM_OUT', onZoomOut);
+    gameEvents.on(EVENTS.SHOW_SPEECH_BUBBLE, onShowSpeech);
+    gameEvents.on(EVENTS.HIDE_SPEECH_BUBBLE, onHideSpeech);
     const removeMissionListeners = () => {
       gameEvents.off('SHOW_MISSION_MARKER', onShowMarker);
       gameEvents.off('REMOVE_MISSION_MARKER', onRemoveMarker);
       gameEvents.off('CAMERA_ZOOM_IN', onZoomIn);
       gameEvents.off('CAMERA_ZOOM_OUT', onZoomOut);
+      gameEvents.off(EVENTS.SHOW_SPEECH_BUBBLE, onShowSpeech);
+      gameEvents.off(EVENTS.HIDE_SPEECH_BUBBLE, onHideSpeech);
     };
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, removeMissionListeners);
     this.events.once(Phaser.Scenes.Events.DESTROY, removeMissionListeners);
@@ -226,14 +259,56 @@ export class GameScene extends Phaser.Scene {
       // the shimmer nearest-neighbour gives when it is scaled down.
       this.textures.get(key).setFilter(Phaser.Textures.FilterMode.LINEAR);
       const c = placedCenter(p);
-      this.add
-        .image(c.x, c.y, key)
+      const piece = () =>
+        this.add.image(c.x, c.y, key).setScale(STATION_SCALE).setAngle(p.angle).setFlip(p.flipX, p.flipY);
+      // Pieces stack between the backdrop (0) and the debug overlay (5).
+      piece().setDepth(1 + p.depth / 10);
+
+      // Hatch rings, end caps and south door walls drawn again over the crew, so walking
+      // through a doorway goes *under* the wall instead of over it (top-down look).
+      const def = PIECES[p.piece];
+      for (const r of def.overhead) {
+        // setCrop reads the rect in the flipped frame; convert from unflipped image px.
+        const cropX = p.flipX ? def.width - r.x - r.w : r.x;
+        const cropY = p.flipY ? def.height - r.y - r.h : r.y;
+        piece().setCrop(cropX, cropY, r.w, r.h).setDepth(OVERHEAD_DEPTH + p.depth / 10);
+      }
+    }
+    this.stationMask = this.createStationMask();
+  }
+
+  /**
+   * Silhouette of the pressurized modules. Characters are clipped to it, so a head that
+   * sticks up while walking through the hatch ring between two cylinders is hidden instead
+   * of showing over open space. Bitmap masks need WebGL; on Canvas characters stay unclipped.
+   */
+  private createStationMask(): Phaser.Display.Masks.BitmapMask | null {
+    if (this.renderer.type !== Phaser.WEBGL) return null;
+    const rt = this.make.renderTexture({ x: 0, y: 0, width: WORLD_WIDTH, height: WORLD_HEIGHT }, false).setOrigin(0, 0);
+    for (const p of PLACEMENTS) {
+      if (p.room === null) continue; // truss, radiators, solar wings: outside, nobody walks there
+      const c = placedCenter(p);
+      const img = this.make
+        .image({ x: c.x, y: c.y, key: stationTextureKey(p.piece) }, false)
         .setScale(STATION_SCALE)
         .setAngle(p.angle)
-        .setFlip(p.flipX, p.flipY)
-        // Pieces stack between the backdrop (0) and the debug overlay (5).
-        .setDepth(1 + p.depth / 10);
+        .setFlip(p.flipX, p.flipY);
+      rt.draw(img);
+      img.destroy();
     }
+    const mask = rt.createBitmapMask();
+    // Not on the display list, so the scene won't free it by itself.
+    let freed = false;
+    const free = () => {
+      if (freed) return;
+      freed = true;
+      mask.destroy();
+      rt.destroy();
+      this.stationMask = null;
+    };
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, free);
+    this.events.once(Phaser.Scenes.Events.DESTROY, free);
+    return mask;
   }
 
   /**
@@ -268,13 +343,14 @@ export class GameScene extends Phaser.Scene {
 
   private createPlayer() {
     this.player = this.add.container(PLAYER_SPAWN.x, PLAYER_SPAWN.y).setDepth(10);
+    if (this.stationMask) this.player.setMask(this.stationMask);
 
     // The player is the chosen crew's commander, drawn as the team's modular astronaut with
-    // their face (McClain = cabeca-1). Her older 4×4 sheet is only a fallback.
-    const crewId = useGameStore.getState().crewId;
-    const commanderId = crewId ? getTeam(crewId).commander.astronautId : '';
+    // that crew's head for them. McClain's older 4×4 sheet is only a fallback.
+    const team = getTeam(useGameStore.getState().crewId);
+    const commanderId = team.commander.astronautId;
     const sprite = CHARACTER_SPRITES[commanderId];
-    const head = getAstronaut(commanderId)?.head;
+    const head = team.heads.commander;
     if (head && this.textures.exists(astronautTextureKey(head))) {
       this.playerHead = head;
       this.playerSprite = this.add.sprite(0, 0, astronautTextureKey(head), 0).setOrigin(0.5, ASTRO_ORIGIN_Y);
@@ -315,6 +391,7 @@ export class GameScene extends Phaser.Scene {
 
   private createNPC(x: number, y: number, color: number, name: string, head: HeadId | null) {
     const npc = this.add.container(x, y).setDepth(9);
+    if (this.stationMask) npc.setMask(this.stationMask);
 
     if (head && this.textures.exists(astronautTextureKey(head))) {
       const sprite = this.add.sprite(0, 0, astronautTextureKey(head), 0).setOrigin(0.5, ASTRO_ORIGIN_Y);
@@ -410,7 +487,7 @@ export class GameScene extends Phaser.Scene {
 
   /** Name tag rendered at 4x so it stays sharp under the zoomed pixel-art camera. */
   private npcLabel(name: string, y: number): Phaser.GameObjects.Text {
-    return this.add
+    return smoothText(this.add
       .text(0, y, name, {
         fontSize: '9px',
         fontStyle: 'bold',
@@ -420,25 +497,27 @@ export class GameScene extends Phaser.Scene {
         strokeThickness: 2,
         resolution: 4,
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5));
   }
 
-  showMissionMarker(room: RoomId) {
+  showMissionMarker(room: RoomId, critical = false) {
     this.removeMissionMarker();
     const center = ROOM_CENTERS[room];
     if (!center) return;
 
+    const color = critical ? 0xe74c3c : 0xf59e0b;
+
     const glow = this.add.graphics().setDepth(15).setAlpha(0.6);
-    glow.fillStyle(0xf59e0b, 0.35);
+    glow.fillStyle(color, 0.35);
     glow.fillCircle(center.x, center.y, 55);
-    glow.fillStyle(0xf59e0b, 0.15);
+    glow.fillStyle(color, 0.15);
     glow.fillCircle(center.x, center.y, 80);
     this.missionGlow = glow;
 
     this.tweens.add({
       targets: glow,
       alpha: { from: 0.4, to: 1 },
-      duration: 800,
+      duration: critical ? 500 : 800,
       yoyo: true,
       repeat: -1,
       ease: 'Sine.easeInOut',
@@ -447,16 +526,17 @@ export class GameScene extends Phaser.Scene {
     const container = this.add.container(center.x, center.y - 30).setDepth(20);
 
     const bg = this.add.graphics();
-    bg.fillStyle(0xf59e0b, 1);
+    bg.fillStyle(color, 1);
     bg.fillRoundedRect(-14, -18, 28, 36, 6);
     bg.fillTriangle(-8, 18, 8, 18, 0, 28);
 
-    const text = this.add.text(0, 0, '!', {
+    const text = smoothText(this.add.text(0, 0, '!', {
       fontSize: '22px',
       fontStyle: 'bold',
-      color: '#1a1a2e',
+      color: critical ? '#ffffff' : '#1a1a2e',
       fontFamily: GAME_FONT,
-    }).setOrigin(0.5);
+      resolution: 4,
+    }).setOrigin(0.5));
 
     container.add([bg, text]);
     this.missionMarker = container;
@@ -464,7 +544,7 @@ export class GameScene extends Phaser.Scene {
     this.tweens.add({
       targets: container,
       y: center.y - 40,
-      duration: 500,
+      duration: critical ? 350 : 500,
       yoyo: true,
       repeat: -1,
       ease: 'Sine.easeInOut',
@@ -480,6 +560,75 @@ export class GameScene extends Phaser.Scene {
       this.missionGlow.destroy();
       this.missionGlow = null;
     }
+  }
+
+  private showSpeechBubble(fullText: string) {
+    this.hideSpeechBubble();
+    this.frozen = true;
+
+    const bubbleW = 220;
+    const bubbleH = 70;
+    const offsetX = 130;
+    const bubbleX = this.player.x + offsetX;
+    const bubbleY = this.player.y - 20;
+
+    const container = this.add.container(bubbleX, bubbleY).setDepth(100);
+
+    const bg = this.add.graphics();
+    // White fill, blue border
+    bg.fillStyle(0xffffff, 0.95);
+    bg.fillRoundedRect(-bubbleW / 2, -bubbleH / 2, bubbleW, bubbleH, 10);
+    bg.lineStyle(2, 0x4dc9f6, 0.8);
+    bg.strokeRoundedRect(-bubbleW / 2, -bubbleH / 2, bubbleW, bubbleH, 10);
+    // Triangle pointing left to the player
+    bg.fillStyle(0xffffff, 0.95);
+    bg.fillTriangle(-bubbleW / 2, -6, -bubbleW / 2, 6, -bubbleW / 2 - 10, 0);
+    bg.lineStyle(2, 0x4dc9f6, 0.8);
+    bg.lineBetween(-bubbleW / 2, -6, -bubbleW / 2 - 10, 0);
+    bg.lineBetween(-bubbleW / 2 - 10, 0, -bubbleW / 2, 6);
+
+    const textObj = smoothText(this.add.text(0, 0, '', {
+      fontSize: '10px',
+      color: '#1a1a2e',
+      fontFamily: GAME_FONT,
+      wordWrap: { width: bubbleW - 24 },
+      align: 'left',
+      lineSpacing: 3,
+      resolution: 3,
+    }).setOrigin(0.5));
+
+    container.add([bg, textObj]);
+    this.speechBubble = container;
+    // Options → Read text aloud also covers the speech bubble (it is canvas text, so L can't see it).
+    if (useSettingsStore.getState().readAloud) speak(fullText);
+
+    // Type out the text character by character
+    let charIndex = 0;
+    this.speechTimer = this.time.addEvent({
+      delay: 30,
+      repeat: fullText.length - 1,
+      callback: () => {
+        charIndex++;
+        textObj.setText(fullText.slice(0, charIndex));
+      },
+    });
+
+    // Emit done event when typing finishes
+    this.time.delayedCall(fullText.length * 30 + 200, () => {
+      gameEvents.emit('SPEECH_BUBBLE_DONE');
+    });
+  }
+
+  private hideSpeechBubble() {
+    if (this.speechTimer) {
+      this.speechTimer.destroy();
+      this.speechTimer = null;
+    }
+    if (this.speechBubble) {
+      this.speechBubble.destroy();
+      this.speechBubble = null;
+    }
+    this.frozen = false;
   }
 
   private isNearMarker(): boolean {
@@ -601,10 +750,10 @@ export class GameScene extends Phaser.Scene {
 
     const moving = vx !== 0 || vy !== 0;
     if (moving) {
-      // Horizontal wins on diagonals, like most top-down games.
       this.facing = vx < 0 ? 'left' : vx > 0 ? 'right' : vy < 0 ? 'up' : 'down';
       this.directionDot?.setRotation(Math.atan2(vy, vx) + Math.PI / 2);
       this.emitPosition();
+      playFootstep();
     }
     if (this.playerSprite && this.playerHead) {
       // Modular astronaut: side frames face right, so left is the same animation flipped.

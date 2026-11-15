@@ -63,6 +63,17 @@ export function RadiationIcon({ size = 16 }: IconProps) {
   );
 }
 
+/** Warning triangle with "!" (low/high resource alert). */
+export function WarningIcon({ size = 16 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 2.5 1.8 20.5h20.4Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      <path d="M12 9v5.5" stroke="#0a0e27" strokeWidth="2.6" strokeLinecap="round" />
+      <circle cx="12" cy="17.6" r="1.5" fill="#0a0e27" />
+    </svg>
+  );
+}
+
 export function MapIcon({ size = 16 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">

@@ -405,7 +405,6 @@
   }
 }
 
-.title-shuffle,
 .title-start {
   display: inline-flex;
   align-items: center;
@@ -415,22 +414,6 @@
   font-weight: 700;
   border-radius: 16px;
   cursor: pointer;
-}
-
-.title-shuffle {
-  min-height: 60px;
-  padding: 10px 24px;
-  font-size: 18px;
-  color: var(--ts-text);
-  background: rgba(77, 201, 246, 0.1);
-  border: 2px solid var(--ts-blue);
-}
-
-.title-shuffle:hover {
-  background: rgba(77, 201, 246, 0.22);
-}
-
-.title-start {
   min-height: 75px;
   min-width: 280px;
   padding: 12px 32px;
@@ -488,31 +471,11 @@
   margin: 0;
 }
 
-.title-credits {
-  min-height: 48px;
-  padding: 8px 16px;
-  font: inherit;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--ts-blue);
-  background: none;
-  border: none;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  cursor: pointer;
-}
-
-.title-credits:hover {
-  transform: none;
-  box-shadow: none;
-}
-
 /* ---------- Focus & motion ---------- */
 .crew-pick:focus-visible,
 .title-continue__btn:focus-visible,
-.title-shuffle:focus-visible,
 .title-start:focus-visible,
-.title-credits:focus-visible {
+.title-top-btn:focus-visible {
   outline: 3px solid var(--ts-amber);
   outline-offset: 4px;
 }
@@ -542,5 +505,101 @@
   .crew-pick:hover {
     transition: none;
     transform: none;
+  }
+}
+
+
+/* ---------- Corner buttons: Options + Credits ---------- */
+.title-topbar {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  display: flex;
+  gap: 10px;
+}
+
+.title-top-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 6px 16px;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ts-text);
+  background: var(--ts-panel);
+  border: 2px solid rgba(77, 201, 246, 0.55);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.title-top-btn svg {
+  color: var(--ts-blue);
+}
+
+.title-top-btn:hover {
+  transform: none;
+  background: rgba(36, 48, 78, 0.95);
+}
+
+/* Small screens: the corner buttons sit in the page flow, above the title. */
+@media (max-width: 759px) {
+  .title-topbar {
+    position: relative;
+    top: auto;
+    right: auto;
+    justify-content: center;
+    padding-top: 16px;
+  }
+}
+
+/* ---------- Wide screens: title on the left, commander choice on the right (fits without scrolling) ---------- */
+@media (min-width: 1200px) {
+  .title-content {
+    width: min(1440px, 100%);
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: grid;
+    grid-template-columns: minmax(340px, 440px) 1fr;
+    /* Empty 1fr rows above and below keep the left block centred next to the cards. */
+    grid-template-areas:
+      '.        pick'
+      'header   pick'
+      'continue pick'
+      'footer   pick'
+      '.        pick';
+    grid-template-rows: 1fr auto auto auto 1fr;
+    align-items: start;
+    column-gap: clamp(32px, 4vw, 64px);
+    row-gap: 32px;
+    padding-top: 80px;
+    padding-bottom: 32px;
+  }
+
+  .title-header {
+    grid-area: header;
+  }
+
+  .title-continue {
+    grid-area: continue;
+  }
+
+  .title-footer {
+    grid-area: footer;
+  }
+
+  .title-pick {
+    grid-area: pick;
+    align-self: center;
+  }
+
+  .title-orbit {
+    font-size: clamp(64px, 6vw, 88px);
+  }
+
+  .title-sub {
+    font-size: 26px;
   }
 }

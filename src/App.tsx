@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
+import { A11yDock, useReadShortcut } from './components/ui/A11yDock';
 import { useShallow } from 'zustand/react/shallow';
 import { useGameStore } from './stores/useGameStore';
 import { useResourceStore } from './stores/useResourceStore';
@@ -32,6 +33,7 @@ function LoadingScreen() {
 }
 
 export default function App() {
+  useReadShortcut();
   const scene = useGameStore((s) => s.scene);
   const playerName = useGameStore((s) => s.playerName);
   const crewId = useGameStore((s) => s.crewId);
@@ -89,6 +91,8 @@ export default function App() {
 
   return (
     <Suspense fallback={<LoadingScreen />}>
+      {/* Read + Options on the story screens (title and game have their own buttons). */}
+      {(scene === 'briefing' || scene === 'crew-intro' || scene === 'ending') && <A11yDock />}
       {scene === 'title' && <TitleScreen
           onStart={handleStart}
           onOpenCredits={() => setShowCredits(true)}

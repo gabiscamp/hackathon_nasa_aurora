@@ -1,6 +1,12 @@
 import type { ReactNode } from 'react';
 
-const LOW_THRESHOLD = 25;
+export const LOW_THRESHOLD = 25;
+
+/** true when the bar is in the danger zone (low, or high for "higherIsWorse" bars). */
+export function isDanger(value: number, higherIsWorse = false, max = 100): boolean {
+  const pct = (value / max) * 100;
+  return higherIsWorse ? pct > 100 - LOW_THRESHOLD : pct < LOW_THRESHOLD;
+}
 
 interface HudBarProps {
   icon: ReactNode;
@@ -16,7 +22,7 @@ interface HudBarProps {
 /** Game-style resource bar: round icon badge + name, gauge and number side by side on the dark panel (never color-only, never text over the fill). */
 export function HudBar({ icon, label, value, max = 100, color, higherIsWorse = false }: HudBarProps) {
   const pct = Math.max(0, Math.min(100, (value / max) * 100));
-  const isLow = higherIsWorse ? pct > 100 - LOW_THRESHOLD : pct < LOW_THRESHOLD;
+  const isLow = isDanger(value, higherIsWorse, max);
 
   return (
     <div

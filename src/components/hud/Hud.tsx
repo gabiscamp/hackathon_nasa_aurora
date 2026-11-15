@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useGameStore } from '../../stores/useGameStore';
 import { PlayerStatus } from './PlayerStatus';
 import { ObjectiveTracker } from './ObjectiveTracker';
-import { InventoryBar } from './InventoryBar';
 import { Minimap } from './Minimap';
 import { LocationHint } from './LocationHint';
 import { ShipMapOverlay } from './ShipMapOverlay';
@@ -10,11 +8,8 @@ import './Hud.css';
 
 /** In-game HUD overlay, laid out like references/wireframe/spaceship-reference-02.png. */
 export function Hud() {
-  const phase = useGameStore((s) => s.phase);
   const [mapOpen, setMapOpen] = useState(false);
   const closeMap = useCallback(() => setMapOpen(false), []);
-  // The decision card and dialogue box sit at the bottom, so the hotbar steps aside.
-  const bottomBusy = phase === 'decision' || phase === 'result';
 
   useEffect(() => {
     if (mapOpen) return; // the open map handles its own keys
@@ -32,9 +27,11 @@ export function Hud() {
 
   return (
     <div className="hud">
-      <PlayerStatus />
-      <ObjectiveTracker />
-      {!bottomBusy && <InventoryBar />}
+      {/* Desktop: display:contents (each panel keeps its corner). Phone: one stacked column at the top. */}
+      <div className="hud-top">
+        <ObjectiveTracker />
+        <PlayerStatus />
+      </div>
       <LocationHint />
       <Minimap onOpen={() => setMapOpen(true)} />
       {/* The station image is AI-generated: team briefing rule = visible watermark while it is on screen. */}

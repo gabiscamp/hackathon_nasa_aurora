@@ -178,7 +178,8 @@ button,
     transform var(--transition-fast),
     box-shadow var(--transition-fast);
   user-select: none;
-  background-color: var(--accent-blue);
+  /* Darker than --accent-blue so white text passes WCAG AA (5.2:1). */
+  background-color: #2563eb;
   color: #ffffff;
 }
 
@@ -268,4 +269,26 @@ button:disabled,
   outline: 3px solid var(--accent-blue);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
+}
+
+/* Visible only to screen readers. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Options → Text size: Big. Grows the reading surfaces (HUD, messages, windows); the game world keeps its zoom. */
+html[data-text-size='big'] .hud {
+  --hud-scale: 1.35;
+}
+
+html[data-text-size='big'] :is(.mission-overlay__panel, .briefing-message-box, .crew-profile, .game-hint-banner, .gm-card, .credits-panel, .panel) {
+  zoom: 1.15;
 }

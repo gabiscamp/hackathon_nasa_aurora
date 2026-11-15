@@ -5,34 +5,40 @@
  *   - a long main truss with solar array wings at both ends and radiators,
  *   - a pressurized row under the truss:  Node A – Dormitory – Node B – Node C – Node D – Airlock,
  *   - rooms hanging from the node bottom hatches:
- *       Node A → Kitchen, Node B → Lab, Node C → Bathroom, Node D → Gym → Docking capsules.
+ *       Node A → Greenhouse → Kitchen, Node B → Lab, Node C → Bathroom,
+ *       Node D → Gym → Docking capsules.
  *
  * Pure data + math (no Phaser / Vite imports) so it can also be run by tooling.
  * Local rects are in piece-image pixels (as produced by the build script, before
  * rotation). The station is assembled in those "art pixels" and then scaled by
  * STATION_SCALE into world pixels, so rooms fit the ~47 px astronaut sprite.
  *
- * Room ids are the ones missions use (src/data/missions.ts):
- *   quarters = dormitory, lab = lab, common = kitchen, gym = gym + bathroom,
- *   airlock = airlock, storage = docking capsules (cargo arrives there),
- *   bridge = Node B, engineering = Node C (life support), corridor = Nodes A and D.
+ * Room ids are the ones missions use (src/data/missions.ts); shown names are in
+ * src/components/hud/LocationHint.tsx (ROOM_NAMES):
+ *   quarters = dormitory, lab = lab, greenhouse = greenhouse, common = kitchen, gym = gym,
+ *   bathroom = bathroom, airlock = airlock, storage = docking capsules ("Cargo Bay"),
+ *   bridge = Node B ("Command Node"), engineering = Node C ("Life Support Node"),
+ *   corridor = Nodes A and D ("Connection Node").
  */
 
 export type RoomId =
   | 'bridge'
   | 'quarters'
   | 'lab'
+  | 'greenhouse'
   | 'common'
   | 'engineering'
   | 'storage'
   | 'airlock'
   | 'gym'
+  | 'bathroom'
   | 'corridor';
 
 /** World pixels per art pixel. */
 export const STATION_SCALE = 0.45;
 
 export type PieceKey =
+  | 'greenhouse'
   | 'lab'
   | 'gym'
   | 'kitchen'
@@ -66,6 +72,11 @@ export interface PieceDef {
   floor: readonly Rect[];
   /** Furniture / equipment carved out of the floor (local px). */
   blocked: readonly Rect[];
+  /**
+   * Wall parts drawn again above the characters (local px): hatch rings, cylinder
+   * end caps and south door walls, so the crew walks *under* them (top-down look).
+   */
+  overhead: readonly Rect[];
 }
 
 export type Angle = 0 | 90 | 180 | -90;
@@ -85,27 +96,60 @@ export interface Placement {
 }
 
 export const PIECES: Record<PieceKey, PieceDef> = {
-  lab: {
-    width: 743,
-    height: 485,
-    room: 'lab',
+  greenhouse: {
+    width: 747,
+    height: 418,
+    room: 'greenhouse',
     floor: [
-      { x: 300, y: 160, w: 145, h: 165 }, // central hub
-      { x: 75, y: 255, w: 230, h: 50 }, // left wing
-      { x: 440, y: 262, w: 262, h: 43 }, // right wing
-      { x: 322, y: 88, w: 100, h: 75 }, // greenhouse arm
-      { x: 348, y: 320, w: 55, h: 165 }, // storage arm → outer hatch
+      { x: 335, y: 0, w: 75, h: 418 }, // center aisle, top door → bottom door
+      { x: 115, y: 178, w: 520, h: 50 }, // cross aisle between the grow beds
     ],
     blocked: [],
+    overhead: [{ x: 0, y: 342, w: 747, h: 76 }], // south wall with the door to the kitchen
+  },
+  // "modulo-laboratorial- invertido.jpeg": open entry arm (door) on top, small greenhouse at the bottom.
+  lab: {
+    width: 744,
+    height: 492,
+    room: 'lab',
+    floor: [
+      { x: 350, y: 0, w: 50, h: 45 }, // top door, between the orange posts
+      { x: 320, y: 40, w: 110, h: 95 }, // entry arm
+      { x: 350, y: 128, w: 50, h: 45 }, // entry arm → hub
+      { x: 300, y: 168, w: 145, h: 150 }, // central hub
+      { x: 60, y: 241, w: 245, h: 64 }, // left wing
+      { x: 445, y: 241, w: 250, h: 64 }, // right wing
+      { x: 350, y: 308, w: 50, h: 50 }, // hub → greenhouse arm
+      { x: 335, y: 348, w: 90, h: 38 }, // greenhouse arm, in front of the planters
+    ],
+    blocked: [
+      { x: 328, y: 10, w: 20, h: 42 }, // door posts
+      { x: 402, y: 10, w: 20, h: 42 },
+      { x: 303, y: 175, w: 38, h: 55 }, // hub pillars
+      { x: 407, y: 175, w: 38, h: 55 },
+      { x: 303, y: 265, w: 38, h: 45 },
+      { x: 407, y: 265, w: 38, h: 45 },
+      { x: 75, y: 233, w: 42, h: 75 }, // DNA poster cabinet
+      { x: 140, y: 233, w: 48, h: 28 }, // centrifuge base
+      { x: 150, y: 265, w: 68, h: 40 }, // left table
+      { x: 228, y: 269, w: 26, h: 36 }, // left drawers
+      { x: 270, y: 281, w: 32, h: 24 }, // left wall monitor
+      { x: 443, y: 279, w: 34, h: 26 }, // right wall monitor
+      { x: 493, y: 269, w: 27, h: 36 }, // right drawers
+      { x: 520, y: 253, w: 78, h: 45 }, // right table
+      { x: 607, y: 269, w: 26, h: 28 }, // stool
+      { x: 648, y: 243, w: 36, h: 62 }, // orange analyzer
+    ],
+    overhead: [], // its door is on top, under the node's hatch ring
   },
   gym: {
     width: 750,
     height: 449,
     room: 'gym',
     floor: [
-      { x: 98, y: 60, w: 552, h: 328 },
+      { x: 98, y: 60, w: 552, h: 312 }, // stops at the south wall
       { x: 340, y: 0, w: 75, h: 60 }, // top door
-      { x: 340, y: 385, w: 75, h: 64 }, // bottom door
+      { x: 340, y: 360, w: 75, h: 89 }, // bottom door
     ],
     blocked: [
       { x: 108, y: 80, w: 190, h: 150 }, // weight rack
@@ -116,6 +160,7 @@ export const PIECES: Record<PieceKey, PieceDef> = {
       { x: 298, y: 65, w: 40, h: 135 }, // left post
       { x: 415, y: 120, w: 30, h: 100 }, // right post
     ],
+    overhead: [{ x: 0, y: 372, w: 750, h: 77 }], // south wall with the door to the capsules
   },
   kitchen: {
     width: 743,
@@ -130,6 +175,7 @@ export const PIECES: Record<PieceKey, PieceDef> = {
       { x: 130, y: 335, w: 130, h: 70 }, // bins
       { x: 495, y: 330, w: 110, h: 75 }, // cabinet
     ],
+    overhead: [], // placed upside down: its door is on top, under the node's hatch ring
   },
   capsules: {
     width: 816,
@@ -140,16 +186,22 @@ export const PIECES: Record<PieceKey, PieceDef> = {
       { x: 110, y: 165, w: 600, h: 75 }, // cross aisle between the pods
     ],
     blocked: [],
+    overhead: [{ x: 0, y: 368, w: 816, h: 40 }], // south wall with the docking port
   },
+  // banheiro-invertido.jpeg: door on top.
   bathroom: {
-    width: 388,
-    height: 456,
-    room: 'gym',
+    width: 396,
+    height: 462,
+    room: 'bathroom',
     floor: [
-      { x: 145, y: 240, w: 135, h: 150 },
-      { x: 165, y: 385, w: 60, h: 71 }, // door
+      { x: 168, y: 0, w: 58, h: 85 }, // top door, between the orange posts
+      { x: 145, y: 80, w: 150, h: 295 },
     ],
-    blocked: [{ x: 272, y: 292, w: 55, h: 75 }], // recycling bin
+    blocked: [
+      { x: 140, y: 112, w: 82, h: 150 }, // toilet
+      { x: 270, y: 80, w: 30, h: 160 }, // hose + wall console
+    ],
+    overhead: [], // its door is on top, under the node's hatch ring
   },
   dormitory: {
     width: 668,
@@ -157,6 +209,10 @@ export const PIECES: Record<PieceKey, PieceDef> = {
     room: 'quarters',
     floor: [{ x: 15, y: 148, w: 640, h: 36 }],
     blocked: [],
+    overhead: [
+      { x: 0, y: 0, w: 132, h: 322 }, // left end cap + hatch
+      { x: 530, y: 0, w: 138, h: 322 }, // right end cap + hatch
+    ],
   },
   node: {
     width: 668,
@@ -167,6 +223,11 @@ export const PIECES: Record<PieceKey, PieceDef> = {
       { x: 300, y: 145, w: 80, h: 205 }, // down to the bottom hatch
     ],
     blocked: [],
+    overhead: [
+      { x: 0, y: 0, w: 118, h: 350 }, // left end cap + hatch
+      { x: 550, y: 0, w: 118, h: 350 }, // right end cap + hatch
+      { x: 118, y: 262, w: 432, h: 88 }, // bottom hull + hatch ring
+    ],
   },
   airlock: {
     width: 626,
@@ -174,10 +235,12 @@ export const PIECES: Record<PieceKey, PieceDef> = {
     room: 'airlock',
     floor: [{ x: 15, y: 150, w: 460, h: 36 }], // stops at the outer hatch
     blocked: [],
+    // Only the hull edge on the node side; the open outer hatch stays behind the crew.
+    overhead: [{ x: 0, y: 0, w: 22, h: 322 }],
   },
-  truss: { width: 677, height: 208, room: null, floor: [], blocked: [] },
-  radiator: { width: 636, height: 331, room: null, floor: [], blocked: [] },
-  solar: { width: 958, height: 508, room: null, floor: [], blocked: [] },
+  truss: { width: 677, height: 208, room: null, floor: [], blocked: [], overhead: [] },
+  radiator: { width: 636, height: 331, room: null, floor: [], blocked: [], overhead: [] },
+  solar: { width: 958, height: 508, room: null, floor: [], blocked: [], overhead: [] },
 };
 
 // ---------------------------------------------------------------------------
@@ -245,9 +308,13 @@ const ROW_CENTER_X = (ROW_X + ROW_RIGHT) / 2;
 
 // Rooms under the node bottom hatches. Rotated 180° rooms have their door on
 // top; the door's x is mirrored (width - local door x).
-const KITCHEN = place('kitchen', hatchX(0) - (743 - 377), HANG_Y, DEPTH.room, { angle: 180 });
-const LAB = place('lab', hatchX(2) - (743 - 375), HANG_Y, DEPTH.room, { angle: 180 });
-const BATHROOM = place('bathroom', hatchX(3) - (388 - 195), HANG_Y, DEPTH.room, { angle: 180 });
+// Greenhouse grows food right above the kitchen (doors top and bottom, like the gym).
+const GREENHOUSE = place('greenhouse', hatchX(0) - 377, HANG_Y, DEPTH.room);
+const KITCHEN = place('kitchen', hatchX(0) - (743 - 377), HANG_Y + PIECES.greenhouse.height - 25, DEPTH.room, {
+  angle: 180,
+});
+const LAB = place('lab', hatchX(2) - 375, HANG_Y, DEPTH.room);
+const BATHROOM = place('bathroom', hatchX(3) - 197, HANG_Y, DEPTH.room);
 const GYM = place('gym', hatchX(4) - 377, HANG_Y, DEPTH.room);
 const CAPSULES = place('capsules', hatchX(4) - 410, HANG_Y + PIECES.gym.height - 25, DEPTH.room);
 
@@ -292,6 +359,7 @@ export const PLACEMENTS: readonly Placement[] = [
   ...SOLAR,
   ...RADIATORS,
   ...TRUSS,
+  GREENHOUSE,
   KITCHEN,
   LAB,
   BATHROOM,
@@ -301,7 +369,8 @@ export const PLACEMENTS: readonly Placement[] = [
 ];
 
 export const WORLD_WIDTH = Math.ceil((TRUSS_RIGHT + 100) * STATION_SCALE);
-export const WORLD_HEIGHT = Math.ceil((CAPSULES.y + PIECES.capsules.height + 130) * STATION_SCALE);
+const LOWEST_ROOM_BOTTOM = Math.max(CAPSULES.y + PIECES.capsules.height, KITCHEN.y + PIECES.kitchen.height);
+export const WORLD_HEIGHT = Math.ceil((LOWEST_ROOM_BOTTOM + 130) * STATION_SCALE);
 
 // ---------------------------------------------------------------------------
 // Local → world transforms
@@ -390,7 +459,7 @@ export const PLAYER_SPAWN = at(ROW[1], 334, 168);
 export const NPC_SPAWNS = {
   engineer: { ...at(ROW[3], 180, 168), room: 'engineering' },
   medic: { ...at(GYM, 377, 245), room: 'gym' },
-  scientist: { ...at(LAB, 372, 250), room: 'lab' },
+  scientist: { ...at(LAB, 374, 247), room: 'lab' },
 } as const satisfies Record<string, { x: number; y: number; room: RoomId }>;
 
 // ---------------------------------------------------------------------------

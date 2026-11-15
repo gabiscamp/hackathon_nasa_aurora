@@ -6,22 +6,25 @@ import { PinIcon } from './HudIcons';
 /** How long the key hints stay after the player first moves (ms). */
 const KEY_HINT_MS = 8000;
 
+/** Shown name of each room; which module each id is: see stationLayout.ts. */
 export const ROOM_NAMES: Record<RoomId, string> = {
-  bridge: 'Bridge',
+  bridge: 'Command Node',
   quarters: 'Crew Quarters',
-  lab: 'Lab & Greenhouse',
+  lab: 'Science Lab',
+  greenhouse: 'Greenhouse',
   common: 'Kitchen',
-  engineering: 'Engineering',
-  storage: 'Storage Bay',
+  engineering: 'Life Support Node',
+  storage: 'Cargo Bay',
   airlock: 'Airlock & Suits',
-  gym: 'Gym & Health',
-  corridor: 'Main Corridor',
+  gym: 'Gym',
+  bathroom: 'Bathroom',
+  corridor: 'Connection Node',
 };
 
 /** Bottom-left HUD: current room + control hints. */
 export function LocationHint() {
   const [room, setRoom] = useState<RoomId>('corridor');
-  // Key hints help at the start; once the player is moving they fade out (they stay in Menu → How to play).
+  // Key hints help at the start; once the player is moving they fade out (they stay in Help / H).
   const [showKeys, setShowKeys] = useState(true);
 
   useEffect(() => {

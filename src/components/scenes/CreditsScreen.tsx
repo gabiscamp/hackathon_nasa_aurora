@@ -192,11 +192,11 @@ export function CreditsScreen({ onClose }: CreditsScreenProps) {
               design documents. No AI wrote them. An AI assistant (Claude, by Anthropic) only helped us write the code.
             </p>
             <p>
-              The station map was made with an AI image tool. We started from a floor plan of the International Space
+              The station map was made with an AI image tool (ChatGPT, by OpenAI). We started from a floor plan of the International Space
               Station and guided the tool step by step. In the game, the map shows an "AI-generated map" mark.
             </p>
             <p>
-              Our team drew the astronaut characters by hand in Aseprite. We also tried an AI tool to clean up the
+              Our team drew the astronaut characters by hand in Aseprite. We also tried ChatGPT to clean up the
               character art.
             </p>
           </section>
