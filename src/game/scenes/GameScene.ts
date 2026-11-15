@@ -17,8 +17,7 @@ import { useCrewStore } from '../../stores/useCrewStore';
 import { CREW_ROLES } from '../../data/crew';
 import { useGameStore } from '../../stores/useGameStore';
 import { useMissionStore } from '../../stores/useMissionStore';
-import { getTeam } from '../../data/crews';
-import { ASTRONAUTS, getAstronaut, type HeadId } from '../../data/astronauts';
+import { getTeam, type HeadId } from '../../data/crews';
 import { ASTRO_ORIGIN_Y, astronautAnim, astronautTextureKey } from '../world/modularAstronaut';
 import {
   CHARACTER_SPRITES,
@@ -132,13 +131,14 @@ export class GameScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, removeMenuListeners);
     this.events.once(Phaser.Scenes.Events.DESTROY, removeMenuListeners);
 
-    // Crew comes from the crew chosen on the home screen.
+    // Crew comes from the crew chosen on the home screen; each seat has that crew's head.
     const crew = useCrewStore.getState().crew;
+    const heads = getTeam(useGameStore.getState().crewId).heads;
     for (const role of CREW_ROLES) {
       const member = crew[role];
       const spawn = NPC_SPAWNS[role];
       const firstName = member.name.replace(/^Dr\.\s*/, '').split(' ')[0];
-      const head = ASTRONAUTS.find((a) => a.name === member.name)?.head ?? null;
+      const head = heads[role];
       this.createNPC(spawn.x, spawn.y, Phaser.Display.Color.HexStringToColor(member.color).color, firstName, head);
     }
 
@@ -327,11 +327,11 @@ export class GameScene extends Phaser.Scene {
     if (this.stationMask) this.player.setMask(this.stationMask);
 
     // The player is the chosen crew's commander, drawn as the team's modular astronaut with
-    // their face (McClain = cabeca-1). Her older 4×4 sheet is only a fallback.
-    const crewId = useGameStore.getState().crewId;
-    const commanderId = crewId ? getTeam(crewId).commander.astronautId : '';
+    // that crew's head for them. McClain's older 4×4 sheet is only a fallback.
+    const team = getTeam(useGameStore.getState().crewId);
+    const commanderId = team.commander.astronautId;
     const sprite = CHARACTER_SPRITES[commanderId];
-    const head = getAstronaut(commanderId)?.head;
+    const head = team.heads.commander;
     if (head && this.textures.exists(astronautTextureKey(head))) {
       this.playerHead = head;
       this.playerSprite = this.add.sprite(0, 0, astronautTextureKey(head), 0).setOrigin(0.5, ASTRO_ORIGIN_Y);

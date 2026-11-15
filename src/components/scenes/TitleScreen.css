@@ -405,7 +405,6 @@
   }
 }
 
-.title-shuffle,
 .title-start {
   display: inline-flex;
   align-items: center;
@@ -415,22 +414,6 @@
   font-weight: 700;
   border-radius: 16px;
   cursor: pointer;
-}
-
-.title-shuffle {
-  min-height: 60px;
-  padding: 10px 24px;
-  font-size: 18px;
-  color: var(--ts-text);
-  background: rgba(77, 201, 246, 0.1);
-  border: 2px solid var(--ts-blue);
-}
-
-.title-shuffle:hover {
-  background: rgba(77, 201, 246, 0.22);
-}
-
-.title-start {
   min-height: 75px;
   min-width: 280px;
   padding: 12px 32px;
@@ -491,7 +474,6 @@
 /* ---------- Focus & motion ---------- */
 .crew-pick:focus-visible,
 .title-continue__btn:focus-visible,
-.title-shuffle:focus-visible,
 .title-start:focus-visible,
 .title-top-btn:focus-visible {
   outline: 3px solid var(--ts-amber);
