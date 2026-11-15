@@ -1,0 +1,136 @@
+{
+ "schema": "astro-game.heads.v2",
+ "frame": [
+  32,
+  26
+ ],
+ "columns": [
+  "front",
+  "side",
+  "back"
+ ],
+ "pin": {
+  "front": [
+   16,
+   22
+  ],
+  "side": [
+   17,
+   22
+  ],
+  "back": [
+   16,
+   22
+  ]
+ },
+ "note": "Draw a head at (anchor.x - pin.x, anchor.y - pin.y) over the uniform frame; anchors come from uniforme-nasa-head-anchors.json (atlasFrames[i] = frame i of uniforme-nasa.json).",
+ "order": [
+  "capacete",
+  "cabeca-1",
+  "cabeca-2",
+  "cabeca-3",
+  "cabeca-4"
+ ],
+ "heads": {
+  "capacete": {
+   "front": {
+    "x": 0,
+    "y": 0,
+    "w": 32,
+    "h": 26
+   },
+   "side": {
+    "x": 32,
+    "y": 0,
+    "w": 32,
+    "h": 26
+   },
+   "back": {
+    "x": 64,
+    "y": 0,
+    "w": 32,
+    "h": 26
+   }
+  },
+  "cabeca-1": {
+   "front": {
+    "x": 0,
+    "y": 26,
+    "w": 32,
+    "h": 26
+   },
+   "side": {
+    "x": 32,
+    "y": 26,
+    "w": 32,
+    "h": 26
+   },
+   "back": {
+    "x": 64,
+    "y": 26,
+    "w": 32,
+    "h": 26
+   }
+  },
+  "cabeca-2": {
+   "front": {
+    "x": 0,
+    "y": 52,
+    "w": 32,
+    "h": 26
+   },
+   "side": {
+    "x": 32,
+    "y": 52,
+    "w": 32,
+    "h": 26
+   },
+   "back": {
+    "x": 64,
+    "y": 52,
+    "w": 32,
+    "h": 26
+   }
+  },
+  "cabeca-3": {
+   "front": {
+    "x": 0,
+    "y": 78,
+    "w": 32,
+    "h": 26
+   },
+   "side": {
+    "x": 32,
+    "y": 78,
+    "w": 32,
+    "h": 26
+   },
+   "back": {
+    "x": 64,
+    "y": 78,
+    "w": 32,
+    "h": 26
+   }
+  },
+  "cabeca-4": {
+   "front": {
+    "x": 0,
+    "y": 104,
+    "w": 32,
+    "h": 26
+   },
+   "side": {
+    "x": 32,
+    "y": 104,
+    "w": 32,
+    "h": 26
+   },
+   "back": {
+    "x": 64,
+    "y": 104,
+    "w": 32,
+    "h": 26
+   }
+  }
+ }
+}
