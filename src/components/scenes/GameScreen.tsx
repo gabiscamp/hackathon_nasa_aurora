@@ -83,7 +83,8 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
   };
 
   return (
-    <div className="game-screen">
+    <main className="game-screen">
+      <h1 className="sr-only">Aurora Station</h1>
       <div className="game-stage">
         <PhaserGame className="station-view" />
         <Hud />
@@ -139,6 +140,6 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
           </div>
         </div>
       )}
-    </div>
+    </main>
   );
 }

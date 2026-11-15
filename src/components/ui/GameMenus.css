@@ -123,7 +123,6 @@
   color: inherit;
   border: 2px solid currentColor;
   border-radius: 7px;
-  opacity: 0.85;
 }
 
 .gm-controls {
@@ -341,4 +340,14 @@
   border-radius: 10px;
   background: rgba(10, 14, 32, 0.9);
   border: 1px solid rgba(77, 201, 246, 0.25);
+}
+
+/* Narrow windows: the top centre is taken by the Station and Mission panels, so Menu/Help sit under the Mission panel. */
+@media (max-width: 1400px) {
+  .gm-top-actions {
+    top: 168px;
+    left: auto;
+    right: 16px;
+    transform: none;
+  }
 }

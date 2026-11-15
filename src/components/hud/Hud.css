@@ -473,8 +473,9 @@
   border-radius: 6px;
   font-size: 15px;
   font-weight: 700;
-  color: var(--hud-bg-deep);
-  background: var(--pin-color);
+  color: var(--hud-text);
+  background: var(--hud-bg-deep);
+  border: 2px solid var(--pin-color);
 }
 
 .ship-map__pin--you {
@@ -492,9 +493,7 @@
   animation: ship-map-bob 1.2s ease-in-out infinite;
 }
 
-.ship-map__pin--mission .ship-map__name {
-  color: var(--hud-text);
-}
+
 
 .ship-map__pin--you .ship-map__face {
   animation: ship-map-bob 1.2s ease-in-out infinite;
@@ -610,4 +609,10 @@
 
 @keyframes hud-fade-in {
   from { opacity: 0; transform: translateY(4px); }
+}
+
+@media (max-width: 1400px) {
+  .hud-ai-mark {
+    top: var(--hud-edge);
+  }
 }

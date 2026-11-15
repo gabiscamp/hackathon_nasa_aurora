@@ -60,7 +60,8 @@ export function MissionBriefing({ playerName, onContinue, onBack }: MissionBrief
         skipLabel={allDone ? undefined : 'Skip message'}
         onSkip={allDone ? undefined : () => setAllDone(true)}
       />
-      <div className="briefing-container">
+      <main className="briefing-container">
+        <h1 className="sr-only">Message from Mission Control</h1>
         <div className="briefing-radio">
           {/* TODO: replace with real asset — UI radio/antenna icon */}
           <svg className="briefing-radio-icon" width="56" height="56" viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -81,7 +82,7 @@ export function MissionBriefing({ playerName, onContinue, onBack }: MissionBrief
           />
         </div>
 
-        <div className="briefing-dots" aria-label={`Message ${messageIndex + 1} of ${MESSAGES.length}`}>
+        <div className="briefing-dots" role="img" aria-label={`Message ${messageIndex + 1} of ${MESSAGES.length}`}>
           {MESSAGES.map((_, i) => (
             <div
               key={i}
@@ -99,7 +100,7 @@ export function MissionBriefing({ playerName, onContinue, onBack }: MissionBrief
             Meet Your Crew
           </Button>
         )}
-      </div>
+      </main>
     </div>
   );
 }
