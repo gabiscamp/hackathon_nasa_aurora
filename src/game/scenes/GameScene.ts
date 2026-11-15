@@ -8,11 +8,19 @@ import { playFootstep } from '../../utils/sounds';
  * The game uses pixelArt (nearest-neighbour) for sprites. Text scaled that way gets jagged
  * edges that read like serifs, so text textures use smooth (linear) filtering: Lexend stays clean.
  */
+interface MarkerParts {
+  container: Phaser.GameObjects.Container;
+  glow: Phaser.GameObjects.Graphics;
+  x: number;
+  y: number;
+}
+
 function smoothText(t: Phaser.GameObjects.Text): Phaser.GameObjects.Text {
   t.texture.setFilter(Phaser.Textures.FilterMode.LINEAR);
   return t;
 }
-import { gameEvents, EVENTS } from '../events';
+import { gameEvents, EVENTS, type MissionMarkerSpec } from '../events';
+import { markerSpecs } from '../missionMarkers';
 import { useCrewStore } from '../../stores/useCrewStore';
 import { CREW_ROLES } from '../../data/crew';
 import { useGameStore } from '../../stores/useGameStore';
@@ -91,8 +99,10 @@ export class GameScene extends Phaser.Scene {
   private walkableDebug: Phaser.GameObjects.Graphics | null = null;
   private currentRoom: RoomId | null = null;
   private lastPositionEmit = 0;
-  private missionMarker: Phaser.GameObjects.Container | null = null;
-  private missionGlow: Phaser.GameObjects.Graphics | null = null;
+  /** One "!" per open problem (several can be open at once). Keyed by mission id. */
+  private missionMarkers = new Map<string, MarkerParts>();
+  /** The marker the player opened last (the camera zooms on it). */
+  private activeMarkerId: string | null = null;
   private frozen = false;
   private speechBubble: Phaser.GameObjects.Container | null = null;
   private speechTimer: Phaser.Time.TimerEvent | null = null;
@@ -177,23 +187,23 @@ export class GameScene extends Phaser.Scene {
 
     this.input.keyboard!.on('keydown-E', () => {
       if (this.frozen) return;
-      if (this.isNearMarker()) {
-        gameEvents.emit(EVENTS.MISSION_START);
+      const id = this.nearestMarker();
+      if (id) {
+        this.activeMarkerId = id;
+        gameEvents.emit(EVENTS.MISSION_START, id);
       }
     });
 
     // Mission events from React (MissionOverlay / GameScreen). Removed when the scene ends:
     // otherwise a destroyed scene from an earlier visit keeps reacting after "Continue mission".
-    const onShowMarker = (room: RoomId, critical?: boolean) => this.showMissionMarker(room, critical);
-    const onRemoveMarker = () => this.removeMissionMarker();
+    const onSetMarkers = (markers: MissionMarkerSpec[]) => this.setMissionMarkers(markers);
     const onShowSpeech = (text: string) => this.showSpeechBubble(text);
     const onHideSpeech = () => this.hideSpeechBubble();
     const onZoomIn = () => {
       this.frozen = true;
       const cam = this.cameras.main;
-      const target = this.missionMarker
-        ? { x: this.missionMarker.x, y: this.missionMarker.y + 30 }
-        : { x: this.player.x, y: this.player.y };
+      const marker = this.activeMarkerId ? this.missionMarkers.get(this.activeMarkerId) : undefined;
+      const target = marker ? { x: marker.x, y: marker.y } : { x: this.player.x, y: this.player.y };
       cam.pan(target.x, target.y, 600, 'Sine.easeInOut');
       cam.zoomTo(this.baseZoom() * MISSION_ZOOM, 600, 'Sine.easeInOut');
     };
@@ -204,15 +214,13 @@ export class GameScene extends Phaser.Scene {
       cam.pan(this.player.x, this.player.y - 16, 500, 'Sine.easeInOut');
       cam.zoomTo(this.baseZoom(), 500, 'Sine.easeInOut');
     };
-    gameEvents.on('SHOW_MISSION_MARKER', onShowMarker);
-    gameEvents.on('REMOVE_MISSION_MARKER', onRemoveMarker);
+    gameEvents.on(EVENTS.SET_MISSION_MARKERS, onSetMarkers);
     gameEvents.on('CAMERA_ZOOM_IN', onZoomIn);
     gameEvents.on('CAMERA_ZOOM_OUT', onZoomOut);
     gameEvents.on(EVENTS.SHOW_SPEECH_BUBBLE, onShowSpeech);
     gameEvents.on(EVENTS.HIDE_SPEECH_BUBBLE, onHideSpeech);
     const removeMissionListeners = () => {
-      gameEvents.off('SHOW_MISSION_MARKER', onShowMarker);
-      gameEvents.off('REMOVE_MISSION_MARKER', onRemoveMarker);
+      gameEvents.off(EVENTS.SET_MISSION_MARKERS, onSetMarkers);
       gameEvents.off('CAMERA_ZOOM_IN', onZoomIn);
       gameEvents.off('CAMERA_ZOOM_OUT', onZoomOut);
       gameEvents.off(EVENTS.SHOW_SPEECH_BUBBLE, onShowSpeech);
@@ -221,10 +229,9 @@ export class GameScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, removeMissionListeners);
     this.events.once(Phaser.Scenes.Events.DESTROY, removeMissionListeners);
 
-    // React may have sent SHOW_MISSION_MARKER before this scene existed (e.g. "Continue mission"
-    // while the map was still loading): draw the marker from the saved state too.
-    const mission = useMissionStore.getState().currentMission;
-    if (useGameStore.getState().phase === 'decision' && mission) this.showMissionMarker(mission.room as RoomId);
+    // React may have sent the markers before this scene existed (e.g. "Continue mission"
+    // while the map was still loading): draw them from the saved state too.
+    if (useGameStore.getState().phase === 'decision') this.setMissionMarkers(markerSpecs(useMissionStore.getState().openEvents));
   }
 
   /** ISS-style station (modules, nodes, truss, radiators, solar wings) over the Mars-orbit backdrop. */
@@ -409,67 +416,63 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(0.5));
   }
 
-  showMissionMarker(room: RoomId, critical = false) {
-    this.removeMissionMarker();
-    const center = ROOM_CENTERS[room];
-    if (!center) return;
-
-    const color = critical ? 0xe74c3c : 0xf59e0b;
-
-    const glow = this.add.graphics().setDepth(15).setAlpha(0.6);
-    glow.fillStyle(color, 0.35);
-    glow.fillCircle(center.x, center.y, 55);
-    glow.fillStyle(color, 0.15);
-    glow.fillCircle(center.x, center.y, 80);
-    this.missionGlow = glow;
-
-    this.tweens.add({
-      targets: glow,
-      alpha: { from: 0.4, to: 1 },
-      duration: critical ? 500 : 800,
-      yoyo: true,
-      repeat: -1,
-      ease: 'Sine.easeInOut',
-    });
-
-    const container = this.add.container(center.x, center.y - 30).setDepth(20);
-
-    const bg = this.add.graphics();
-    bg.fillStyle(color, 1);
-    bg.fillRoundedRect(-14, -18, 28, 36, 6);
-    bg.fillTriangle(-8, 18, 8, 18, 0, 28);
-
-    const text = smoothText(this.add.text(0, 0, '!', {
-      fontSize: '22px',
-      fontStyle: 'bold',
-      color: critical ? '#ffffff' : '#1a1a2e',
-      fontFamily: GAME_FONT,
-      resolution: 4,
-    }).setOrigin(0.5));
-
-    container.add([bg, text]);
-    this.missionMarker = container;
-
-    this.tweens.add({
-      targets: container,
-      y: center.y - 40,
-      duration: critical ? 350 : 500,
-      yoyo: true,
-      repeat: -1,
-      ease: 'Sine.easeInOut',
-    });
-  }
-
-  removeMissionMarker() {
-    if (this.missionMarker) {
-      this.missionMarker.destroy();
-      this.missionMarker = null;
+  /** Draws one "!" per open problem; problems in the same room stand side by side. */
+  setMissionMarkers(markers: MissionMarkerSpec[]) {
+    for (const parts of this.missionMarkers.values()) {
+      parts.container.destroy();
+      parts.glow.destroy();
     }
-    if (this.missionGlow) {
-      this.missionGlow.destroy();
-      this.missionGlow = null;
+    this.missionMarkers.clear();
+
+    const perRoom = new Map<string, number>();
+    for (const m of markers) {
+      const center = ROOM_CENTERS[m.room as RoomId];
+      if (!center) continue;
+      const index = perRoom.get(m.room) ?? 0;
+      perRoom.set(m.room, index + 1);
+      const x = center.x + index * 70;
+      const y = center.y;
+      const color = m.critical ? 0xe74c3c : 0xf59e0b;
+
+      const glow = this.add.graphics().setDepth(15).setAlpha(0.6);
+      glow.fillStyle(color, 0.35);
+      glow.fillCircle(x, y, 55);
+      glow.fillStyle(color, 0.15);
+      glow.fillCircle(x, y, 80);
+      this.tweens.add({
+        targets: glow,
+        alpha: { from: 0.4, to: 1 },
+        duration: m.critical ? 500 : 800,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+
+      const container = this.add.container(x, y - 30).setDepth(20);
+      const bg = this.add.graphics();
+      bg.fillStyle(color, 1);
+      bg.fillRoundedRect(-14, -18, 28, 36, 6);
+      bg.fillTriangle(-8, 18, 8, 18, 0, 28);
+      const text = smoothText(this.add.text(0, 0, '!', {
+        fontSize: '22px',
+        fontStyle: 'bold',
+        color: m.critical ? '#ffffff' : '#1a1a2e',
+        fontFamily: GAME_FONT,
+        resolution: 4,
+      }).setOrigin(0.5));
+      container.add([bg, text]);
+      this.tweens.add({
+        targets: container,
+        y: y - 40,
+        duration: m.critical ? 350 : 500,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+      this.missionMarkers.set(m.id, { container, glow, x, y });
     }
   }
+
 
   private showSpeechBubble(fullText: string) {
     this.hideSpeechBubble();
@@ -540,11 +543,18 @@ export class GameScene extends Phaser.Scene {
     this.frozen = false;
   }
 
-  private isNearMarker(): boolean {
-    if (!this.missionMarker) return false;
-    const dx = this.player.x - this.missionMarker.x;
-    const dy = this.player.y - (this.missionMarker.y + 30);
-    return Math.sqrt(dx * dx + dy * dy) < INTERACT_DISTANCE;
+  /** The open problem the player is standing next to (closest one), if any. */
+  private nearestMarker(): string | null {
+    let best: string | null = null;
+    let bestDist = INTERACT_DISTANCE;
+    for (const [id, m] of this.missionMarkers) {
+      const dist = Math.hypot(this.player.x - m.x, this.player.y - m.y);
+      if (dist < bestDist) {
+        best = id;
+        bestDist = dist;
+      }
+    }
+    return best;
   }
 
   private toggleWalkableDebug() {

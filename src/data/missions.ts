@@ -1,10 +1,72 @@
 import type { ResourceKey } from '../stores/useResourceStore';
+import { MISSIONS_BATCH_1 } from './missionsBatch1';
 
 export type MissionSeverity = 'normal' | 'critical';
 
 export interface ChoiceEffect {
   resource: ResourceKey;
   delta: number;
+}
+
+/** The four people on board who can be sent to a job. The commander is the player. */
+export type CrewSlot = 'commander' | 'engineer' | 'medic' | 'scientist';
+
+/** Who a choice needs. Every mission needs at least one person (see DEFAULT_CREW_NEED). */
+export interface CrewNeed {
+  /** People needed. 0 only for missions where someone is already involved (crewOutside). */
+  min: number;
+  /** Most people that help (default: min). */
+  max?: number;
+  /** Specialists who make it easier (+15% chance, or shown as "Best: …" when there is no risk). */
+  best?: CrewSlot[];
+  /** Can be tried with fewer people than `min`: harder (-20% chance per missing person). */
+  allowFewer?: boolean;
+  /** The whole crew takes part (evacuation, everybody rests). Busy jobs are stopped. */
+  everyone?: boolean;
+}
+
+/** A mission that this choice can set off later (a chained consequence). */
+export interface FollowUp {
+  /** Must be the id of a mission in MISSIONS (checked by validateMissions). */
+  missionId: string;
+  /** Days from now; 0 = a new emergency later today. */
+  afterDays: number;
+  /** When set, the day is random between afterDays and afterDaysMax. */
+  afterDaysMax?: number;
+  /** Chance in % (default 100). Rolled when it is scheduled. */
+  chance?: number;
+  /** Does not happen if this flag is set by the time it is due (e.g. the problem was fixed for good). */
+  unlessFlag?: string;
+}
+
+/** A lasting state of the station (a temporary fix, smoke, a broken machine). Uses only the 7 resources. */
+export interface StationCondition {
+  id: string;
+  /** Shown in the day summary, e.g. "Water recycler broken". */
+  label: string;
+  /** Resource change applied every day while it lasts. */
+  daily: ChoiceEffect[];
+  /** Lasts this many days; undefined = until a choice clears it. */
+  days?: number;
+  /** Makes every job harder while it lasts (in %). */
+  successPenalty?: number;
+}
+
+/** What else a choice does, besides changing resources. */
+export interface Outcome {
+  followUps?: FollowUp[];
+  addConditions?: StationCondition[];
+  clearConditions?: string[];
+  setFlags?: string[];
+  clearFlags?: string[];
+  /** Change to the oxygen-candle stock (an item, not a resource). */
+  candles?: number;
+  /** Personal health change for each crew member sent. */
+  crewHealth?: number;
+  /** Extra tiredness for each crew member sent. */
+  crewFatigue?: number;
+  /** The crew sent must rest this many days after (they can't be sent). */
+  crewRestDays?: number;
 }
 
 export interface Choice {
@@ -16,6 +78,29 @@ export interface Choice {
   successRate?: number;
   failNarrative?: string;
   failEffects?: ChoiceEffect[];
+
+  /** Who this choice needs (default: DEFAULT_CREW_NEED). */
+  crew?: CrewNeed;
+  /** How long the job takes, as the player reads it ("3 hours", "2 days"). */
+  time?: string;
+  /** Extra days the crew stays busy after today (0 or undefined = today only). */
+  busyDays?: number;
+  /** Tiredness added to each crew member sent (default 1). */
+  fatigue?: number;
+  /** An improvised fix: works now, may fail later. Shown as "Temporary fix". */
+  temporary?: boolean;
+  /** Oxygen candles this choice burns; locked when there are not enough. */
+  needsCandles?: number;
+  /** Not offered when this flag is set. */
+  hiddenIfFlag?: string;
+  /** If it fails, the mission comes back at once without this choice. */
+  retryOnFail?: boolean;
+  onSuccess?: Outcome;
+  onFail?: Outcome;
+  /** Applied when a multi-day job ends normally (e.g. the repair is finished). */
+  onDone?: Outcome;
+  /** If the crew is pulled off this job before it ends. */
+  onInterrupt?: { effects: ChoiceEffect[]; text: string; resumeMissionId?: string };
 }
 
 export interface Mission {
@@ -32,11 +117,25 @@ export interface Mission {
   nasaYear?: number;
   popup: string;
   choices: Choice[];
+
+  /** Only happens when another mission sets it off (never on a fixed day). */
+  followUpOnly?: boolean;
+  /** "Deal with it tomorrow": what waiting costs. false = there is no time to wait. */
+  defer?: { effects: ChoiceEffect[]; text: string } | false;
+  /** Someone is already outside on a spacewalk and takes part in every choice. */
+  crewOutside?: boolean;
+  /** Popup badge: real history, a NASA simulation, or a space tip (for follow-ups). */
+  factKind?: 'history' | 'simulation' | 'tip';
+  /** Number of the mission in the team's missoes.txt. */
+  sourceNumber?: number;
 }
 
-export const MISSIONS: Mission[] = [
+/** Missions written before crew assignment existed need one person, two at most. */
+export const DEFAULT_CREW_NEED: CrewNeed = { min: 1, max: 2 };
+
+export const MISSIONS_BASE: Mission[] = [
   // ═══════════════════════════════════════════════════════════════
-  // ACT 1 — Days 1-25 — Easy, learning
+  // ACT 1 — Days 1-15 — Easy, learning
   // ═══════════════════════════════════════════════════════════════
 
   {
@@ -79,54 +178,6 @@ export const MISSIONS: Mission[] = [
     ],
   },
 
-  {
-    id: 'bathroom-broke',
-    title: 'The Bathroom Broke',
-    description:
-      'The toilet and water recycler broke down. In space, the toilet also recycles water from pee and sweat. Without it, you lose water every time someone uses the bathroom.',
-    act: 1,
-    day: 5,
-    system: 'water',
-    room: 'engineering',
-    icon: '🚽',
-    severity: 'normal',
-    nasaSource: 'ISS Water Recovery System',
-    nasaYear: 2008,
-    popup:
-      'The ISS toilet has broken multiple times. In 2008, NASA had to send repair parts on a cargo ship. The water recycler turns waste back into clean water — and that water is also used to make oxygen!',
-    choices: [
-      {
-        id: 'full-repair',
-        label: 'Engineer fixes it today',
-        icon: '🔧',
-        effects: [{ resource: 'energy', delta: -5 }],
-        narrative:
-          'Kira spent the whole day repairing the toilet system. The water recycler is back online — 98% of water is being recovered again! But nothing else got fixed today.',
-      },
-      {
-        id: 'use-bags',
-        label: 'Use emergency bags for now',
-        icon: '🛍️',
-        effects: [
-          { resource: 'water', delta: -5 },
-          { resource: 'satisfaction', delta: -8 },
-        ],
-        narrative:
-          'The crew used emergency waste bags, like Apollo astronauts. It works, but nobody is happy. The water in those bags can\'t be recycled — lost forever.',
-      },
-      {
-        id: 'partial-fix',
-        label: 'Quick partial fix',
-        icon: '⚡',
-        effects: [
-          { resource: 'water', delta: -3 },
-          { resource: 'energy', delta: -3 },
-        ],
-        narrative:
-          'Kira did a quick fix — toilet works but the water recycler is still broken. You\'re losing a little water every day until the full repair.',
-      },
-    ],
-  },
 
   {
     id: 'bath-day',
@@ -134,7 +185,7 @@ export const MISSIONS: Mission[] = [
     description:
       'It\'s been a week and the crew wants to clean up. But water is precious in space. A full shower uses a lot of water. Wet wipes use almost none.',
     act: 1,
-    day: 7,
+    day: 4,
     system: 'water',
     room: 'quarters',
     icon: '🚿',
@@ -179,59 +230,6 @@ export const MISSIONS: Mission[] = [
     ],
   },
 
-  {
-    id: 'invisible-leak',
-    title: 'Invisible Leak',
-    description:
-      'A slow air leak has been detected. Pressure is dropping bit by bit. You need to find and seal the leak before more air escapes.',
-    act: 1,
-    day: 10,
-    system: 'oxygen',
-    room: 'bridge',
-    icon: '💨',
-    severity: 'normal',
-    nasaSource: 'ISS Air Leak Detection',
-    nasaYear: 2004,
-    popup:
-      'In 2004, a slow air leak was found on the ISS. After days of searching, they discovered a cracked hose seal — astronauts had been using the hose as a handhold! Something that simple almost caused a serious emergency.',
-    choices: [
-      {
-        id: 'lockdown-search',
-        label: 'Lock down and search every room',
-        icon: '🔒',
-        effects: [
-          { resource: 'oxygen', delta: -3 },
-          { resource: 'satisfaction', delta: -3 },
-        ],
-        narrative:
-          'You sealed all rooms and checked each one. Found it! A cracked seal. Easy fix once found. But it took a full day with everyone in tight spaces.',
-      },
-      {
-        id: 'listen-for-it',
-        label: 'Listen carefully for the hiss',
-        icon: '👂',
-        effects: [{ resource: 'oxygen', delta: -1 }],
-        narrative:
-          'The crew spread out with leak detectors. Found it in 4 hours! A cracked seal — fixed quickly.',
-        successRate: 85,
-        failNarrative:
-          'Couldn\'t find it today. Pressure dropped more overnight.',
-        failEffects: [{ resource: 'oxygen', delta: -8 }],
-      },
-      {
-        id: 'eva-inspect',
-        label: 'Check from outside the station',
-        icon: '🧑‍🚀',
-        effects: [
-          { resource: 'oxygen', delta: -5 },
-          { resource: 'energy', delta: -3 },
-          { resource: 'health', delta: -3 },
-        ],
-        narrative:
-          'The engineer went outside and found the leak AND two other weak spots. All fixed! But the spacewalk was tiring.',
-      },
-    ],
-  },
 
   {
     id: 'mars-shadow',
@@ -239,7 +237,7 @@ export const MISSIONS: Mission[] = [
     description:
       'The station is about to pass behind Mars. Solar panels will stop making energy. The battery can\'t power everything. What do you turn off?',
     act: 1,
-    day: 12,
+    day: 6,
     system: 'energy',
     room: 'bridge',
     icon: '⚡',
@@ -289,7 +287,7 @@ export const MISSIONS: Mission[] = [
     description:
       'DONKI detected a solar storm heading toward Mars! It\'s small, but radiation is invisible energy from the Sun — too much can make astronauts sick.',
     act: 1,
-    day: 15,
+    day: 8,
     system: 'radiation',
     room: 'bridge',
     icon: '☢️',
@@ -324,7 +322,7 @@ export const MISSIONS: Mission[] = [
     description:
       'A video message arrived from the crew\'s families on Earth! But the antenna needs extra energy to download it. Do you use the energy?',
     act: 1,
-    day: 17,
+    day: 9,
     system: 'energy',
     room: 'common',
     icon: '💌',
@@ -355,61 +353,6 @@ export const MISSIONS: Mission[] = [
     ],
   },
 
-  {
-    id: 'slow-problem',
-    title: 'Slow Problem',
-    description:
-      'The cooling system has a small leak. It\'s not dangerous yet, but the station is getting warmer. Electronics don\'t like heat. If it gets too hot, things start breaking.',
-    act: 1,
-    day: 20,
-    system: 'energy',
-    room: 'engineering',
-    icon: '🌡️',
-    severity: 'normal',
-    nasaSource: 'ISS Thermal Control System',
-    popup:
-      'The ISS uses ammonia coolant loops to keep temperature steady. In 2013, a coolant leak forced an emergency spacewalk to replace a pump. Without cooling, electronics overheat and the crew gets too warm.',
-    nasaYear: 2013,
-    choices: [
-      {
-        id: 'fix-now',
-        label: 'Fix it now before it gets worse',
-        icon: '🔧',
-        effects: [{ resource: 'energy', delta: -5 }],
-        narrative:
-          'Kira found the leak and sealed it. Cooling is back to normal! Good thing you caught it early.',
-      },
-      {
-        id: 'reduce-load',
-        label: 'Turn off some machines to reduce heat',
-        icon: '🔌',
-        effects: [
-          { resource: 'energy', delta: -3 },
-          { resource: 'satisfaction', delta: -3 },
-        ],
-        narrative:
-          'You turned off non-essential machines. The station cooled down, but some systems are offline. The leak still needs fixing tomorrow.',
-      },
-      {
-        id: 'ignore-it',
-        label: 'Monitor it and fix later',
-        icon: '📊',
-        effects: [
-          { resource: 'energy', delta: -2 },
-          { resource: 'health', delta: -2 },
-        ],
-        narrative:
-          'You decided to watch and wait. The leak got a bit worse overnight. The station is now uncomfortably warm.',
-        successRate: 50,
-        failNarrative:
-          'The leak got much worse overnight! The cooling system failed and you had to do an emergency repair.',
-        failEffects: [
-          { resource: 'energy', delta: -10 },
-          { resource: 'health', delta: -5 },
-        ],
-      },
-    ],
-  },
 
   {
     id: 'first-harvest',
@@ -417,7 +360,7 @@ export const MISSIONS: Mission[] = [
     description:
       'The greenhouse lettuce is ready! Fresh food in space is rare and precious. But do you eat it now or save it for when food runs low?',
     act: 1,
-    day: 23,
+    day: 12,
     system: 'food',
     room: 'lab',
     icon: '🥬',
@@ -471,7 +414,7 @@ export const MISSIONS: Mission[] = [
     description:
       'Some food packages are close to their expiration date. The vitamins inside break down over time. Do you eat the old food first or save it?',
     act: 1,
-    day: 25,
+    day: 13,
     system: 'food',
     room: 'storage',
     icon: '📅',
@@ -526,7 +469,7 @@ export const MISSIONS: Mission[] = [
     description:
       'An old satellite broke apart and over 1500 pieces of debris are heading your way. Metal moving at 7 km/s — faster than a bullet!',
     act: 2,
-    day: 28,
+    day: 14,
     system: 'shielding',
     room: 'bridge',
     icon: '🛰️',
@@ -573,7 +516,7 @@ export const MISSIONS: Mission[] = [
     description:
       'A massive solar storm hit the station! Solar panels are damaged — energy production is down. The crew needs to survive with less power.',
     act: 2,
-    day: 32,
+    day: 16,
     system: 'energy',
     room: 'bridge',
     icon: '🌞',
@@ -629,58 +572,6 @@ export const MISSIONS: Mission[] = [
     ],
   },
 
-  {
-    id: 'toxic-air',
-    title: 'Toxic Air!',
-    description:
-      'The oxygen machine overheated and is smoking! The air smells like burning rubber. This is the first serious air emergency on the station.',
-    act: 2,
-    day: 35,
-    system: 'oxygen',
-    room: 'engineering',
-    icon: '☠️',
-    severity: 'critical',
-    nasaSource: 'ISS Elektron Oxygen Generator',
-    nasaYear: 2006,
-    popup:
-      'The ISS oxygen generator (called Elektron) has failed multiple times. It splits water into oxygen and hydrogen using electricity. When it overheats, it can release toxic fumes. The crew uses gas masks and backup oxygen candles during repairs.',
-    choices: [
-      {
-        id: 'masks-restart',
-        label: 'Put on masks and restart it',
-        icon: '😷',
-        effects: [{ resource: 'oxygen', delta: -5 }],
-        narrative:
-          'Everyone put on masks. The engineer restarted the machine — it works at 70% power! Needs full repair later.',
-        successRate: 60,
-        failNarrative:
-          'The machine won\'t start. You need to use emergency oxygen candles now!',
-        failEffects: [{ resource: 'oxygen', delta: -15 }],
-      },
-      {
-        id: 'seal-vent',
-        label: 'Seal the room and vent the smoke',
-        icon: '🚪',
-        effects: [
-          { resource: 'oxygen', delta: -8 },
-          { resource: 'energy', delta: -5 },
-        ],
-        narrative:
-          'You sealed the room, vented the toxic air, and cleaned the machine. It took longer, but the repair is solid. Machine runs at 90%.',
-      },
-      {
-        id: 'oxygen-candles',
-        label: 'Switch to backup oxygen candles',
-        icon: '🕯️',
-        effects: [
-          { resource: 'oxygen', delta: 3 },
-          { resource: 'energy', delta: -3 },
-        ],
-        narrative:
-          'You lit oxygen candles. Fresh air! But candles are limited and there\'s a small fire risk. The machine still needs fixing.',
-      },
-    ],
-  },
 
   {
     id: 'crew-not-sleeping',
@@ -688,7 +579,7 @@ export const MISSIONS: Mission[] = [
     description:
       'The crew has been having trouble sleeping. In space, there\'s no sunrise or sunset. The body gets confused. Tired astronauts make more mistakes.',
     act: 2,
-    day: 38,
+    day: 19,
     system: 'health',
     room: 'quarters',
     icon: '😴',
@@ -733,56 +624,6 @@ export const MISSIONS: Mission[] = [
     ],
   },
 
-  {
-    id: 'dirty-water',
-    title: 'Dirty Water!',
-    description:
-      'The water recycler is putting out cloudy, smelly water. Something contaminated the system. The crew can\'t drink this water safely.',
-    act: 2,
-    day: 40,
-    system: 'water',
-    room: 'engineering',
-    icon: '🚰',
-    severity: 'critical',
-    nasaSource: 'ISS Water Recovery System',
-    popup:
-      'The ISS recycles 98% of all water — including sweat and pee! The water goes through filters, chemicals, and a high-temperature reactor. The water that comes out is actually cleaner than most tap water on Earth.',
-    choices: [
-      {
-        id: 'full-shutdown',
-        label: 'Shut down and deep clean the system',
-        icon: '🔧',
-        effects: [
-          { resource: 'water', delta: -10 },
-          { resource: 'energy', delta: -5 },
-        ],
-        narrative:
-          'The engineer shut everything down and cleaned it piece by piece. Took a whole day. Water is clean again, but you used reserves while the system was off.',
-      },
-      {
-        id: 'filter-extra',
-        label: 'Add extra filters and keep running',
-        icon: '🔬',
-        effects: [
-          { resource: 'water', delta: -5 },
-          { resource: 'health', delta: -5 },
-        ],
-        narrative:
-          'You added extra filters. Water is better but not perfect. Some crew members got mild stomach problems.',
-      },
-      {
-        id: 'emergency-reserves',
-        label: 'Switch to emergency water reserves',
-        icon: '🧊',
-        effects: [
-          { resource: 'water', delta: -8 },
-          { resource: 'satisfaction', delta: -3 },
-        ],
-        narrative:
-          'You switched to backup water while the recycler is fixed. Clean water, but the reserves are shrinking. Recycler still needs fixing.',
-      },
-    ],
-  },
 
   {
     id: 'trash-piling-up',
@@ -790,7 +631,7 @@ export const MISSIONS: Mission[] = [
     description:
       'There\'s nowhere to throw trash in space. Bags of garbage are piling up. The smell is getting bad and it\'s taking up space the crew needs.',
     act: 2,
-    day: 42,
+    day: 21,
     system: 'health',
     room: 'storage',
     icon: '🗑️',
@@ -841,7 +682,7 @@ export const MISSIONS: Mission[] = [
     description:
       'You can\'t reach Earth. No messages in, no messages out. You don\'t know if the problem is on your end or Earth\'s. You are alone.',
     act: 2,
-    day: 45,
+    day: 23,
     system: 'communication',
     room: 'bridge',
     icon: '📡',
@@ -897,7 +738,7 @@ export const MISSIONS: Mission[] = [
     description:
       'Two crew members got into a big argument. Living in a tiny space for weeks is hard. The tension is affecting everyone on the station.',
     act: 2,
-    day: 47,
+    day: 24,
     system: 'morale',
     room: 'common',
     icon: '😤',
@@ -945,7 +786,7 @@ export const MISSIONS: Mission[] = [
     description:
       'The crew is exhausted and homesick. Day after day in a metal box, far from Earth. Some crew members just sit and stare at the wall.',
     act: 2,
-    day: 50,
+    day: 25,
     system: 'morale',
     room: 'common',
     icon: '😞',
@@ -995,7 +836,7 @@ export const MISSIONS: Mission[] = [
     description:
       'A sensor on the outside of the station is broken. Without it, you can\'t detect debris or storms. Someone needs to go outside to fix it.',
     act: 2,
-    day: 53,
+    day: 27,
     system: 'shielding',
     room: 'engineering',
     icon: '🧑‍🚀',
@@ -1047,65 +888,6 @@ export const MISSIONS: Mission[] = [
     ],
   },
 
-  {
-    id: 'water-in-helmet',
-    title: 'Water in the Helmet!',
-    description:
-      'During a spacewalk, the astronaut\'s helmet starts filling with water! A leak in the cooling system. Water in zero gravity floats over the nose and mouth — you could drown in a spacesuit!',
-    act: 2,
-    day: 55,
-    system: 'health',
-    room: 'engineering',
-    icon: '🪖',
-    severity: 'critical',
-    nasaSource: 'ISS EVA Emergency',
-    nasaYear: 2013,
-    popup:
-      'THIS REALLY HAPPENED! In 2013, Italian astronaut Luca Parmitano nearly drowned during a spacewalk when his helmet filled with water. He couldn\'t see, hear, or breathe normally. He made it back alive by following the safety cable by feel.',
-    choices: [
-      {
-        id: 'abort-immediately',
-        label: 'Abort the spacewalk right now',
-        icon: '🚨',
-        effects: [
-          { resource: 'health', delta: -5 },
-          { resource: 'satisfaction', delta: -5 },
-        ],
-        narrative:
-          'You ordered an immediate return. The astronaut followed the cable back by feel. Safe inside! Shaken but alive. The repair isn\'t done.',
-      },
-      {
-        id: 'buddy-rescue',
-        label: 'Send the buddy to help',
-        icon: '🤝',
-        effects: [
-          { resource: 'oxygen', delta: -5 },
-          { resource: 'health', delta: -3 },
-        ],
-        narrative:
-          'The second astronaut guided their buddy back. Both made it inside safely. The leaking suit needs a full inspection before the next EVA.',
-      },
-      {
-        id: 'quick-fix-outside',
-        label: 'Try to fix the leak outside',
-        icon: '🔧',
-        effects: [
-          { resource: 'health', delta: -3 },
-          { resource: 'oxygen', delta: -3 },
-        ],
-        narrative:
-          'The astronaut patched the leak with tape. It held! They finished the repair and got back inside. Brave but risky.',
-        successRate: 50,
-        failNarrative:
-          'The fix didn\'t hold. Water kept rising. Emergency abort! The astronaut barely made it back inside.',
-        failEffects: [
-          { resource: 'health', delta: -15 },
-          { resource: 'oxygen', delta: -8 },
-          { resource: 'satisfaction', delta: -10 },
-        ],
-      },
-    ],
-  },
 
   {
     id: 'birthday-on-station',
@@ -1113,7 +895,7 @@ export const MISSIONS: Mission[] = [
     description:
       'It\'s a crew member\'s birthday! How do you celebrate when you\'re millions of kilometers from home?',
     act: 2,
-    day: 58,
+    day: 29,
     system: 'morale',
     room: 'common',
     icon: '🎂',
@@ -1164,7 +946,7 @@ export const MISSIONS: Mission[] = [
     description:
       'You counted the food supply. There\'s enough to last, but only if you eat smaller portions. The crew is already hungry from hard work.',
     act: 2,
-    day: 60,
+    day: 30,
     system: 'food',
     room: 'storage',
     icon: '🍽',
@@ -1218,7 +1000,7 @@ export const MISSIONS: Mission[] = [
     description:
       'Water reserves are getting low. The recycler can\'t keep up. You need to decide how to cut water use.',
     act: 2,
-    day: 62,
+    day: 31,
     system: 'water',
     room: 'bridge',
     icon: '💧',
@@ -1270,7 +1052,7 @@ export const MISSIONS: Mission[] = [
     description:
       'A message from Earth arrived. Good news: the crew\'s families are proud and healthy. Bad news: the next cargo mission was delayed by 3 months.',
     act: 2,
-    day: 65,
+    day: 33,
     system: 'morale',
     room: 'bridge',
     icon: '📨',
@@ -1323,7 +1105,7 @@ export const MISSIONS: Mission[] = [
     description:
       'The main battery is losing charge faster than normal. If it dies, the station goes dark. No lights, no heat, no oxygen machine.',
     act: 3,
-    day: 66,
+    day: 32,
     system: 'energy',
     room: 'engineering',
     icon: '🔋',
@@ -1374,58 +1156,6 @@ export const MISSIONS: Mission[] = [
     ],
   },
 
-  {
-    id: 'co2-filter-broke',
-    title: 'CO2 Filter Broke!',
-    description:
-      'The CO2 scrubber broke! It removes carbon dioxide from the air. Without it, the crew will slowly suffocate. You have limited tools and materials.',
-    act: 3,
-    day: 68,
-    system: 'oxygen',
-    room: 'engineering',
-    icon: '💨',
-    severity: 'critical',
-    nasaSource: 'Apollo 13',
-    nasaYear: 1970,
-    popup:
-      'THIS REALLY HAPPENED! On Apollo 13, the CO2 filters broke. NASA engineers on Earth figured out how to build an adapter from duct tape, cardboard, and plastic bags — using only what the astronauts had. They saved the crew.',
-    choices: [
-      {
-        id: 'build-adapter',
-        label: 'Build a makeshift adapter',
-        icon: '🔧',
-        effects: [{ resource: 'oxygen', delta: -5 }],
-        narrative:
-          'The engineer worked for 3 hours and built an adapter from tape and plastic. The filter works again! CO2 rose during the repair but it\'s coming down.',
-        successRate: 75,
-        failNarrative:
-          'The adapter didn\'t hold. CO2 is still rising! You need another plan fast.',
-        failEffects: [{ resource: 'oxygen', delta: -15 }],
-      },
-      {
-        id: 'everybody-rest',
-        label: 'Everyone lie still and breathe slowly',
-        icon: '😴',
-        effects: [
-          { resource: 'oxygen', delta: -3 },
-          { resource: 'satisfaction', delta: -5 },
-        ],
-        narrative:
-          'The crew lay still, breathing slowly. CO2 rose but stayed below danger. No work done today — the filter still needs fixing tomorrow.',
-      },
-      {
-        id: 'oxygen-candles',
-        label: 'Burn emergency oxygen candles',
-        icon: '🕯️',
-        effects: [
-          { resource: 'oxygen', delta: 5 },
-          { resource: 'energy', delta: -3 },
-        ],
-        narrative:
-          'You burned a precious oxygen candle. Fresh air! But candles are limited and there\'s a fire risk. The filter still needs fixing.',
-      },
-    ],
-  },
 
   {
     id: 'o2-machine-stopped',
@@ -1433,7 +1163,7 @@ export const MISSIONS: Mission[] = [
     description:
       'The main oxygen generator has completely stopped. No new oxygen is being made. The station has a limited air supply. Every breath counts.',
     act: 3,
-    day: 70,
+    day: 35,
     system: 'oxygen',
     room: 'engineering',
     icon: '🫁',
@@ -1487,109 +1217,7 @@ export const MISSIONS: Mission[] = [
     ],
   },
 
-  {
-    id: 'fire-on-station',
-    title: 'Fire on the Station!',
-    description:
-      'An oxygen candle caught fire! These candles normally make oxygen, but this one is burning out of control. Smoke fills the room.',
-    act: 3,
-    day: 72,
-    system: 'oxygen',
-    room: 'engineering',
-    icon: '🔥',
-    severity: 'critical',
-    nasaSource: 'MIR Space Station',
-    nasaYear: 1997,
-    popup:
-      'THIS REALLY HAPPENED! In February 1997, an oxygen candle caught fire on MIR. The flames burned for 14 minutes and blocked one escape capsule. The crew fought the fire with extinguishers. Nobody died, but the smoke made the air bad for weeks.',
-    choices: [
-      {
-        id: 'fight-fire',
-        label: 'Fight the fire with extinguishers',
-        icon: '🧯',
-        effects: [
-          { resource: 'oxygen', delta: -10 },
-          { resource: 'health', delta: -10 },
-        ],
-        narrative:
-          'Two crew members fought the fire for 15 minutes. Fire is out! But toxic smoke fills the air for the next 3 days. Everyone gets headaches.',
-      },
-      {
-        id: 'seal-room',
-        label: 'Seal the door and cut off air',
-        icon: '🚪',
-        effects: [
-          { resource: 'energy', delta: -10 },
-          { resource: 'oxygen', delta: -5 },
-        ],
-        narrative:
-          'You sealed the door. No air means no fire. It died out. But everything in that room is lost — tools, spare parts, and supplies.',
-      },
-      {
-        id: 'evacuate',
-        label: 'Move everyone to the safe section',
-        icon: '🏃',
-        effects: [
-          { resource: 'energy', delta: -5 },
-          { resource: 'oxygen', delta: -8 },
-          { resource: 'satisfaction', delta: -10 },
-        ],
-        narrative:
-          'Everyone moved to the safe section. The fire burned itself out but damaged equipment. The crew is scared.',
-      },
-    ],
-  },
 
-  {
-    id: 'micrometeorite-hole',
-    title: 'Micrometeorite Hole!',
-    description:
-      'A tiny space rock punched a small hole in the station wall! Air is hissing out. It\'s small enough to cover with a finger — for now.',
-    act: 3,
-    day: 75,
-    system: 'oxygen',
-    room: 'lab',
-    icon: '☄️',
-    severity: 'critical',
-    nasaSource: 'ISS Soyuz Capsule Leak',
-    nasaYear: 2018,
-    popup:
-      'In 2018, a small hole was found in the Soyuz capsule docked to the ISS. Air was leaking out. An astronaut literally put his finger over the hole while others got repair materials. They sealed it with epoxy. The hole was only 2mm wide!',
-    choices: [
-      {
-        id: 'epoxy-patch',
-        label: 'Seal it with emergency epoxy',
-        icon: '🩹',
-        effects: [
-          { resource: 'oxygen', delta: -5 },
-        ],
-        narrative:
-          'Someone held their finger on the hole while others mixed epoxy. Sealed! The patch is holding. Close call!',
-      },
-      {
-        id: 'metal-plate',
-        label: 'Weld a metal plate over it',
-        icon: '🔩',
-        effects: [
-          { resource: 'oxygen', delta: -8 },
-          { resource: 'energy', delta: -5 },
-        ],
-        narrative:
-          'The engineer welded a proper metal plate. Permanent fix! But it took longer and more air escaped. The weld is solid though.',
-      },
-      {
-        id: 'seal-room-off',
-        label: 'Seal the whole room and leave it',
-        icon: '🚪',
-        effects: [
-          { resource: 'oxygen', delta: -3 },
-          { resource: 'satisfaction', delta: -8 },
-        ],
-        narrative:
-          'You sealed the lab and left the room depressurized. No more air loss, but you lost access to important science equipment.',
-      },
-    ],
-  },
 
   {
     id: 'maya-discovery',
@@ -1597,7 +1225,7 @@ export const MISSIONS: Mission[] = [
     description:
       'Maya, the scientist, found something incredible in her Mars atmosphere samples. It could be evidence of ancient microbial life! But analyzing it properly takes a lot of energy.',
     act: 3,
-    day: 78,
+    day: 39,
     system: 'science',
     room: 'lab',
     icon: '🔬',
@@ -1648,7 +1276,7 @@ export const MISSIONS: Mission[] = [
     description:
       'An unmanned cargo ship approaching the station lost its navigation. It\'s drifting toward you! You have minutes to react.',
     act: 3,
-    day: 80,
+    day: 40,
     system: 'shielding',
     room: 'bridge',
     icon: '🚀',
@@ -1712,7 +1340,7 @@ export const MISSIONS: Mission[] = [
     description:
       'The food tracking system shows someone is eating extra portions at night. Food is running low. Do you investigate or trust the crew?',
     act: 3,
-    day: 83,
+    day: 42,
     system: 'food',
     room: 'common',
     icon: '🍪',
@@ -1763,7 +1391,7 @@ export const MISSIONS: Mission[] = [
     description:
       'Maya\'s science data is ready to send to Earth. But transmitting uses a lot of energy, and the batteries are struggling. Do you send the data or save power?',
     act: 3,
-    day: 85,
+    day: 43,
     system: 'energy',
     room: 'bridge',
     icon: '📡',
@@ -1813,7 +1441,7 @@ export const MISSIONS: Mission[] = [
     description:
       'Day 88. The return window opens in 2 days. The ship needs to be ready. What do you prioritize for the final preparations?',
     act: 3,
-    day: 88,
+    day: 44,
     system: 'engineering',
     room: 'bridge',
     icon: '⏱️',
@@ -1862,9 +1490,9 @@ export const MISSIONS: Mission[] = [
     id: 'final-day',
     title: 'The Final Day',
     description:
-      'Day 90. It\'s time to leave Mars orbit and begin the long journey home. One last decision before you go.',
+      'Day 45. It\'s time to leave Mars orbit and begin the long journey home. One last decision before you go.',
     act: 3,
-    day: 90,
+    day: 45,
     system: 'mission',
     room: 'bridge',
     icon: '🌍',
@@ -1908,3 +1536,13 @@ export const MISSIONS: Mission[] = [
     ],
   },
 ];
+
+/**
+ * Every mission in the game: the missions above plus the ones rewritten from the team's
+ * missoes.txt, one batch of up to 10 at a time (src/data/missionsBatch1.ts = missions 1-10).
+ */
+export const MISSIONS: Mission[] = [...MISSIONS_BASE, ...MISSIONS_BATCH_1];
+
+export function getMission(id: string): Mission | undefined {
+  return MISSIONS.find((m) => m.id === id);
+}

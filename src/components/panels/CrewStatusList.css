@@ -1,0 +1,95 @@
+/* Crew availability list (Begin Day panel, day summary). */
+.crew-status {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.crew-status__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.crew-status__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.crew-status__row {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  grid-template-areas:
+    'face who tired'
+    'face what what';
+  column-gap: 10px;
+  align-items: center;
+  font-size: 16px;
+}
+
+.crew-status__face {
+  grid-area: face;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  overflow: hidden;
+  border-radius: 50%;
+  border: 2px solid;
+  font-weight: 700;
+  background: #141b2d;
+}
+
+.crew-status__face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+}
+
+.crew-status__who {
+  grid-area: who;
+  color: var(--text-primary);
+}
+
+.crew-status__role {
+  color: var(--text-secondary);
+}
+
+.crew-status__what {
+  grid-area: what;
+  color: var(--text-secondary);
+}
+
+.crew-status__row--busy .crew-status__what {
+  color: #fbbf24;
+}
+
+.crew-status__row--resting .crew-status__what {
+  color: #f87171;
+}
+
+.crew-status__tired {
+  grid-area: tired;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid currentColor;
+  color: #4ade80;
+}
+
+.crew-status__tired--2 {
+  color: #fbbf24;
+}
+
+.crew-status__tired--3,
+.crew-status__tired--4 {
+  color: #f87171;
+}

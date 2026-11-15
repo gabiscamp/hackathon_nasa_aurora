@@ -7,7 +7,7 @@ Aurora Station is an educational space management game that teaches kids (ages 7
 ## Setting
 
 - **Location**: Aurora Station, a research habitat in orbit around Mars
-- **Timeline**: 90-day mission (Day 1 through Day 90)
+- **Timeline**: 45-day mission (Day 1 through Day 45; team decision 2026-11-15, was 90)
 - **Constraint**: No resupply possible. Everything the crew needs is already on board. Every resource spent is gone forever.
 - **Tone**: Hopeful and educational. Challenges are serious but never frightening. The crew supports each other.
 
@@ -293,7 +293,7 @@ Each in-game day follows this structure:
 
 ## Endings
 
-Determined by average resource levels and crew status on Day 90.
+Determined by average resource levels and crew status on Day 45.
 
 ### Good Ending: "Mission Complete" (Average resources > 30%)
 - The crew celebrates. Earth congratulates the Commander.

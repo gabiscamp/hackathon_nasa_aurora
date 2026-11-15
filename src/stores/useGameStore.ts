@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { MISSION_DAYS } from '../data/missionLength';
 
 export type GameScene =
   | 'title'
@@ -88,7 +89,7 @@ export const useGameStore = create<GameState>()((set) => ({
   nextDay: () =>
     set((state) => {
       const nextDay = state.day + 1;
-      if (nextDay > 90) {
+      if (nextDay > MISSION_DAYS) {
         return { scene: 'ending' as GameScene };
       }
       return { day: nextDay, phase: 'briefing' as DayPhase };

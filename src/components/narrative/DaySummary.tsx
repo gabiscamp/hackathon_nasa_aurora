@@ -1,5 +1,6 @@
 import { useResourceStore, type Resources } from '../../stores/useResourceStore';
-import { useCrewStore } from '../../stores/useCrewStore';
+import { useMissionStore } from '../../stores/useMissionStore';
+import { CrewStatusList } from '../panels/CrewStatusList';
 import { useGameStore } from '../../stores/useGameStore';
 import { Button } from '../ui/Button';
 import { useState } from 'react';
@@ -20,7 +21,8 @@ function Delta({ label, before, after, higherIsWorse = false }: { label: string;
   );
 }
 
-export function DaySummary() {
+/** End-of-day summary. `onNext` ends the day (daily consumption + next day). */
+export function DaySummary({ onNext }: { onNext: () => void }) {
   const food = useResourceStore((s) => s.food);
   const water = useResourceStore((s) => s.water);
   const oxygen = useResourceStore((s) => s.oxygen);
@@ -28,11 +30,13 @@ export function DaySummary() {
   const energy = useResourceStore((s) => s.energy);
   const health = useResourceStore((s) => s.health);
   const satisfaction = useResourceStore((s) => s.satisfaction);
-  const crew = useCrewStore((s) => s.crew);
-  const nextDay = useGameStore((s) => s.nextDay);
+  const conditions = useMissionStore((s) => s.conditions);
   const day = useGameStore((s) => s.day);
 
-  const [snapshot] = useState<Resources>({ food, water, oxygen, radiation, energy, health, satisfaction });
+  const dayStart = useMissionStore((s) => s.dayStart);
+  // Compared with the start of the day (all missions, jobs and lasting problems of today).
+  const [fallback] = useState<Resources>({ food, water, oxygen, radiation, energy, health, satisfaction });
+  const snapshot = dayStart ?? fallback;
 
   return (
     <div
@@ -62,19 +66,25 @@ export function DaySummary() {
         <Delta label="😊 Satisfaction" before={snapshot.satisfaction} after={satisfaction} />
       </div>
 
+      {conditions.length > 0 && (
+        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-3)' }} data-read>
+          <h3 style={{ fontSize: 'var(--text-sm)', margin: 0, color: 'var(--text-secondary)' }}>Station problems still going on</h3>
+          <ul style={{ margin: 'var(--space-1) 0 0', paddingLeft: 20, fontSize: 'var(--text-sm)', color: '#fbbf24' }}>
+            {conditions.map((c) => (
+              <li key={c.id}>
+                {c.label}
+                {c.untilDay !== undefined ? ` (until Day ${c.untilDay})` : ''}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-3)' }}>
-        <h3 style={{ fontSize: 'var(--text-sm)', marginBottom: 'var(--space-2)', margin: 0, color: 'var(--text-secondary)' }}>Crew Status</h3>
-        {Object.values(crew).map((m) => (
-          <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--text-sm)', padding: 'var(--space-1) 0' }}>
-            <span style={{ color: 'var(--text-primary)' }}>{m.name.split(' ')[0]}</span>
-            <span style={{ color: 'var(--text-secondary)' }}>
-              ❤️ {Math.round(m.health)}  😊 {Math.round(m.morale)}
-            </span>
-          </div>
-        ))}
+        <CrewStatusList day={day + 1} title="Your crew tomorrow" />
       </div>
 
-      <Button variant="primary" onClick={nextDay} icon="🌅">
+      <Button variant="primary" onClick={onNext} icon="🌅">
         Next Day
       </Button>
     </div>

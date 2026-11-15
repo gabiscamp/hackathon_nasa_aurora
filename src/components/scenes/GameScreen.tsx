@@ -2,36 +2,38 @@ import { useEffect, useState } from 'react';
 import { useGameStore } from '../../stores/useGameStore';
 import { useResourceStore } from '../../stores/useResourceStore';
 import { useMissionStore } from '../../stores/useMissionStore';
-import { pickMissionForDay } from '../../engine/eventResolver';
-import { MISSIONS } from '../../data/missions';
+import { getMission, MISSIONS } from '../../data/missions';
+import { advanceTo, nextEventDay, openDay } from '../../engine/missionEngine';
 import { MissionOverlay } from '../panels/MissionOverlay';
 import { DaySkipOverlay } from '../panels/DaySkipOverlay';
 import { DaySummary } from '../narrative/DaySummary';
+import { CrewStatusList } from '../panels/CrewStatusList';
 import { Button } from '../ui/Button';
 import { getAct } from '../panels/DayTracker';
 import { PhaserGame } from '../../game/PhaserGame';
 import { Hud } from '../hud/Hud';
 import { gameEvents, EVENTS } from '../../game/events';
+import { markerSpecs } from '../../game/missionMarkers';
 import { startAlertLoop, stopAlertLoop } from '../../utils/sounds';
 import type { RoomId } from '../../game/world/shipLayout';
 import { ROOM_NAMES } from '../hud/LocationHint';
 import { PauseMenu } from '../hud/PauseMenu';
+import { MISSION_DAYS } from '../../data/missionLength';
 import './GameScreen.css';
 
-/** Sorted list of days that have missions. */
-const MISSION_DAYS = [
-  1, 5, 7, 10, 12, 15, 17, 20, 23, 25,
-  28, 32, 35, 38, 40, 42, 45, 47, 50, 53,
-  55, 58, 60, 62, 65, 66, 68, 70, 72, 75,
-  78, 80, 83, 85, 88, 90,
-];
+/** Last day of the mission: when nothing else is planned, the game jumps here. */
+const LAST_DAY = MISSION_DAYS;
 
-/** Return the next mission day >= currentDay (or null if past 90). */
-function nextMissionDay(currentDay: number): number | null {
-  for (const d of MISSION_DAYS) {
-    if (d >= currentDay) return d;
-  }
-  return null;
+/** Missions that will open on `day` (preview for the "Begin Day" panel). */
+function incomingTitles(day: number): string[] {
+  const { openEvents, scheduled, completedMissions } = useMissionStore.getState();
+  const ids = new Set<string>(openEvents);
+  for (const s of scheduled) if (s.day <= day) ids.add(s.missionId);
+  for (const m of MISSIONS) if (m.day === day && !m.followUpOnly && !completedMissions.includes(m.id)) ids.add(m.id);
+  return [...ids].flatMap((id) => {
+    const m = getMission(id);
+    return m && !completedMissions.includes(id) ? [`${m.icon} ${m.title}`] : [];
+  });
 }
 
 interface GameScreenProps {
@@ -43,18 +45,18 @@ interface GameScreenProps {
 export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScreenProps) {
   const day = useGameStore((s) => s.day);
   const phase = useGameStore((s) => s.phase);
-  const nextPhase = useGameStore((s) => s.nextPhase);
+  const setPhase = useGameStore((s) => s.setPhase);
   const nextDay = useGameStore((s) => s.nextDay);
   const setDay = useGameStore((s) => s.setDay);
   const playerName = useGameStore((s) => s.playerName);
-  const completedMissions = useMissionStore((s) => s.completedMissions);
   const setMission = useMissionStore((s) => s.setMission);
+  const clearMission = useMissionStore((s) => s.clearMission);
   const currentMission = useMissionStore((s) => s.currentMission);
+  const openEvents = useMissionStore((s) => s.openEvents);
   const tick = useResourceStore((s) => s.tick);
   const tickDays = useResourceStore((s) => s.tickDays);
 
   const [missionOpen, setMissionOpen] = useState(false);
-  const [alertPlayed, setAlertPlayed] = useState('');
 
   /** Day-skip overlay state */
   const [skipInfo, setSkipInfo] = useState<{
@@ -63,73 +65,65 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
     act: 1 | 2 | 3;
   } | null>(null);
 
-  const { act, label: actLabel } = getAct(day);
+  const { label: actLabel } = getAct(day);
+  const briefingDay = nextEventDay(day) ?? Math.max(day, LAST_DAY);
 
+  // One "!" per open problem; the alarm rings while an emergency is waiting.
   useEffect(() => {
-    if (phase === 'briefing' && !currentMission) {
-      const mission = pickMissionForDay(day, act, completedMissions, MISSIONS);
-      if (mission) {
-        setMission(mission);
-      }
-    }
-  }, [phase, day, act, completedMissions, currentMission, setMission]);
-
-  useEffect(() => {
-    if (phase === 'decision' && !currentMission) {
-      nextPhase();
-    }
-  }, [phase, currentMission, nextPhase]);
-
-  useEffect(() => {
-    if (phase === 'decision' && currentMission && alertPlayed !== currentMission.id) {
-      const isCritical = currentMission.severity === 'critical';
-      gameEvents.emit('SHOW_MISSION_MARKER', currentMission.room as RoomId, isCritical);
-      setAlertPlayed(currentMission.id);
-      if (isCritical) {
-        startAlertLoop();
-      }
-    }
-  }, [phase, currentMission, alertPlayed]);
-
-  useEffect(() => {
-    const onMissionStart = () => {
+    if (phase !== 'decision') {
+      gameEvents.emit(EVENTS.SET_MISSION_MARKERS, []);
       stopAlertLoop();
+      return;
+    }
+    gameEvents.emit(EVENTS.SET_MISSION_MARKERS, markerSpecs(openEvents));
+    const emergency = openEvents.some((id) => getMission(id)?.severity === 'critical');
+    if (emergency && !missionOpen) startAlertLoop();
+    else stopAlertLoop();
+  }, [phase, openEvents, missionOpen]);
+
+  useEffect(() => () => stopAlertLoop(), []);
+
+  // Every problem solved or left for tomorrow: the day ends.
+  useEffect(() => {
+    if (phase === 'decision' && openEvents.length === 0 && !missionOpen && !skipInfo) setPhase('summary');
+  }, [phase, openEvents, missionOpen, skipInfo, setPhase]);
+
+  useEffect(() => {
+    const onMissionStart = (id?: string) => {
+      const mission = id ? getMission(id) : undefined;
+      if (!mission) return;
+      stopAlertLoop();
+      setMission(mission);
       setMissionOpen(true);
       gameEvents.emit('CAMERA_ZOOM_IN');
-      gameEvents.emit('REMOVE_MISSION_MARKER');
     };
     gameEvents.on(EVENTS.MISSION_START, onMissionStart);
-    return () => { gameEvents.off(EVENTS.MISSION_START, onMissionStart); };
-  }, []);
+    return () => {
+      gameEvents.off(EVENTS.MISSION_START, onMissionStart);
+    };
+  }, [setMission]);
 
   const handleBeginDay = () => {
-    const target = nextMissionDay(day);
-    if (target !== null && target > day) {
-      // Days need to be skipped
-      const skip = target - day;
-      const targetAct = getAct(target).act;
-      tickDays(skip);
-      setDay(target);
-      // Re-pick mission for the new day
-      const mission = pickMissionForDay(target, targetAct, completedMissions, MISSIONS);
-      if (mission) setMission(mission);
-      setSkipInfo({ daysSkipped: skip, targetDay: target, act: targetAct });
-    } else {
-      // Already on a mission day, just show the intro overlay (0 days skipped)
-      const currentAct = getAct(day).act;
-      setSkipInfo({ daysSkipped: 0, targetDay: day, act: currentAct });
-    }
+    const target = Math.max(day, nextEventDay(day) ?? LAST_DAY);
+    const skip = target - day;
+    // Quiet days still use food, water and air (tickDays); the engine runs each morning
+    // (jobs end, people rest, lasting problems apply) and opens the new day's problems.
+    if (skip > 0) tickDays(skip);
+    advanceTo(target);
+    setDay(target);
+    openDay(target);
+    setSkipInfo({ daysSkipped: skip, targetDay: target, act: getAct(target).act });
   };
 
   const handleSkipDone = () => {
     setSkipInfo(null);
-    nextPhase(); // briefing -> decision
+    setPhase('decision');
   };
 
-  const handleMissionComplete = () => {
+  const handleMissionClosed = () => {
     setMissionOpen(false);
+    clearMission();
     gameEvents.emit('CAMERA_ZOOM_OUT');
-    nextPhase();
   };
 
   const radiation = useResourceStore((s) => s.radiation);
@@ -143,6 +137,13 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
     nextDay();
   };
 
+  const openMissions = openEvents.flatMap((id) => {
+    const m = getMission(id);
+    return m ? [m] : [];
+  });
+  const anyEmergency = openMissions.some((m) => m.severity === 'critical');
+  const roomList = [...new Set(openMissions.map((m) => ROOM_NAMES[m.room as RoomId] ?? m.room))].join(', ');
+
   return (
     <main className="game-screen">
       <h1 className="sr-only">Aurora Station</h1>
@@ -151,14 +152,24 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
         <Hud />
         <PauseMenu onMainMenu={onMainMenu} onOpenCredits={onOpenCredits} suspended={creditsOpen} />
 
-        {phase === 'decision' && !missionOpen && currentMission && (
-          <div className={`game-hint-banner ${currentMission.severity === 'critical' ? 'game-hint-banner--critical' : ''}`} data-read>
-            <span>{currentMission.icon} {currentMission.severity === 'critical' ? 'EMERGENCY! ' : ''}Go to {ROOM_NAMES[currentMission.room as RoomId] ?? currentMission.room} and press <kbd>E</kbd> to investigate!</span>
+        {phase === 'decision' && !missionOpen && !skipInfo && openMissions.length > 0 && (
+          <div className={`game-hint-banner ${anyEmergency ? 'game-hint-banner--critical' : ''}`} data-read>
+            {openMissions.length === 1 ? (
+              <span>
+                {openMissions[0].icon} {anyEmergency ? 'EMERGENCY! ' : ''}Go to {roomList} and press <kbd>E</kbd> to
+                investigate!
+              </span>
+            ) : (
+              <span>
+                {anyEmergency ? 'EMERGENCY! ' : ''}
+                {openMissions.length} problems today: {roomList}. Walk to each <strong>!</strong> and press <kbd>E</kbd>.
+              </span>
+            )}
           </div>
         )}
 
         {missionOpen && currentMission && (
-          <MissionOverlay onComplete={handleMissionComplete} />
+          <MissionOverlay key={currentMission.id} onComplete={handleMissionClosed} />
         )}
 
         {skipInfo && (
@@ -175,13 +186,14 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
       {phase === 'briefing' && !skipInfo && (
         <div className="game-overlay">
           <div className="panel day-briefing">
-            <h2 style={{ fontSize: 'var(--font-size-xl)' }}>Day {nextMissionDay(day) ?? day}</h2>
+            <h2 style={{ fontSize: 'var(--font-size-xl)' }}>Day {briefingDay}</h2>
             <p style={{ color: 'var(--accent-amber)' }}>{actLabel}</p>
-            {currentMission && (
-              <p style={{ color: 'var(--text-secondary)' }}>
-                {currentMission.icon} Incoming: {currentMission.title}
+            {incomingTitles(briefingDay).map((t) => (
+              <p key={t} style={{ color: 'var(--text-secondary)', margin: 0 }}>
+                Incoming: {t}
               </p>
-            )}
+            ))}
+            <CrewStatusList day={briefingDay} title="Your crew today" />
             <Button variant="primary" icon="▶️" onClick={handleBeginDay}>
               Begin Day
             </Button>
@@ -191,12 +203,7 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
 
       {phase === 'summary' && (
         <div className="game-overlay">
-          <DaySummary />
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 12 }}>
-            <Button variant="primary" onClick={handleEndDay}>
-              Next Day
-            </Button>
-          </div>
+          <DaySummary onNext={handleEndDay} />
         </div>
       )}
 
@@ -205,7 +212,7 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
           <div className="panel day-briefing">
             <h2>Quiet Day</h2>
             <p style={{ color: 'var(--text-secondary)' }}>No events today. Resources ticked down as usual.</p>
-            <Button variant="primary" onClick={nextPhase}>
+            <Button variant="primary" onClick={() => setPhase('summary')}>
               Continue to Summary
             </Button>
           </div>

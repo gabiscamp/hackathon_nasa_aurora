@@ -50,7 +50,7 @@ export function HowToPlay() {
       <div className="gm-help__col">
         <section>
           <h3>Your goal</h3>
-          <p>Keep the station and the crew safe for 90 days near Mars.</p>
+          <p>Keep the station and the crew safe for 45 days near Mars.</p>
         </section>
 
         <section>
