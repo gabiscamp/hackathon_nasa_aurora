@@ -121,6 +121,14 @@ select {
   color: inherit;
 }
 
+/* Key hints (<kbd>) and code would otherwise use the browser's monospace font. */
+kbd,
+code,
+samp,
+pre {
+  font-family: var(--font-family);
+}
+
 ul,
 ol {
   list-style: none;

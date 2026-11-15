@@ -61,3 +61,6 @@ export const theme = {
 } as const;
 
 export default theme;
+
+/** Font for text drawn inside the Phaser canvas (canvas text can't read CSS variables). */
+export const GAME_FONT = 'Lexend, system-ui, sans-serif';

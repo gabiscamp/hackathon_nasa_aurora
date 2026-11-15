@@ -3,6 +3,9 @@ import { SHIP_BG_KEY, SHIP_BG_URL, SPACE_BG_KEY, SPACE_BG_URL } from '../world/s
 import { CHARACTER_SPRITES, SPRITE_FRAME_H, SPRITE_FRAME_W } from '../world/characterSprites';
 import { buildModularAstronauts, preloadModularAstronaut } from '../world/modularAstronaut';
 
+/** Longest wait for the game font before starting anyway with the fallback font (ms). */
+const FONT_WAIT_MS = 2500;
+
 export class BootScene extends Phaser.Scene {
   constructor() {
     super({ key: 'BootScene' });
@@ -44,6 +47,12 @@ export class BootScene extends Phaser.Scene {
 
   create() {
     buildModularAstronauts(this);
-    this.scene.start('GameScene');
+    // Canvas text is drawn once with whatever font is ready at that moment. Wait for Lexend
+    // (bold weights used by the name labels), or at most FONT_WAIT_MS if it can't load (offline).
+    const fontReady = Promise.all([document.fonts.load(`700 16px Lexend`), document.fonts.load(`400 16px Lexend`)]);
+    const timeout = new Promise((resolve) => setTimeout(resolve, FONT_WAIT_MS));
+    void Promise.race([fontReady, timeout])
+      .catch(() => undefined)
+      .then(() => this.scene.start('GameScene'));
   }
 }

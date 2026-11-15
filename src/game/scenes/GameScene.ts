@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { GAME_FONT } from '../../styles/theme';
 import { gameEvents, EVENTS } from '../events';
 import { useCrewStore } from '../../stores/useCrewStore';
 import { CREW_ROLES } from '../../data/crew';
@@ -309,7 +310,7 @@ export class GameScene extends Phaser.Scene {
         fontSize: '9px',
         fontStyle: 'bold',
         color: '#f0ece4',
-        fontFamily: 'Lexend, sans-serif',
+        fontFamily: GAME_FONT,
         stroke: '#0a0e27',
         strokeThickness: 2,
         resolution: 4,
@@ -349,7 +350,7 @@ export class GameScene extends Phaser.Scene {
       fontSize: '22px',
       fontStyle: 'bold',
       color: '#1a1a2e',
-      fontFamily: 'Lexend, sans-serif',
+      fontFamily: GAME_FONT,
     }).setOrigin(0.5);
 
     container.add([bg, text]);
