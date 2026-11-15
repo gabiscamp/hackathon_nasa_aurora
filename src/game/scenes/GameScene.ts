@@ -1,5 +1,14 @@
 import Phaser from 'phaser';
 import { GAME_FONT } from '../../styles/theme';
+
+/**
+ * The game uses pixelArt (nearest-neighbour) for sprites. Text scaled that way gets jagged
+ * edges that read like serifs, so text textures use smooth (linear) filtering: Lexend stays clean.
+ */
+function smoothText(t: Phaser.GameObjects.Text): Phaser.GameObjects.Text {
+  t.texture.setFilter(Phaser.Textures.FilterMode.LINEAR);
+  return t;
+}
 import { gameEvents, EVENTS } from '../events';
 import { useCrewStore } from '../../stores/useCrewStore';
 import { CREW_ROLES } from '../../data/crew';
@@ -327,7 +336,7 @@ export class GameScene extends Phaser.Scene {
 
   /** Name tag rendered at 4x so it stays sharp under the zoomed pixel-art camera. */
   private npcLabel(name: string, y: number): Phaser.GameObjects.Text {
-    return this.add
+    return smoothText(this.add
       .text(0, y, name, {
         fontSize: '9px',
         fontStyle: 'bold',
@@ -337,7 +346,7 @@ export class GameScene extends Phaser.Scene {
         strokeThickness: 2,
         resolution: 4,
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5));
   }
 
   showMissionMarker(room: RoomId) {
@@ -368,12 +377,13 @@ export class GameScene extends Phaser.Scene {
     bg.fillRoundedRect(-14, -18, 28, 36, 6);
     bg.fillTriangle(-8, 18, 8, 18, 0, 28);
 
-    const text = this.add.text(0, 0, '!', {
+    const text = smoothText(this.add.text(0, 0, '!', {
       fontSize: '22px',
       fontStyle: 'bold',
       color: '#1a1a2e',
       fontFamily: GAME_FONT,
-    }).setOrigin(0.5);
+      resolution: 4,
+    }).setOrigin(0.5));
 
     container.add([bg, text]);
     this.missionMarker = container;

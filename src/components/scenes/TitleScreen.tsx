@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { OptionsDialog } from '../ui/OptionsPanel';
 import { RoleIcon } from '../ui/RoleIcon';
 import { drawTeams, type CrewTeam } from '../../data/crews';
 import type { SeatProfile } from '../../data/astronauts';
@@ -40,6 +41,7 @@ export function TitleScreen({ onStart, onOpenCredits, savedMission, onContinueMi
   const [teams, setTeams] = useState<CrewTeam[]>(() => drawTeams());
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [confirmNew, setConfirmNew] = useState(false);
+  const [optionsOpen, setOptionsOpen] = useState(false);
   const selected = selectedIndex === null ? null : teams[selectedIndex];
 
   const reshuffle = () => setTeams(drawTeams());
@@ -52,7 +54,7 @@ export function TitleScreen({ onStart, onOpenCredits, savedMission, onContinueMi
   };
 
   useEffect(() => {
-    if (creditsOpen || confirmNew) return;
+    if (creditsOpen || confirmNew || optionsOpen) return;
     const onKey = (e: KeyboardEvent) => {
       const index = ['1', '2'].indexOf(e.key);
       if (index >= 0) setSelectedIndex(index);
@@ -173,12 +175,19 @@ export function TitleScreen({ onStart, onOpenCredits, savedMission, onContinueMi
         </section>
 
         <footer className="title-footer">
-          <button type="button" className="title-credits" onClick={onOpenCredits}>
-            Credits, photos &amp; NASA sources
-          </button>
+          <div className="title-footer__links">
+            <button type="button" className="title-credits" onClick={() => setOptionsOpen(true)}>
+              Options: text, voice &amp; sound
+            </button>
+            <button type="button" className="title-credits" onClick={onOpenCredits}>
+              Credits, photos &amp; NASA sources
+            </button>
+          </div>
           <p>Based on real NASA data. Not made or endorsed by NASA.</p>
         </footer>
       </main>
+
+      {optionsOpen && <OptionsDialog onClose={() => setOptionsOpen(false)} />}
 
       {confirmNew && selected && savedMission && (
         <ConfirmDialog

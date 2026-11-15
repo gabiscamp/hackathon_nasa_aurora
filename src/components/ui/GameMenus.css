@@ -351,3 +351,97 @@
     transform: none;
   }
 }
+
+/* ---------- Options ---------- */
+.gm-card--options {
+  width: min(560px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  text-align: left;
+}
+
+.gm-card--options .gm-title {
+  text-align: center;
+}
+
+.opt-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 8px 0 20px;
+}
+
+.opt-row {
+  margin: 0;
+  padding: 0;
+  border: none;
+  min-width: 0;
+}
+
+.opt-row__title {
+  margin-bottom: 4px;
+  padding: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #f5a623;
+}
+
+.opt-row__hint {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: #c9cfdb;
+}
+
+.opt-seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.opt-seg__item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 0;
+  min-width: 96px;
+  min-height: 48px;
+  padding: 6px 14px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #f0ece4;
+  background: #1b2440;
+  border: 2px solid #3a4666;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.opt-seg__item:hover {
+  border-color: #4dc9f6;
+}
+
+/* The real radio stays in the page for keyboard and screen readers, just invisible. */
+.opt-seg__item input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.opt-seg__item.is-on {
+  color: #0a0e27;
+  background: #4dc9f6;
+  border-color: #4dc9f6;
+}
+
+.opt-seg__item:has(input:focus-visible) {
+  outline: 3px solid #f5a623;
+  outline-offset: 2px;
+}
+
+.opt-note {
+  margin: 0;
+  font-size: 16px;
+  color: #c9cfdb;
+}

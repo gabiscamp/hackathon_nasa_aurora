@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { gameEvents, EVENTS } from '../../game/events';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { HowToPlay } from './HowToPlay';
+import { OptionsPanel } from '../ui/OptionsPanel';
 import '../ui/GameMenus.css';
 
 interface PauseMenuProps {
@@ -11,7 +12,7 @@ interface PauseMenuProps {
   suspended: boolean;
 }
 
-type View = 'menu' | 'help';
+type View = 'menu' | 'help' | 'options';
 
 /**
  * In-game menu: visible "Menu" (Esc / P) and "Help" (H) buttons (Nielsen: user control and freedom,
@@ -58,7 +59,7 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
       }
       if (key !== 'escape' && key !== 'p') return;
       if (!open) openMenu();
-      else if (view === 'help' && !helpDirect) setView('menu');
+      else if ((view === 'help' && !helpDirect) || view === 'options') setView('menu');
       else closeMenu();
     };
     window.addEventListener('keydown', onKey);
@@ -110,7 +111,7 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
 
       {open && (
         <div className="gm-backdrop" role="dialog" aria-modal="true" aria-labelledby="gm-pause-title">
-          <div className={`gm-card ${view === 'help' ? 'gm-card--help' : ''}`}>
+          <div className={`gm-card ${view === 'help' ? 'gm-card--help' : view === 'options' ? 'gm-card--options' : ''}`}>
             {view === 'menu' ? (
               <>
                 <h2 id="gm-pause-title" className="gm-title">
@@ -124,6 +125,9 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
                   <button type="button" className="gm-btn gm-btn--wide" onClick={() => setView('help')}>
                     How to play
                   </button>
+                  <button type="button" className="gm-btn gm-btn--wide" onClick={() => setView('options')}>
+                    Options: text, voice &amp; sound
+                  </button>
                   <button type="button" className="gm-btn gm-btn--wide" onClick={onOpenCredits}>
                     Credits &amp; NASA sources
                   </button>
@@ -131,6 +135,16 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
                     Main menu
                   </button>
                 </div>
+              </>
+            ) : view === 'options' ? (
+              <>
+                <h2 id="gm-pause-title" className="gm-title">
+                  Options
+                </h2>
+                <OptionsPanel />
+                <button ref={resumeRef} type="button" className="gm-btn gm-btn--primary gm-btn--wide" onClick={() => setView('menu')}>
+                  Back <kbd className="gm-kbd">Esc</kbd>
+                </button>
               </>
             ) : (
               <>

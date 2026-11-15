@@ -1,4 +1,9 @@
+import { useSettingsStore } from '../stores/useSettingsStore';
+
 let audioCtx: AudioContext | null = null;
+
+/** Player's sound level from Options (0 = off, 1 = original loudness). */
+const vol = () => useSettingsStore.getState().volume;
 
 function getCtx(): AudioContext {
   if (!audioCtx) audioCtx = new AudioContext();
@@ -7,6 +12,7 @@ function getCtx(): AudioContext {
 }
 
 export function playKeyTick() {
+  if (vol() === 0) return;
   const ctx = getCtx();
   const bufferSize = ctx.sampleRate * 0.012;
   const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
@@ -22,7 +28,7 @@ export function playKeyTick() {
   filter.frequency.value = 3000 + Math.random() * 1500;
 
   const gain = ctx.createGain();
-  gain.gain.value = 0.025 + Math.random() * 0.01;
+  gain.gain.value = (0.025 + Math.random() * 0.01) * vol();
 
   source.connect(filter);
   filter.connect(gain);
@@ -34,14 +40,14 @@ let alertAudio: HTMLAudioElement | null = null;
 let alertPlaying = false;
 
 export function playAlertSound() {
-  if (alertPlaying) return;
+  if (alertPlaying || vol() === 0) return;
   alertPlaying = true;
   try {
     if (!alertAudio) {
       alertAudio = new Audio('/sounds/alert.mp3');
-      alertAudio.volume = 0.05;
       alertAudio.loop = false;
     }
+    alertAudio.volume = Math.min(1, 0.05 * vol());
     alertAudio.currentTime = 0;
     alertAudio.play().catch(() => {
       playAlertFallback();
@@ -69,7 +75,7 @@ function playAlertFallback() {
     gain.connect(ctx.destination);
     osc.type = 'square';
     osc.frequency.setValueAtTime(200, ctx.currentTime + offset);
-    gain.gain.setValueAtTime(0.1, ctx.currentTime + offset);
+    gain.gain.setValueAtTime(0.1 * vol(), ctx.currentTime + offset);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + offset + 0.22);
     osc.start(ctx.currentTime + offset);
     osc.stop(ctx.currentTime + offset + 0.25);
@@ -77,6 +83,7 @@ function playAlertFallback() {
 }
 
 export function playChoiceSound() {
+  if (vol() === 0) return;
   const ctx = getCtx();
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
@@ -86,7 +93,7 @@ export function playChoiceSound() {
   osc.type = 'sine';
   osc.frequency.setValueAtTime(523, ctx.currentTime);
   osc.frequency.setValueAtTime(659, ctx.currentTime + 0.08);
-  gain.gain.setValueAtTime(0.08, ctx.currentTime);
+  gain.gain.setValueAtTime(0.08 * vol(), ctx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
 
   osc.start(ctx.currentTime);
