@@ -14,6 +14,8 @@ export const EVENTS = {
   MISSION_START: 'mission-start',
   MISSION_COMPLETE: 'mission-complete',
   PLAYER_MOVED: 'player-moved',
+  SHOW_SPEECH_BUBBLE: 'show-speech-bubble',
+  HIDE_SPEECH_BUBBLE: 'hide-speech-bubble',
 } as const;
 
 export interface PlayerMovedPayload {

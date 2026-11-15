@@ -31,31 +31,26 @@ export function playKeyTick() {
 }
 
 let alertAudio: HTMLAudioElement | null = null;
-let alertPlaying = false;
 
-export function playAlertSound() {
-  if (alertPlaying) return;
-  alertPlaying = true;
+export function startAlertLoop() {
   try {
     if (!alertAudio) {
       alertAudio = new Audio('/sounds/alert.mp3');
-      alertAudio.volume = 0.05;
-      alertAudio.loop = false;
+      alertAudio.volume = 0.1;
     }
+    alertAudio.loop = true;
     alertAudio.currentTime = 0;
-    alertAudio.play().catch(() => {
-      playAlertFallback();
-    });
-    setTimeout(() => {
-      if (alertAudio) {
-        alertAudio.pause();
-        alertAudio.currentTime = 0;
-      }
-      alertPlaying = false;
-    }, 2000);
+    alertAudio.play().catch(() => {});
   } catch {
-    playAlertFallback();
-    alertPlaying = false;
+    // silently fail
+  }
+}
+
+export function stopAlertLoop() {
+  if (alertAudio) {
+    alertAudio.pause();
+    alertAudio.currentTime = 0;
+    alertAudio.loop = false;
   }
 }
 
@@ -74,6 +69,37 @@ function playAlertFallback() {
     osc.start(ctx.currentTime + offset);
     osc.stop(ctx.currentTime + offset + 0.25);
   }
+}
+
+let lastStepTime = 0;
+const STEP_INTERVAL = 280;
+
+export function playFootstep() {
+  const now = performance.now();
+  if (now - lastStepTime < STEP_INTERVAL) return;
+  lastStepTime = now;
+
+  const ctx = getCtx();
+  const bufferSize = Math.floor(ctx.sampleRate * 0.035);
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.08));
+  }
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = 600 + Math.random() * 200;
+
+  const gain = ctx.createGain();
+  gain.gain.value = 0.06 + Math.random() * 0.02;
+
+  source.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+  source.start();
 }
 
 export function playChoiceSound() {
