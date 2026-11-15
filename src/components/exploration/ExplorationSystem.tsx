@@ -66,6 +66,17 @@ export function ExplorationSystem() {
   }, [openMissionMenu]);
 
   useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() !== 'r' || event.repeat) return;
+      if (useExplorationStore.getState().status !== 'aboard') return;
+      if (document.querySelector('[role="dialog"], [role="alertdialog"]')) return;
+      gameEvents.emit(EVENTS.ROBOT_INTERACT);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  useEffect(() => {
     if (!active) return;
     const update = () => {
       const currentTime = Date.now();
@@ -150,6 +161,19 @@ export function ExplorationSystem() {
 
   return (
     <>
+      {status === 'aboard' && (
+        <button
+          className="robot-dock-button"
+          type="button"
+          onClick={() => gameEvents.emit(EVENTS.ROBOT_INTERACT)}
+          aria-label="Abrir missões do robô AUR-1"
+        >
+          <span className="robot-dock-button__dot" aria-hidden="true" />
+          <span><strong>AUR-1</strong><small>Missões do robô</small></span>
+          <kbd>R</kbd>
+        </button>
+      )}
+
       {active && (
         <button className="robot-widget" type="button" onClick={openDetails} aria-label="Abrir detalhes da exploração">
           <RobotPortrait size={64} />

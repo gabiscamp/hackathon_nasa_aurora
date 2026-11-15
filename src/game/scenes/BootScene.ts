@@ -6,7 +6,7 @@ import { buildModularAstronauts, preloadModularAstronaut } from '../world/modula
 
 /** Longest wait for the game font before starting anyway with the fallback font (ms). */
 const FONT_WAIT_MS = 2500;
-export const ROBOT_TEXTURE_KEY = 'robot';
+export const ROBOT_TEXTURE_KEY = 'robot-keyed-source';
 const ROBOT_SOURCE_KEY = 'robot-source';
 const ROBOT_FRAME_WIDTH = 192;
 const ROBOT_FRAME_HEIGHT = 256;
@@ -82,9 +82,11 @@ export class BootScene extends Phaser.Scene {
       if (red > 185 && blue > 130 && green < 105 && red > green * 1.8) pixels.data[index + 3] = 0;
     }
     context.putImageData(pixels, 0, 0);
-    const keyedTexture = this.textures.addCanvas('robot-keyed-source', canvas);
+    const keyedTexture = this.textures.addCanvas(ROBOT_TEXTURE_KEY, canvas);
     if (!keyedTexture) return;
-    this.textures.addSpriteSheet(ROBOT_TEXTURE_KEY, keyedTexture, {
+    // Passing a Phaser Texture updates that same texture; Phaser deliberately ignores
+    // the key argument in this overload. The sprite therefore uses ROBOT_TEXTURE_KEY.
+    this.textures.addSpriteSheet('', keyedTexture, {
       frameWidth: ROBOT_FRAME_WIDTH,
       frameHeight: ROBOT_FRAME_HEIGHT,
     });
