@@ -6,6 +6,7 @@ import { useCrewStore } from './stores/useCrewStore';
 import { useSpaceWeatherStore } from './stores/useSpaceWeatherStore';
 import { getTeam, type CrewTeam } from './data/crews';
 import { useMissionStore } from './stores/useMissionStore';
+import { useExplorationStore } from './stores/useExplorationStore';
 
 const TitleScreen = lazy(() => import('./components/scenes/TitleScreen').then(m => ({ default: m.TitleScreen })));
 const MissionBriefing = lazy(() => import('./components/scenes/MissionBriefing').then(m => ({ default: m.MissionBriefing })));
@@ -41,6 +42,7 @@ export default function App() {
   const resumeMission = useGameStore((s) => s.resumeMission);
   const selectTeam = useCrewStore((s) => s.selectTeam);
   const resetMissions = useMissionStore((s) => s.reset);
+  const resetExploration = useExplorationStore((s) => s.reset);
   const setScene = useGameStore((s) => s.setScene);
   const resetGame = useGameStore((s) => s.resetGame);
   // Ending screen reads all resources (mission system from main: 7 resources).
@@ -68,6 +70,7 @@ export default function App() {
   const handleStart = (team: CrewTeam) => {
     resetResources();
     resetMissions();
+    resetExploration();
     selectTeam(team.id);
     startMission(team.id, team.commander.name);
   };
@@ -81,6 +84,7 @@ export default function App() {
     resetResources();
     resetCrew();
     resetMissions();
+    resetExploration();
   };
 
   return (

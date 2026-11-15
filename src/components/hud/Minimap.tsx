@@ -2,6 +2,10 @@ import { WALKABLE_AREAS, NPC_SPAWNS } from '../../game/world/shipLayout';
 import { useCrewStore } from '../../stores/useCrewStore';
 import { CREW_ROLES } from '../../data/crew';
 import { usePlayerPosition } from './usePlayerPosition';
+import { useRobotPosition } from './useRobotPosition';
+import { useExplorationStore } from '../../stores/useExplorationStore';
+
+const ROBOT_COLOR = '#9a5b32';
 
 const PAD = 30;
 /** World region shown: the walkable floor's bounding box plus a margin (ship is about 2:1 wide). */
@@ -16,7 +20,9 @@ const VIEW = (() => {
 /** Bottom-right HUD: ship-shaped map with room floors, crew dots and the player ("You"). */
 export function Minimap({ onOpen }: { onOpen: () => void }) {
   const pos = usePlayerPosition();
+  const robotPos = useRobotPosition();
   const crew = useCrewStore((s) => s.crew);
+  const robotAboard = useExplorationStore((s) => s.status === 'aboard');
 
   return (
     <button type="button" className="hud-panel hud-minimap" onClick={onOpen} aria-label="Open the full ship map (M)" title="Open the full ship map (M)">
@@ -31,6 +37,10 @@ export function Minimap({ onOpen }: { onOpen: () => void }) {
         {CREW_ROLES.map((role) => (
           <circle key={role} cx={NPC_SPAWNS[role].x} cy={NPC_SPAWNS[role].y - 14} r="22" fill={crew[role].color} stroke="#0a0e27" strokeWidth="7" />
         ))}
+        {/* AUR-1 uses the rover's brown body colour and disappears while exploring Mars. */}
+        {robotAboard && (
+          <circle cx={robotPos.x} cy={robotPos.y - 14} r="24" fill={ROBOT_COLOR} stroke="#0a0e27" strokeWidth="7" />
+        )}
         {/* player */}
         <circle cx={pos.x} cy={pos.y - 14} r="48" fill="rgba(245, 166, 35, 0.35)" className="hud-minimap__ping" />
         <circle cx={pos.x} cy={pos.y - 14} r="28" fill="#f5a623" stroke="#0a0e27" strokeWidth="8" />

@@ -5,6 +5,7 @@ import { useCrewStore } from '../../stores/useCrewStore';
 import { CREW_ROLES } from '../../data/crew';
 import { useGameStore } from '../../stores/useGameStore';
 import { useMissionStore } from '../../stores/useMissionStore';
+import { useExplorationStore } from '../../stores/useExplorationStore';
 import { getTeam } from '../../data/crews';
 import { ASTRONAUTS, getAstronaut, type HeadId } from '../../data/astronauts';
 import { ASTRO_ORIGIN_Y, astronautAnim, astronautTextureKey } from '../world/modularAstronaut';
@@ -33,6 +34,7 @@ import {
   type RoomId,
 } from '../world/shipLayout';
 import { stationTextureKey } from '../world/stationAssets';
+import { ROBOT_TEXTURE_KEY } from './BootScene';
 
 const PLAYER_SPEED = 160;
 const PLAYER_SIZE = 28;
@@ -57,6 +59,8 @@ const POSITION_EMIT_INTERVAL = 80;
 const INTERACT_DISTANCE = 80;
 /** Extra zoom when the camera flies to a mission spot. */
 const MISSION_ZOOM = 1.4;
+const ROBOT_SCALE = 0.24;
+const ROBOT_INTERACT_DISTANCE = 72;
 
 export class GameScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Container;
@@ -78,6 +82,8 @@ export class GameScene extends Phaser.Scene {
   private missionMarker: Phaser.GameObjects.Container | null = null;
   private missionGlow: Phaser.GameObjects.Graphics | null = null;
   private frozen = false;
+  private robot: Phaser.GameObjects.Sprite | null = null;
+  private robotPatrol: Phaser.Tweens.Tween | null = null;
 
   constructor() {
     super({ key: 'GameScene' });
@@ -122,6 +128,7 @@ export class GameScene extends Phaser.Scene {
       const head = ASTRONAUTS.find((a) => a.name === member.name)?.head ?? null;
       this.createNPC(spawn.x, spawn.y, Phaser.Display.Color.HexStringToColor(member.color).color, firstName, head);
     }
+    this.createRobot();
 
     // Input — WASD and arrows work simultaneously. Start clean: keys held while the
     // home screen was open (e.g. Enter on "Continue") must not stay stuck "down".
@@ -158,6 +165,10 @@ export class GameScene extends Phaser.Scene {
 
     this.input.keyboard!.on('keydown-E', () => {
       if (this.frozen) return;
+      if (this.isNearRobot()) {
+        gameEvents.emit(EVENTS.ROBOT_INTERACT);
+        return;
+      }
       if (this.isNearMarker()) {
         gameEvents.emit(EVENTS.MISSION_START);
       }
@@ -325,6 +336,78 @@ export class GameScene extends Phaser.Scene {
     npc.setData('name', name);
   }
 
+  /** AUR-1 roams the main pressurised corridor until it is deployed to Mars. */
+  private createRobot() {
+    if (!this.textures.exists(ROBOT_TEXTURE_KEY)) return;
+    // The main pressurised row is continuous, so these room centres form a safe patrol route.
+    // Starting on the bridge makes the robot visible early instead of hiding it at the far airlock.
+    const center = ROOM_CENTERS.bridge;
+    if (!this.anims.exists('robot-idle')) {
+      this.anims.create({
+        key: 'robot-idle',
+        frames: this.anims.generateFrameNumbers(ROBOT_TEXTURE_KEY, { start: 0, end: 7 }),
+        frameRate: 5,
+        repeat: -1,
+      });
+    }
+    this.robot = this.add
+      .sprite(center.x, center.y, ROBOT_TEXTURE_KEY, 0)
+      .setOrigin(0.5, 0.78)
+      .setScale(ROBOT_SCALE)
+      .setDepth(9)
+      .setInteractive({ useHandCursor: true });
+    this.robot.anims.play('robot-idle');
+    this.robot.on('pointerdown', () => {
+      if (useExplorationStore.getState().status === 'aboard') gameEvents.emit(EVENTS.ROBOT_INTERACT);
+    });
+
+    this.startRandomRobotPatrol();
+
+    const syncRobot = (status: 'aboard' | 'exploring') => {
+      const aboard = status === 'aboard';
+      this.robot?.setVisible(aboard).setActive(aboard);
+      if (aboard && this.robotPatrol) this.robotPatrol.resume();
+      else if (aboard) this.startRandomRobotPatrol();
+      else this.robotPatrol?.pause();
+    };
+    syncRobot(useExplorationStore.getState().status);
+    const unsubscribe = useExplorationStore.subscribe((state) => syncRobot(state.status));
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, unsubscribe);
+    this.events.once(Phaser.Scenes.Events.DESTROY, unsubscribe);
+  }
+
+  /** Picks another module on the connected main corridor, waits there, then chooses again. */
+  private startRandomRobotPatrol() {
+    if (!this.robot || useExplorationStore.getState().status !== 'aboard') return;
+    const route = [
+      ROOM_CENTERS.quarters,
+      ROOM_CENTERS.bridge,
+      ROOM_CENTERS.engineering,
+      ROOM_CENTERS.corridor,
+      ROOM_CENTERS.airlock,
+    ];
+    const candidates = route.filter((point) => Phaser.Math.Distance.Between(this.robot!.x, this.robot!.y, point.x, point.y) > 70);
+    const target = Phaser.Utils.Array.GetRandom(candidates);
+    const distance = Phaser.Math.Distance.Between(this.robot.x, this.robot.y, target.x, target.y);
+
+    this.robotPatrol = this.tweens.add({
+      targets: this.robot,
+      x: target.x,
+      y: target.y,
+      duration: Math.max(1800, distance * 12),
+      ease: 'Sine.easeInOut',
+      onUpdate: () => {
+        if (this.robot) gameEvents.emit(EVENTS.ROBOT_MOVED, { x: this.robot.x, y: this.robot.y });
+      },
+      onComplete: () => {
+        if (!this.robot) return;
+        gameEvents.emit(EVENTS.ROBOT_MOVED, { x: this.robot.x, y: this.robot.y });
+        this.robotPatrol = null;
+        this.time.delayedCall(Phaser.Math.Between(900, 2400), () => this.startRandomRobotPatrol());
+      },
+    });
+  }
+
   /** Name tag rendered at 4x so it stays sharp under the zoomed pixel-art camera. */
   private npcLabel(name: string, y: number): Phaser.GameObjects.Text {
     return this.add
@@ -404,6 +487,11 @@ export class GameScene extends Phaser.Scene {
     const dx = this.player.x - this.missionMarker.x;
     const dy = this.player.y - (this.missionMarker.y + 30);
     return Math.sqrt(dx * dx + dy * dy) < INTERACT_DISTANCE;
+  }
+
+  private isNearRobot(): boolean {
+    if (!this.robot?.visible || useExplorationStore.getState().status !== 'aboard') return false;
+    return Phaser.Math.Distance.Between(this.player.x, this.player.y, this.robot.x, this.robot.y) < ROBOT_INTERACT_DISTANCE;
   }
 
   private toggleWalkableDebug() {
