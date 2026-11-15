@@ -48,6 +48,10 @@ export interface CrewDuty {
   illness?: Illness | null;
   /** Personal radiation dose from spacewalks (0-100). At 100 the crew member must go home (problem 39). */
   dose?: number;
+  /** Taken off spacewalks (near the dose limit, problem 39). */
+  noSpacewalk?: boolean;
+  /** Reached the dose limit and went back to Earth (problem 39): never available again. */
+  goneHome?: boolean;
 }
 
 type DutyRecord = Record<CrewSlot, CrewDuty>;
@@ -81,9 +85,10 @@ export const useDutyStore = create<DutyState>()(
   ),
 );
 
-export type CrewAvailability = 'free' | 'busy' | 'resting' | 'sick';
+export type CrewAvailability = 'free' | 'busy' | 'resting' | 'sick' | 'away';
 
 export function availability(duty: CrewDuty, day: number): CrewAvailability {
+  if (duty.goneHome) return 'away';
   if (duty.illness && duty.illness.mode !== 'working') return 'sick';
   if (duty.restUntilDay >= day) return 'resting';
   if (duty.task && duty.task.untilDay >= day) return 'busy';

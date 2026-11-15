@@ -88,18 +88,20 @@ export function CrewPicker({ mission, choice, day, lockedSlot, chanceFor, onBack
             ? 'The sick crew member will be left alone and get better more slowly.'
             : taskMission?.choices.find((c) => c.id === task?.choiceId)?.onInterrupt?.text;
           const notAllowed = !!need.only && !need.only.includes(slot);
+          const noEva = !!choice.spacewalk && !!d.noSpacewalk;
           return (
             <li key={slot}>
               <button
                 type="button"
                 className={`crew-card crew-card--${state} ${selected ? 'crew-card--selected' : ''}`}
                 aria-pressed={selected}
-                disabled={state === 'resting' || state === 'sick' || notAllowed}
+                disabled={state === 'resting' || state === 'sick' || state === 'away' || notAllowed || noEva}
                 onClick={() => toggle(slot)}
               >
                 {cardBody(slot)}
                 {isBest && !notAllowed && <span className="crew-card__best">Best for this job</span>}
                 {notAllowed && <span className="crew-card__note">Only the {need.only!.map(slotTitle).join(' or ')} can do this</span>}
+                {noEva && !notAllowed && <span className="crew-card__note">No more spacewalks (radiation dose)</span>}
                 {state === 'busy' && selected && (
                   <span className="crew-card__note crew-card__note--warn">
                     This stops "{task?.label}". {stopText ?? 'Progress is lost.'}

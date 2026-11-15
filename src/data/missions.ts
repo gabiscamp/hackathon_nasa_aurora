@@ -4,6 +4,7 @@ import { MISSIONS_BATCH_2 } from './missionsBatch2';
 import { MISSIONS_BATCH_3 } from './missionsBatch3';
 import { MISSIONS_BATCH_4 } from './missionsBatch4';
 import { MISSIONS_BATCH_5 } from './missionsBatch5';
+import { MISSIONS_BATCH_6 } from './missionsBatch6';
 
 export type MissionSeverity = 'normal' | 'critical';
 
@@ -112,6 +113,10 @@ export interface Outcome {
   delayed?: DelayedEffect[];
   /** Personal radiation dose for each crew member sent (a spacewalk). A quarter also adds to station Radiation. */
   crewDose?: number;
+  /** The honoree (e.g. the crew member near the dose limit) may not do spacewalks any more. */
+  honoreeNoSpacewalk?: boolean;
+  /** Personal health change for the honoree. */
+  honoreeHealth?: number;
 }
 
 export interface Choice {
@@ -204,6 +209,12 @@ export interface Mission {
   delayIfFlag?: { flag: string; days: number };
   /** A fixed-day mission does not happen if this flag is set (e.g. the plants died). */
   skipIfFlag?: string;
+  /** A fixed-day mission only happens if this flag is set (e.g. the trash wall needs compacted trash). */
+  onlyIfFlag?: string;
+  /** Happens once when any crew member's personal radiation dose reaches this. */
+  doseTrigger?: number;
+  /** With honoree: pick the crew member with the highest radiation dose. */
+  honoreeBy?: 'highest-dose';
 }
 
 /** Missions written before crew assignment existed need one person, two at most. */
@@ -220,42 +231,6 @@ export const MISSIONS_BASE: Mission[] = [
 
 
 
-  {
-    id: 'family-message',
-    title: 'Family Message',
-    description:
-      'A video message arrived from the crew\'s families on Earth! But the antenna needs extra energy to download it. Do you use the energy?',
-    act: 1,
-    day: 9,
-    system: 'energy',
-    room: 'common',
-    icon: '💌',
-    severity: 'normal',
-    nasaSource: 'ISS Communication System',
-    popup:
-      'On the ISS, astronauts can video-call their families. But on a Mars mission, messages take 4-24 minutes to travel one way. No live calls — only video messages, like very slow email.',
-    choices: [
-      {
-        id: 'download-now',
-        label: 'Download the message right away',
-        icon: '📩',
-        effects: [
-          { resource: 'energy', delta: -5 },
-          { resource: 'satisfaction', delta: 12 },
-        ],
-        narrative:
-          'The crew gathered to watch. Tears and laughs! Seeing their families made everyone feel closer to home. Morale went way up.',
-      },
-      {
-        id: 'wait-for-shadow',
-        label: 'Wait until we have spare energy',
-        icon: '⏰',
-        effects: [{ resource: 'satisfaction', delta: -5 }],
-        narrative:
-          'You told the crew to wait. They understand, but they\'re disappointed. The message will be there tomorrow when energy is better.',
-      },
-    ],
-  },
 
 
 
@@ -265,67 +240,6 @@ export const MISSIONS_BASE: Mission[] = [
   // ═══════════════════════════════════════════════════════════════
 
 
-  {
-    id: 'big-solar-storm',
-    title: 'BIG Solar Storm!',
-    description:
-      'A massive solar storm hit the station! Solar panels are damaged — energy production is down. The crew needs to survive with less power.',
-    act: 2,
-    day: 16,
-    system: 'energy',
-    room: 'bridge',
-    icon: '🌞',
-    severity: 'critical',
-    nasaSource: 'NASA Solar Dynamics Observatory',
-    nasaYear: 2003,
-    popup:
-      'In 2003, a series of solar storms (the "Halloween Storms") were so powerful they damaged satellites and caused blackouts on Earth. On Mars, without Earth\'s magnetic field, a big storm could fry electronics and give astronauts dangerous radiation doses.',
-    choices: [
-      {
-        id: 'emergency-mode',
-        label: 'Switch to emergency power mode',
-        icon: '🔋',
-        effects: [
-          { resource: 'energy', delta: -15 },
-          { resource: 'radiation', delta: 5 },
-          { resource: 'satisfaction', delta: -8 },
-        ],
-        narrative:
-          'You cut power to almost everything. Lights are dim, heating is low, no science. But you\'ll survive until panels can be repaired.',
-      },
-      {
-        id: 'repair-panels',
-        label: 'Send someone to repair the panels',
-        icon: '🔧',
-        effects: [
-          { resource: 'energy', delta: -8 },
-          { resource: 'radiation', delta: 10 },
-          { resource: 'health', delta: -5 },
-        ],
-        narrative:
-          'The engineer went outside during the storm to fix the panels. Brave! Panels are partly working again. But the engineer absorbed a lot of radiation.',
-        successRate: 70,
-        failNarrative:
-          'The storm was too strong. The engineer had to come back without fixing the panels, and absorbed dangerous radiation.',
-        failEffects: [
-          { resource: 'energy', delta: -15 },
-          { resource: 'radiation', delta: 15 },
-          { resource: 'health', delta: -10 },
-        ],
-      },
-      {
-        id: 'shelter-wait',
-        label: 'Shelter and wait for the storm to pass',
-        icon: '🛡️',
-        effects: [
-          { resource: 'energy', delta: -12 },
-          { resource: 'radiation', delta: 3 },
-        ],
-        narrative:
-          'Everyone stayed in the shelter. The storm passed after 6 hours. Panels are damaged but working at reduced power. You\'ll need to manage carefully.',
-      },
-    ],
-  },
 
 
   {
@@ -811,7 +725,7 @@ export const MISSIONS_BASE: Mission[] = [
  * Every mission in the game: the missions above plus the ones rewritten from the team's
  * missoes.txt, one batch of up to 10 at a time (src/data/missionsBatch1.ts = missions 1-10).
  */
-export const MISSIONS: Mission[] = [...MISSIONS_BASE, ...MISSIONS_BATCH_1, ...MISSIONS_BATCH_2, ...MISSIONS_BATCH_3, ...MISSIONS_BATCH_4, ...MISSIONS_BATCH_5];
+export const MISSIONS: Mission[] = [...MISSIONS_BASE, ...MISSIONS_BATCH_1, ...MISSIONS_BATCH_2, ...MISSIONS_BATCH_3, ...MISSIONS_BATCH_4, ...MISSIONS_BATCH_5, ...MISSIONS_BATCH_6];
 
 export function getMission(id: string): Mission | undefined {
   return MISSIONS.find((m) => m.id === id);

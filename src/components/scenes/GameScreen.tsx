@@ -3,7 +3,7 @@ import { useGameStore } from '../../stores/useGameStore';
 import { useResourceStore } from '../../stores/useResourceStore';
 import { useMissionStore } from '../../stores/useMissionStore';
 import { getMission, MISSIONS } from '../../data/missions';
-import { advanceTo, nextEventDay, openDay } from '../../engine/missionEngine';
+import { advanceTo, missionLastDay, nextEventDay, openDay } from '../../engine/missionEngine';
 import { MissionOverlay } from '../panels/MissionOverlay';
 import { DaySkipOverlay } from '../panels/DaySkipOverlay';
 import { DaySummary } from '../narrative/DaySummary';
@@ -18,11 +18,8 @@ import { startAlertLoop, stopAlertLoop } from '../../utils/sounds';
 import type { RoomId } from '../../game/world/shipLayout';
 import { ROOM_NAMES } from '../hud/LocationHint';
 import { PauseMenu } from '../hud/PauseMenu';
-import { MISSION_DAYS } from '../../data/missionLength';
 import './GameScreen.css';
 
-/** Last day of the mission: when nothing else is planned, the game jumps here. */
-const LAST_DAY = MISSION_DAYS;
 
 /** Missions that will open on `day` (preview for the "Begin Day" panel). */
 function incomingTitles(day: number): string[] {
@@ -68,7 +65,8 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
   } | null>(null);
 
   const { label: actLabel } = getAct(day);
-  const briefingDay = nextEventDay(day) ?? Math.max(day, LAST_DAY);
+  const lastDay = missionLastDay();
+  const briefingDay = Math.min(nextEventDay(day) ?? Math.max(day, lastDay), Math.max(day, lastDay));
 
   // One "!" per open problem; the alarm rings while an emergency is waiting.
   useEffect(() => {
@@ -106,7 +104,7 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
   }, [setMission]);
 
   const handleBeginDay = () => {
-    const target = Math.max(day, nextEventDay(day) ?? LAST_DAY);
+    const target = Math.max(day, Math.min(nextEventDay(day) ?? lastDay, lastDay));
     const skip = target - day;
     // Quiet days still use food, water and air (tickDays); the engine runs each morning
     // (jobs end, people rest, lasting problems apply) and opens the new day's problems.
@@ -132,6 +130,11 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
 
   const handleEndDay = () => {
     tick();
+    // Mission over: Day 45, or Day 37 if the crew chose to go home early (problem 42).
+    if (day >= lastDay) {
+      useGameStore.getState().setScene('ending');
+      return;
+    }
     if (radiation >= 95) {
       useGameStore.getState().setScene('ending');
       return;

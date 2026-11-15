@@ -15,6 +15,7 @@ const SICK_TEXT: Record<string, string> = {
 
 export function dutyText(duty: CrewDuty, day: number): string {
   const state = availability(duty, day);
+  if (state === 'away') return 'Went back to Earth (radiation limit)';
   if (state === 'sick' && duty.illness) {
     const until = duty.illness.untilDay ? ` until Day ${duty.illness.untilDay}` : '';
     return `${SICK_TEXT[duty.illness.mode] ?? 'Sick'}${until}`;

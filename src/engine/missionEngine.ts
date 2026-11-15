@@ -10,6 +10,7 @@ import {
   type Mission,
   type Outcome,
   type SideRisk,
+  type StationCondition,
 } from '../data/missions';
 import { useMissionStore, type ActiveCondition } from '../stores/useMissionStore';
 import {
@@ -214,6 +215,15 @@ function applyAndMeasure(effects: ChoiceEffect[]): Partial<Record<ResourceKey, n
   return diff;
 }
 
+/** Notes created while a choice is applied (shown on the result screen). */
+let outcomeNotes: string[] = [];
+
+/** Day the mission ends: 45, or 37 if the crew chose to go home early (problem 42). */
+export const EARLY_END_DAY = 37;
+export function missionLastDay(): number {
+  return useMissionStore.getState().flags.includes('early-end') ? EARLY_END_DAY : MISSION_LAST_DAY;
+}
+
 function addNews(text: string): void {
   useMissionStore.setState({ news: [...useMissionStore.getState().news, text] });
 }
@@ -232,7 +242,7 @@ function freeCaretaker(caretaker: CrewSlot | undefined): void {
 /** Someone healthy who is not already sick (for a new sickness). */
 function pickHealthy(exclude: CrewSlot[] = []): CrewSlot | undefined {
   const crew = useDutyStore.getState().crew;
-  const options = CREW_SLOTS.filter((s) => !crew[s].illness && !exclude.includes(s));
+  const options = CREW_SLOTS.filter((s) => !crew[s].illness && !crew[s].goneHome && !exclude.includes(s));
   if (options.length === 0) return undefined;
   return options[Math.floor(seededRandom() * options.length)];
 }
@@ -375,6 +385,14 @@ function dayTick(day: number): void {
       useMissionStore.setState({ scheduled: [...st.scheduled, { missionId: m.id, day }] });
     }
   }
+  // Missions set off by a high personal radiation dose (problem 39).
+  const maxDose = Math.max(...CREW_SLOTS.map((s) => (useDutyStore.getState().crew[s].goneHome ? 0 : (useDutyStore.getState().crew[s].dose ?? 0))));
+  for (const m of MISSIONS) {
+    if (m.doseTrigger === undefined || isClosed(m.id) || maxDose < m.doseTrigger) continue;
+    const st = useMissionStore.getState();
+    if (st.openEvents.includes(m.id) || st.scheduled.some((x) => x.missionId === m.id)) continue;
+    useMissionStore.setState({ scheduled: [...st.scheduled, { missionId: m.id, day }] });
+  }
   useMissionStore.setState({
     conditions: useMissionStore.getState().conditions.filter((c) => c.untilDay === undefined || c.untilDay >= day),
   });
@@ -400,7 +418,11 @@ function assignPatient(missionId: string, day: number, preferred?: CrewSlot): vo
   const m = getMission(missionId);
   if (!m?.patient && !m?.honoree) return;
   const patients = useMissionStore.getState().patients;
-  const patient = preferred ?? patients[missionId] ?? pickHealthy();
+  const crew = useDutyStore.getState().crew;
+  const byDose = m.honoreeBy === 'highest-dose'
+    ? [...CREW_SLOTS].filter((s) => !crew[s].goneHome).sort((a, b) => (crew[b].dose ?? 0) - (crew[a].dose ?? 0))[0]
+    : undefined;
+  const patient = preferred ?? patients[missionId] ?? byDose ?? pickHealthy();
   if (!patient) return;
   const ill = useDutyStore.getState().crew[patient].illness;
   if (m.patient && !ill) setIllness(patient, { mode: 'pending', sinceDay: day });
@@ -421,7 +443,7 @@ export function openDay(day: number): string[] {
   for (const s of due) if (!s.unlessFlag || !flags.includes(s.unlessFlag)) add(s.missionId, s.patient);
   for (const m of MISSIONS) {
     if (m.day !== day || m.followUpOnly || useMissionStore.getState().completedMissions.includes(m.id)) continue;
-    if (m.skipIfFlag && flags.includes(m.skipIfFlag)) {
+    if ((m.skipIfFlag && flags.includes(m.skipIfFlag)) || (m.onlyIfFlag && !flags.includes(m.onlyIfFlag))) {
       // It will never happen (e.g. the plants died): close it so it is not waited for.
       useMissionStore.setState({ completedMissions: [...useMissionStore.getState().completedMissions, m.id] });
       continue;
@@ -468,7 +490,7 @@ function schedule(followUps: FollowUp[], day: number, fromMissionId?: string): s
       useMissionStore.setState({ openEvents: [...state.openEvents, f.missionId] });
       assignPatient(f.missionId, day, patient);
       startedNow.push(f.missionId);
-    } else if (when <= MISSION_LAST_DAY) {
+    } else if (when <= missionLastDay()) {
       useMissionStore.setState({
         scheduled: [...state.scheduled, { missionId: f.missionId, day: when, unlessFlag: f.unlessFlag, patient }],
       });
@@ -482,7 +504,8 @@ function applyOutcome(outcome: Outcome, slots: CrewSlot[], day: number, missionI
   const state = useMissionStore.getState();
   let conditions = state.conditions;
   if (outcome.clearConditions?.length) conditions = conditions.filter((c) => !outcome.clearConditions!.includes(c.id));
-  for (const c of outcome.addConditions ?? []) {
+  for (const raw of outcome.addConditions ?? []) {
+    const c = raw.id === 'storm' ? stormModifiers(raw) : raw;
     conditions = [
       ...conditions.filter((x) => x.id !== c.id),
       {
@@ -517,15 +540,48 @@ function applyOutcome(outcome: Outcome, slots: CrewSlot[], day: number, missionI
     const duty = useDutyStore.getState().crew[s];
     if (outcome.crewDose) {
       // A spacewalk dose is personal; a quarter of it shows on the station Radiation bar (4 crew).
-      useDutyStore.getState().setDuty(s, { dose: clamp((duty.dose ?? 0) + outcome.crewDose, 0, 100) });
+      const dose = clamp((duty.dose ?? 0) + outcome.crewDose, 0, 100);
+      useDutyStore.getState().setDuty(s, { dose });
       applyEffects(useResourceStore.getState(), [{ resource: 'radiation', delta: outcome.crewDose / 4 }]);
+      if (dose >= 100 && s !== 'commander') {
+        // "Se a Dose individual chegar a 100, o tripulante retorna à Terra" (problem 39).
+        useDutyStore.getState().setDuty(s, { goneHome: true, task: null });
+        outcomeNotes.push(`${crewName(s)} reached the radiation limit and must fly back to Earth on the next ship. The crew is one person short now.`);
+      }
     }
     useDutyStore.getState().setDuty(s, {
       fatigue: clamp(duty.fatigue + (outcome.crewFatigue ?? 0), 0, FATIGUE_EXHAUSTED),
       restUntilDay: outcome.crewRestDays ? Math.max(duty.restUntilDay, day + outcome.crewRestDays) : duty.restUntilDay,
     });
   }
+  if (missionId && (outcome.honoreeNoSpacewalk || outcome.honoreeHealth)) {
+    const h = patientOf(missionId);
+    if (h) {
+      if (outcome.honoreeNoSpacewalk) useDutyStore.getState().setDuty(h, { noSpacewalk: true });
+      if (outcome.honoreeHealth) {
+        if (h === 'commander') applyEffects(useResourceStore.getState(), [{ resource: 'health', delta: outcome.honoreeHealth / 4 }]);
+        else useCrewStore.getState().updateCrew(h, { health: clamp(useCrewStore.getState().crew[h].health + outcome.honoreeHealth, 0, 100) });
+      }
+    }
+  }
   return schedule(outcome.followUps ?? [], day, missionId);
+}
+
+/**
+ * A solar storm's dose after the station's own shields and sensors:
+ * the trash wall blocks 10% more (problem 44); with a broken radiation sensor there is a 30%
+ * chance the crew reaches the shelter too late (problem 41), doubling the dose.
+ */
+function stormModifiers(c: StationCondition): StationCondition {
+  const flags = useMissionStore.getState().flags;
+  let factor = 1;
+  if (flags.includes('trash-wall')) factor *= 0.9;
+  if (flags.includes('sensor-broken') && rollSuccess(30)) {
+    factor *= 2;
+    outcomeNotes.push('The broken radiation sensor gave no alarm: the crew reached the shelter late, and the dose is doubled!');
+  }
+  if (factor === 1) return c;
+  return { ...c, daily: c.daily.map((e) => (e.resource === 'radiation' ? { ...e, delta: Math.round(e.delta * factor * 10) / 10 } : e)) };
 }
 
 /** Starts the treatment chosen for the patient (problems 1 and 2). */
@@ -623,6 +679,7 @@ export function sideRiskChance(risk: SideRisk | undefined, day: number = current
  * changes the resources, applies the outcome, keeps the crew busy and records the decision.
  */
 export function sendCrew(mission: Mission, choice: Choice, slots: CrewSlot[], day: number, commanderName: string): MissionResult {
+  outcomeNotes = [];
   const notes = interruptJobs(slots, day, commanderName);
 
   // Plain luck (noVerdict) uses the written chance; skill jobs use the crew's chance.
@@ -682,6 +739,7 @@ export function sendCrew(mission: Mission, choice: Choice, slots: CrewSlot[], da
     if (d.restUntilDay > day) notes.push(`${crewName(s, commanderName)} must rest until Day ${d.restUntilDay}.`);
     else if (d.fatigue >= FATIGUE_VERY_TIRED) notes.push(`${crewName(s, commanderName)} is very tired and needs rest.`);
   }
+  notes.push(...outcomeNotes);
   for (const id of newEmergencies) notes.push(`NEW PROBLEM: ${getMission(id)?.title ?? id}!`);
 
   const state = useMissionStore.getState();
@@ -713,7 +771,7 @@ function finishMission(mission: Mission, day: number): void {
   if (mission.repeatEveryDays !== undefined && repeatAllowed) {
     const next = day + mission.repeatEveryDays;
     const st = useMissionStore.getState();
-    if (next <= MISSION_LAST_DAY && !st.scheduled.some((s) => s.missionId === mission.id)) {
+    if (next <= missionLastDay() && !st.scheduled.some((s) => s.missionId === mission.id)) {
       useMissionStore.setState({ scheduled: [...st.scheduled, { missionId: mission.id, day: next }] });
     }
   }

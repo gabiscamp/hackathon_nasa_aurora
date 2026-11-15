@@ -184,7 +184,7 @@ export function MissionOverlay({ onComplete }: MissionOverlayProps) {
     // "Whole crew" = everyone who can act: not the sick, and caretakers stay with their patient.
     if (need.everyone || (need.min === 0 && !need.max)) {
       const slots: CrewSlot[] = need.everyone
-        ? CREW_SLOTS.filter((s) => availability(duty[s], day) !== 'sick' && !isCaringFor(duty[s]))
+        ? CREW_SLOTS.filter((s) => !['sick', 'away'].includes(availability(duty[s], day)) && !isCaringFor(duty[s]))
         : outside
           ? [outside]
           : [];
@@ -278,7 +278,7 @@ export function MissionOverlay({ onComplete }: MissionOverlayProps) {
                 >
                   <span className="mission-choice__icon">{c.icon}</span>
                   <span className="mission-choice__content">
-                    <span className="mission-choice__label">{c.label}</span>
+                    <span className="mission-choice__label">{fill(c.label)}</span>
                     <ChoiceMeta choice={c} lockedReason={state.lockedReason} patientName={patientName} outside={!!outside} />
                   </span>
                 </button>
