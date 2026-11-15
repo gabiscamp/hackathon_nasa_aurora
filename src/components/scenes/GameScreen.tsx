@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useGameStore } from '../../stores/useGameStore';
-import { useResourceStore } from '../../stores/useResourceStore';
 import { useMissionStore } from '../../stores/useMissionStore';
 import { getMission, MISSIONS } from '../../data/missions';
 import { advanceTo, missionLastDay, nextEventDay, openDay } from '../../engine/missionEngine';
+import { checkCollapse } from '../../engine/survival';
+import { saveCheckpoint } from '../../engine/checkpoint';
 import { MissionOverlay } from '../panels/MissionOverlay';
 import { DaySkipOverlay } from '../panels/DaySkipOverlay';
 import { DaySummary } from '../narrative/DaySummary';
@@ -52,8 +53,6 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
   const openEvents = useMissionStore((s) => s.openEvents);
   const news = useMissionStore((s) => s.news);
   const [newsSeenDay, setNewsSeenDay] = useState(0);
-  const tick = useResourceStore((s) => s.tick);
-  const tickDays = useResourceStore((s) => s.tickDays);
 
   const [missionOpen, setMissionOpen] = useState(false);
 
@@ -106,10 +105,15 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
   const handleBeginDay = () => {
     const target = Math.max(day, Math.min(nextEventDay(day) ?? lastDay, lastDay));
     const skip = target - day;
-    // Quiet days still use food, water and air (tickDays); the engine runs each morning
-    // (jobs end, people rest, lasting problems apply) and opens the new day's problems.
-    if (skip > 0) tickDays(skip);
+    // "Try again from Day X" after a game over: the mission as it was when this act began.
+    saveCheckpoint(getAct(target).act, day);
+    // The engine runs each morning, skipped days too: the crew uses food, water and air,
+    // chain failures hurt, jobs end, people rest, lasting problems apply.
     advanceTo(target);
+    if (useMissionStore.getState().collapse) {
+      useGameStore.getState().setScene('ending');
+      return;
+    }
     setDay(target);
     openDay(target);
     setSkipInfo({ daysSkipped: skip, targetDay: target, act: getAct(target).act });
@@ -124,18 +128,16 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
     setMissionOpen(false);
     clearMission();
     gameEvents.emit('CAMERA_ZOOM_OUT');
+    // A choice took oxygen or health to 0 (or radiation to 100): the station is lost today.
+    if (checkCollapse(day)) {
+      stopAlertLoop();
+      useGameStore.getState().setScene('ending');
+    }
   };
 
-  const radiation = useResourceStore((s) => s.radiation);
-
   const handleEndDay = () => {
-    tick();
-    // Mission over: Day 45, or Day 37 if the crew chose to go home early (problem 42).
-    if (day >= lastDay) {
-      useGameStore.getState().setScene('ending');
-      return;
-    }
-    if (radiation >= 95) {
+    // Game over, or mission over: Day 45, or Day 37 if the crew chose to go home early (problem 42).
+    if (checkCollapse(day) || day >= lastDay) {
       useGameStore.getState().setScene('ending');
       return;
     }

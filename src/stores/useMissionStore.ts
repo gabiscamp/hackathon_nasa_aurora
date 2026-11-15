@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { MISSIONS, type ChoiceEffect, type CrewSlot, type Mission, type StationCondition } from '../data/missions';
-import type { Resources } from './useResourceStore';
+import type { ResourceKey, Resources } from './useResourceStore';
 
 /** A follow-up mission waiting for its day (set off by an earlier choice). */
 export interface ScheduledEvent {
@@ -25,7 +25,22 @@ export interface DecisionRecord {
   choiceId: string;
   day: number;
   success: boolean;
+  /** What really changed (the game-over screen lists the decisions that cost the most). */
+  changes?: Partial<Record<ResourceKey, number>>;
 }
+
+/** Why the station was lost (src/engine/survival.ts). */
+export type CollapseCause = 'oxygen' | 'health' | 'radiation';
+
+export interface Collapse {
+  cause: CollapseCause;
+  day: number;
+  /** The chain failures that were hurting the station at that moment. */
+  reasons: string[];
+}
+
+/** Station protocols that turn on by themselves (src/data/difficulty.ts PROTOCOLS). */
+export type ProtocolId = 'water-saving' | 'food-rationing';
 
 /** Oxygen candles on board at the start (missoes.txt, mission 5: "You have 12 candles"). */
 export const START_CANDLES = 12;
@@ -54,6 +69,10 @@ interface MissionState {
   news: string[];
   /** Resources that change on a later day (a harvest, a surprise). */
   pendingEffects: { day: number; effects: ChoiceEffect[]; text: string; unlessFlag?: string }[];
+  /** Water saving / food rationing, while they are on. */
+  protocols: ProtocolId[];
+  /** Game over: set when oxygen or health reach 0, or radiation reaches 100. */
+  collapse: Collapse | null;
 
   setMission: (mission: Mission) => void;
   completeMission: (missionId: string) => void;
@@ -80,6 +99,8 @@ export const useMissionStore = create<MissionState>()(
       counters: {},
       news: [],
       pendingEffects: [],
+      protocols: [],
+      collapse: null,
 
       setMission: (mission) => set({ currentMission: mission }),
 
@@ -122,11 +143,13 @@ export const useMissionStore = create<MissionState>()(
           counters: {},
           news: [],
           pendingEffects: [],
+          protocols: [],
+          collapse: null,
         }),
     }),
     {
       name: 'aurora-mission-store',
-      version: 4,
+      version: 5,
       // v1/v2 saves had only currentMission + completedMissions: the new lists start empty.
       migrate: (persisted) => {
         const old = (persisted ?? {}) as Partial<MissionState>;
@@ -145,6 +168,8 @@ export const useMissionStore = create<MissionState>()(
           counters: old.counters ?? {},
           news: old.news ?? [],
           pendingEffects: old.pendingEffects ?? [],
+          protocols: old.protocols ?? [],
+          collapse: old.collapse ?? null,
         } as MissionState;
       },
     },

@@ -31,6 +31,8 @@ import { applyEffects } from './resourceEngine';
 import { rollSuccess, seededRandom } from '../utils/random';
 import { clamp } from '../utils/clamp';
 import { MISSION_DAYS } from '../data/missionLength';
+import { FAIL_EXTRA_FATIGUE } from '../data/difficulty';
+import { checkCollapse, liveOneDay, sickChanceToday, weigh } from './survival';
 
 /**
  * Mission engine: crew assignment, multi-day jobs, tiredness, sickness, station conditions and
@@ -73,7 +75,6 @@ const SEVERE_DAYS_MEDIC = 3;
 const SEVERE_DAYS_OTHER = 5;
 /** Station health below this: someone may get sick (problems 6, 11…: "Se a Saúde ficar abaixo de 30"). */
 export const SICK_HEALTH = 30;
-const LOW_HEALTH_SICK_CHANCE = 30;
 /** A problem set off by a low bar does not come back for this many days after a decision. */
 const TRIGGER_COOLDOWN_DAYS = 5;
 
@@ -339,6 +340,9 @@ function dayTick(day: number): void {
   }
   useDutyStore.getState().setAll(crew);
 
+  // Yesterday's food, water and air, the protocols and the chain failures (src/engine/survival.ts).
+  for (const line of liveOneDay()) addNews(line);
+
   // Multi-day jobs that ended normally pay off now (e.g. the recycler repair is done).
   for (const { task, slots } of finished.values()) {
     const choice = getMission(task.missionId)?.choices.find((c) => c.id === task.choiceId);
@@ -350,7 +354,7 @@ function dayTick(day: number): void {
   const { conditions } = useMissionStore.getState();
   for (const c of conditions) {
     if (c.startDay < day && (c.untilDay === undefined || c.untilDay >= day)) {
-      applyEffects(useResourceStore.getState(), c.daily);
+      applyEffects(useResourceStore.getState(), weigh(c.daily));
       // Some lasting problems can make someone sick, more likely each day (e.g. no vitamins).
       if (c.sickChance?.length) {
         const chance = c.sickChance[Math.min(day - c.startDay - 1, c.sickChance.length - 1)];
@@ -365,7 +369,7 @@ function dayTick(day: number): void {
   const flagsNow = useMissionStore.getState().flags;
   for (const p of pending.filter((x) => x.day <= day)) {
     if (p.unlessFlag && flagsNow.includes(p.unlessFlag)) continue;
-    applyEffects(useResourceStore.getState(), p.effects);
+    applyEffects(useResourceStore.getState(), weigh(p.effects));
     addNews(p.text);
   }
   useMissionStore.setState({ pendingEffects: pending.filter((x) => x.day > day) });
@@ -397,11 +401,14 @@ function dayTick(day: number): void {
     conditions: useMissionStore.getState().conditions.filter((c) => c.untilDay === undefined || c.untilDay >= day),
   });
 
-  // Poor health makes people sick (missoes.txt: "Se a Saúde ficar abaixo de 30, vira o problema 1").
+  // Poor health makes people sick (missoes.txt: "Se a Saúde ficar abaixo de 30, vira o problema 1"),
+  // and so does high radiation (+30%).
   const anyoneSick = CREW_SLOTS.some((s) => useDutyStore.getState().crew[s].illness);
-  if (useResourceStore.getState().health < SICK_HEALTH && !anyoneSick && rollSuccess(LOW_HEALTH_SICK_CHANCE)) {
+  const sickChance = sickChanceToday();
+  if (sickChance > 0 && !anyoneSick && rollSuccess(sickChance)) {
     const who = pickHealthy();
-    if (who) startSickness(who, day, 'got sick: the crew has been weak for too long.');
+    const why = useResourceStore.getState().health < SICK_HEALTH ? 'the crew has been weak for too long' : 'too much radiation';
+    if (who) startSickness(who, day, `got sick: ${why}.`);
   }
   useDutyStore.setState({ lastTickDay: day });
 }
@@ -410,7 +417,11 @@ function dayTick(day: number): void {
 export function advanceTo(toDay: number): void {
   const last = useDutyStore.getState().lastTickDay;
   if (toDay > last) useMissionStore.setState({ news: [] });
-  for (let d = last + 1; d <= toDay; d++) dayTick(d);
+  for (let d = last + 1; d <= toDay; d++) {
+    dayTick(d);
+    // Game over on a quiet day: stop there (GameScreen shows the ending).
+    if (checkCollapse(d)) break;
+  }
 }
 
 /** Gives a patient mission its sick crew member (the one set off, or someone healthy). */
@@ -691,12 +702,13 @@ export function sendCrew(mission: Mission, choice: Choice, slots: CrewSlot[], da
     ...(success ? choice.effects : (choice.failEffects ?? choice.effects)),
     ...(success && specialist ? (choice.bestBonus ?? []) : []),
   ];
-  const changes = applyAndMeasure(effects);
+  // Decisions weigh more than the written numbers, failures even more (src/data/difficulty.ts).
+  const changes = applyAndMeasure(weigh(effects, !success));
 
   // A second risk that does not depend on success (e.g. ripping food packets while moving them).
   const riskChance = sideRiskChance(choice.sideRisk, day);
   if (choice.sideRisk && riskChance !== null && rollSuccess(riskChance)) {
-    const extra = applyAndMeasure(choice.sideRisk.effects);
+    const extra = applyAndMeasure(weigh(choice.sideRisk.effects));
     for (const [k, v] of Object.entries(extra) as [ResourceKey, number][]) changes[k] = (changes[k] ?? 0) + v;
     if (choice.sideRisk.setFlags?.length) {
       const f = useMissionStore.getState().flags;
@@ -714,7 +726,8 @@ export function sendCrew(mission: Mission, choice: Choice, slots: CrewSlot[], da
   const crewStore = useCrewStore.getState();
   for (const s of slots) {
     const d = useDutyStore.getState().crew[s];
-    const fatigue = clamp(d.fatigue + (choice.fatigue ?? 1), 0, FATIGUE_EXHAUSTED);
+    const failTired = !success && chance !== null && !choice.noVerdict ? FAIL_EXTRA_FATIGUE : 0;
+    const fatigue = clamp(d.fatigue + (choice.fatigue ?? 1) + failTired, 0, FATIGUE_EXHAUSTED);
     useDutyStore.getState().setDuty(s, {
       fatigue,
       task: { taskId, missionId: mission.id, choiceId: choice.id, label: mission.title, room: mission.room, startDay: day, untilDay },
@@ -743,7 +756,7 @@ export function sendCrew(mission: Mission, choice: Choice, slots: CrewSlot[], da
   for (const id of newEmergencies) notes.push(`NEW PROBLEM: ${getMission(id)?.title ?? id}!`);
 
   const state = useMissionStore.getState();
-  useMissionStore.setState({ decisions: [...state.decisions, { missionId: mission.id, choiceId: choice.id, day, success }] });
+  useMissionStore.setState({ decisions: [...state.decisions, { missionId: mission.id, choiceId: choice.id, day, success, changes }] });
 
   const retry = !success && !!choice.retryOnFail;
   if (retry) {
@@ -779,7 +792,7 @@ function finishMission(mission: Mission, day: number): void {
 
 /** "Deal with it tomorrow": pays the cost of waiting and moves the problem to the next day. */
 export function deferMission(mission: Mission, day: number): Partial<Record<ResourceKey, number>> {
-  const changes = mission.defer ? applyAndMeasure(mission.defer.effects) : {};
+  const changes = mission.defer ? applyAndMeasure(weigh(mission.defer.effects)) : {};
   const state = useMissionStore.getState();
   useMissionStore.setState({
     openEvents: state.openEvents.filter((id) => id !== mission.id),
