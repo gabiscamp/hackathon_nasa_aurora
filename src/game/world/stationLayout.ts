@@ -13,10 +13,12 @@
  * rotation). The station is assembled in those "art pixels" and then scaled by
  * STATION_SCALE into world pixels, so rooms fit the ~47 px astronaut sprite.
  *
- * Room ids are the ones missions use (src/data/missions.ts):
- *   quarters = dormitory, lab = lab, greenhouse = greenhouse, common = kitchen, gym = gym + bathroom,
- *   airlock = airlock, storage = docking capsules (cargo arrives there),
- *   bridge = Node B, engineering = Node C (life support), corridor = Nodes A and D.
+ * Room ids are the ones missions use (src/data/missions.ts); shown names are in
+ * src/components/hud/LocationHint.tsx (ROOM_NAMES):
+ *   quarters = dormitory, lab = lab, greenhouse = greenhouse, common = kitchen, gym = gym,
+ *   bathroom = bathroom, airlock = airlock, storage = docking capsules ("Cargo Bay"),
+ *   bridge = Node B ("Command Node"), engineering = Node C ("Life Support Node"),
+ *   corridor = Nodes A and D ("Connection Node").
  */
 
 export type RoomId =
@@ -29,6 +31,7 @@ export type RoomId =
   | 'storage'
   | 'airlock'
   | 'gym'
+  | 'bathroom'
   | 'corridor';
 
 /** World pixels per art pixel. */
@@ -189,7 +192,7 @@ export const PIECES: Record<PieceKey, PieceDef> = {
   bathroom: {
     width: 396,
     height: 462,
-    room: 'gym',
+    room: 'bathroom',
     floor: [
       { x: 168, y: 0, w: 58, h: 85 }, // top door, between the orange posts
       { x: 145, y: 80, w: 150, h: 295 },

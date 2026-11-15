@@ -2,18 +2,18 @@ import Phaser from 'phaser';
 import bodyPngUrl from '../../assets/cabecas/exports/web-v2/uniforme-nasa.png';
 import bodyJsonUrl from '../../assets/cabecas/exports/web-v2/uniforme-nasa.json?url';
 import anchorsJsonUrl from '../../assets/cabecas/exports/web-v2/uniforme-nasa-head-anchors.json?url';
-import headsPngUrl from '../../assets/cabecas/exports/web-v2/cabecas.png';
-import headsJsonUrl from '../../assets/cabecas/exports/web-v2/cabecas.json?url';
-import type { HeadId } from '../../data/astronauts';
+// Heads: one per crew member, from the team sheets (public/assets/cabecas/equipe*.png,
+// built by scripts/build_head_sheets.py).
+import headsPngUrl from '../../assets/cabecas/exports/equipes/cabecas.png';
+import headsJsonUrl from '../../assets/cabecas/exports/equipes/cabecas.json?url';
+import { HEAD_IDS, type HeadId } from '../../data/crews';
 
 /**
  * Modular astronaut (team pixel art): one NASA-uniform body atlas + swappable heads.
  * At boot, every head is drawn onto every body frame (using the per-frame neck anchors)
  * into one spritesheet per head, so the game uses plain sprites and animations.
- * Format: src/assets/cabecas/exports/web-v2 (see AstronautaModular.jsx there).
+ * Body format: src/assets/cabecas/exports/web-v2 (see AstronautaModular.jsx there).
  */
-
-export const HEAD_IDS: readonly HeadId[] = ['cabeca-1', 'cabeca-2', 'cabeca-3', 'cabeca-4'];
 
 const BODY_KEY = 'astro-body';
 const BODY_JSON_KEY = 'astro-body-json';
@@ -22,9 +22,15 @@ const HEADS_KEY = 'astro-heads';
 const HEADS_JSON_KEY = 'astro-heads-json';
 
 /** Body frame size and the feet point inside it (from the export notes). */
-export const ASTRO_FRAME_W = 32;
-export const ASTRO_FRAME_H = 47;
-export const ASTRO_ORIGIN_Y = 46 / 47;
+const BODY_FRAME_W = 32;
+const BODY_FRAME_H = 47;
+const BODY_FEET_Y = 46;
+/** Room around the body for heads bigger than the old ones (curly hair is wider and taller). */
+const PAD_X = 2;
+const PAD_TOP = 2;
+export const ASTRO_FRAME_W = BODY_FRAME_W + PAD_X * 2;
+export const ASTRO_FRAME_H = BODY_FRAME_H + PAD_TOP;
+export const ASTRO_ORIGIN_Y = (BODY_FEET_Y + PAD_TOP) / ASTRO_FRAME_H;
 
 type View = 'front' | 'side' | 'back';
 interface Rect {
@@ -80,11 +86,15 @@ export function buildModularAstronauts(scene: Phaser.Scene) {
 
     body.frames.forEach(({ frame }, i) => {
       const ox = i * ASTRO_FRAME_W;
-      ctx.drawImage(bodyImg, frame.x, frame.y, frame.w, frame.h, ox, 0, frame.w, frame.h);
+      // Body and anchors are in body-frame px; shift both by the padding.
+      const bx = ox + PAD_X;
+      ctx.drawImage(bodyImg, frame.x, frame.y, frame.w, frame.h, bx, PAD_TOP, frame.w, frame.h);
       const anchor = anchors.atlasFrames[i];
-      const rect = heads.heads[head][anchor.view];
-      const [pinX, pinY] = heads.pin[anchor.view];
-      ctx.drawImage(headsImg, rect.x, rect.y, rect.w, rect.h, ox + anchor.x - pinX, anchor.y - pinY, rect.w, rect.h);
+      const rect = heads.heads[head]?.[anchor.view];
+      if (rect) {
+        const [pinX, pinY] = heads.pin[anchor.view];
+        ctx.drawImage(headsImg, rect.x, rect.y, rect.w, rect.h, bx + anchor.x - pinX, PAD_TOP + anchor.y - pinY, rect.w, rect.h);
+      }
       canvas.add(i, 0, ox, 0, ASTRO_FRAME_W, ASTRO_FRAME_H);
     });
     canvas.refresh();

@@ -128,8 +128,8 @@ We follow the Space Apps rules on AI and declare it here and in the game's Credi
 
 - **All the creative work is ours:** the idea, the game rules, the story, the missions and the design documents. No AI wrote them.
 - **Code:** an AI assistant (Claude, by Anthropic) helped us write the code.
-- **Station map:** made with an AI image tool. We started from a floor plan of the International Space Station and guided the tool step by step. In the game it always shows an **"AI-generated map"** mark.
-- **Characters:** our team drew the astronauts by hand in Aseprite. We also tried an AI tool to clean up the character art.
+- **Station map:** made with an AI image tool (ChatGPT, by OpenAI). We started from a floor plan of the International Space Station and guided the tool step by step. In the game it always shows an **"AI-generated map"** mark.
+- **Characters:** our team drew the astronauts by hand in Aseprite. We also tried ChatGPT to clean up the character art.
 
 <!-- TODO(team): confirm the origin of the Mars backdrop (public/assets/environments/mars-backdrop.jpg) and of public/sounds/alert.mp3. If either was AI-generated, add it to the list above and to the Credits screen. -->
 

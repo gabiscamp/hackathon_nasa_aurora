@@ -17,6 +17,7 @@ import type { RoomId } from '../../game/world/shipLayout';
 import { ROOM_NAMES } from '../hud/LocationHint';
 import { PauseMenu } from '../hud/PauseMenu';
 import './GameScreen.css';
+import { ExplorationSystem } from '../exploration/ExplorationSystem';
 
 /** Sorted list of days that have missions. */
 const MISSION_DAYS = [
@@ -151,6 +152,7 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
       <div className="game-stage">
         <PhaserGame className="station-view" />
         <Hud />
+        <ExplorationSystem />
         <PauseMenu onMainMenu={onMainMenu} onOpenCredits={onOpenCredits} suspended={creditsOpen} />
 
         {phase === 'decision' && !missionOpen && currentMission && (

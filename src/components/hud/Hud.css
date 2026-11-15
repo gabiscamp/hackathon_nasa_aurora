@@ -335,6 +335,67 @@
   border: 1px solid var(--hud-rim);
 }
 
+/* Zoom controls, next to Close (wheel / drag / + − 0 / arrows also work). */
+.ship-map__zoom {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.ship-map__zoom-btn {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 6px 12px;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  background: #2b3654;
+  border: 1px solid var(--hud-rim);
+}
+
+.ship-map__zoom-btn--wide {
+  font-size: 18px;
+}
+
+.ship-map__zoom-btn kbd {
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--hud-text);
+  background: var(--hud-bg-deep);
+  border: 1px solid #3a4666;
+  border-bottom-width: 2px;
+}
+
+/* Drag to move the map. */
+.ship-map__frame--pan {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.ship-map__frame--pan.is-dragging {
+  cursor: grabbing;
+}
+
+.ship-map__hint {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  z-index: 4;
+  padding: 2px 10px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--hud-text);
+  background: rgba(10, 14, 32, 0.8);
+  pointer-events: none;
+}
+
 .ship-map__frame {
   position: relative;
   aspect-ratio: 2 / 1;
@@ -364,14 +425,18 @@
   background: rgba(10, 14, 32, 0.8);
 }
 
+/* Sits on its module and wraps to stay inside it (max-width set inline from the module size). */
 .ship-map__room {
   position: absolute;
+  z-index: 1;
   transform: translate(-50%, -50%);
-  padding: 2px 10px;
+  width: max-content;
+  padding: 2px 6px;
   border-radius: 8px;
-  font-size: clamp(14px, 1.3vw, 19px);
+  font-size: clamp(12px, 0.9vw, 15px);
   font-weight: 700;
-  white-space: nowrap;
+  line-height: 1.15;
+  text-align: center;
   color: var(--hud-text);
   background: rgba(10, 14, 32, 0.85);
   border: 1px solid var(--hud-rim);
@@ -407,6 +472,16 @@
   height: 100%;
   object-fit: cover;
   object-position: 50% 18%;
+}
+
+.ship-map__face canvas {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+}
+
+.ship-map__pin--robot .ship-map__face {
+  padding: 2px;
 }
 
 .ship-map__name {

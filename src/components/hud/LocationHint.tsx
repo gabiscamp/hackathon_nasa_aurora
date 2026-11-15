@@ -6,17 +6,19 @@ import { PinIcon } from './HudIcons';
 /** How long the key hints stay after the player first moves (ms). */
 const KEY_HINT_MS = 8000;
 
+/** Shown name of each room; which module each id is: see stationLayout.ts. */
 export const ROOM_NAMES: Record<RoomId, string> = {
-  bridge: 'Bridge',
+  bridge: 'Command Node',
   quarters: 'Crew Quarters',
-  lab: 'Lab & Greenhouse',
+  lab: 'Science Lab',
   greenhouse: 'Greenhouse',
   common: 'Kitchen',
-  engineering: 'Engineering',
-  storage: 'Storage Bay',
+  engineering: 'Life Support Node',
+  storage: 'Cargo Bay',
   airlock: 'Airlock & Suits',
-  gym: 'Gym & Health',
-  corridor: 'Main Corridor',
+  gym: 'Gym',
+  bathroom: 'Bathroom',
+  corridor: 'Connection Node',
 };
 
 /** Bottom-left HUD: current room + control hints. */

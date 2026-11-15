@@ -3,7 +3,7 @@ import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { OptionsDialog } from '../ui/OptionsPanel';
 import { ReadButton } from '../ui/A11yDock';
 import { RoleIcon } from '../ui/RoleIcon';
-import { drawTeams, type CrewTeam } from '../../data/crews';
+import { TEAMS, type CrewTeam } from '../../data/crews';
 import type { SeatProfile } from '../../data/astronauts';
 import './TitleScreen.css';
 
@@ -34,18 +34,15 @@ function Portrait({ seat, size }: { seat: SeatProfile; size: 'lg' | 'sm' }) {
 }
 
 /**
- * Home: pick one of the two commanders from the team briefing (Anne McClain or
- * Neil Armstrong). Each commander's crew is drawn at random from real astronauts,
- * different between the two cards. Shortcuts: 1/2 choose, R new crews, Enter start.
+ * Home: pick one of the two crews from the team briefing, led by Anne McClain or
+ * Neil Armstrong (see crews.ts). Shortcuts: 1/2 choose, Enter start.
  */
 export function TitleScreen({ onStart, onOpenCredits, savedMission, onContinueMission, creditsOpen }: TitleScreenProps) {
-  const [teams, setTeams] = useState<CrewTeam[]>(() => drawTeams());
+  const teams = TEAMS;
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [confirmNew, setConfirmNew] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
   const selected = selectedIndex === null ? null : teams[selectedIndex];
-
-  const reshuffle = () => setTeams(drawTeams());
 
   // Starting over would replace a saved mission, so ask first (error prevention).
   const start = () => {
@@ -59,7 +56,6 @@ export function TitleScreen({ onStart, onOpenCredits, savedMission, onContinueMi
     const onKey = (e: KeyboardEvent) => {
       const index = ['1', '2'].indexOf(e.key);
       if (index >= 0) setSelectedIndex(index);
-      else if (e.key.toLowerCase() === 'r') reshuffle();
       else if (e.key === 'Enter' && !(e.target instanceof HTMLButtonElement)) {
         // Stop the same Enter from also clicking the dialog button that gets focus.
         e.preventDefault();
@@ -122,7 +118,7 @@ export function TitleScreen({ onStart, onOpenCredits, savedMission, onContinueMi
             <h2 className="title-choose" id="choose-crew">
               {savedMission ? 'Or start a new mission' : 'Choose your commander'}
             </h2>
-            <p className="title-hint">You play as the commander. The crew is picked at random from real astronauts.</p>
+            <p className="title-hint">You play as the commander. Each crew is made of real astronauts.</p>
           </div>
 
           <div className="title-crews" role="radiogroup" aria-labelledby="choose-crew">
@@ -174,13 +170,6 @@ export function TitleScreen({ onStart, onOpenCredits, savedMission, onContinueMi
           </div>
 
           <div className="title-actions">
-            <button type="button" className="title-shuffle" onClick={reshuffle}>
-              <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />
-              </svg>
-              New crew members
-              <kbd className="title-kbd">R</kbd>
-            </button>
             <button type="button" className="title-start" onClick={start} disabled={!selected}>
               {selected ? (
                 <>
