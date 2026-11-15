@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_FONT } from '../../styles/theme';
+import { playFootstep } from '../../utils/sounds';
 
 /**
  * The game uses pixelArt (nearest-neighbour) for sprites. Text scaled that way gets jagged
@@ -92,6 +93,9 @@ export class GameScene extends Phaser.Scene {
   private missionMarker: Phaser.GameObjects.Container | null = null;
   private missionGlow: Phaser.GameObjects.Graphics | null = null;
   private frozen = false;
+  private speechBubble: Phaser.GameObjects.Container | null = null;
+  private speechText: Phaser.GameObjects.Text | null = null;
+  private speechTimer: Phaser.Time.TimerEvent | null = null;
 
   constructor() {
     super({ key: 'GameScene' });
@@ -179,8 +183,10 @@ export class GameScene extends Phaser.Scene {
 
     // Mission events from React (MissionOverlay / GameScreen). Removed when the scene ends:
     // otherwise a destroyed scene from an earlier visit keeps reacting after "Continue mission".
-    const onShowMarker = (room: RoomId) => this.showMissionMarker(room);
+    const onShowMarker = (room: RoomId, critical?: boolean) => this.showMissionMarker(room, critical);
     const onRemoveMarker = () => this.removeMissionMarker();
+    const onShowSpeech = (text: string) => this.showSpeechBubble(text);
+    const onHideSpeech = () => this.hideSpeechBubble();
     const onZoomIn = () => {
       this.frozen = true;
       const cam = this.cameras.main;
@@ -201,11 +207,15 @@ export class GameScene extends Phaser.Scene {
     gameEvents.on('REMOVE_MISSION_MARKER', onRemoveMarker);
     gameEvents.on('CAMERA_ZOOM_IN', onZoomIn);
     gameEvents.on('CAMERA_ZOOM_OUT', onZoomOut);
+    gameEvents.on(EVENTS.SHOW_SPEECH_BUBBLE, onShowSpeech);
+    gameEvents.on(EVENTS.HIDE_SPEECH_BUBBLE, onHideSpeech);
     const removeMissionListeners = () => {
       gameEvents.off('SHOW_MISSION_MARKER', onShowMarker);
       gameEvents.off('REMOVE_MISSION_MARKER', onRemoveMarker);
       gameEvents.off('CAMERA_ZOOM_IN', onZoomIn);
       gameEvents.off('CAMERA_ZOOM_OUT', onZoomOut);
+      gameEvents.off(EVENTS.SHOW_SPEECH_BUBBLE, onShowSpeech);
+      gameEvents.off(EVENTS.HIDE_SPEECH_BUBBLE, onHideSpeech);
     };
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, removeMissionListeners);
     this.events.once(Phaser.Scenes.Events.DESTROY, removeMissionListeners);
@@ -398,22 +408,24 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(0.5));
   }
 
-  showMissionMarker(room: RoomId) {
+  showMissionMarker(room: RoomId, critical = false) {
     this.removeMissionMarker();
     const center = ROOM_CENTERS[room];
     if (!center) return;
 
+    const color = critical ? 0xe74c3c : 0xf59e0b;
+
     const glow = this.add.graphics().setDepth(15).setAlpha(0.6);
-    glow.fillStyle(0xf59e0b, 0.35);
+    glow.fillStyle(color, 0.35);
     glow.fillCircle(center.x, center.y, 55);
-    glow.fillStyle(0xf59e0b, 0.15);
+    glow.fillStyle(color, 0.15);
     glow.fillCircle(center.x, center.y, 80);
     this.missionGlow = glow;
 
     this.tweens.add({
       targets: glow,
       alpha: { from: 0.4, to: 1 },
-      duration: 800,
+      duration: critical ? 500 : 800,
       yoyo: true,
       repeat: -1,
       ease: 'Sine.easeInOut',
@@ -422,14 +434,14 @@ export class GameScene extends Phaser.Scene {
     const container = this.add.container(center.x, center.y - 30).setDepth(20);
 
     const bg = this.add.graphics();
-    bg.fillStyle(0xf59e0b, 1);
+    bg.fillStyle(color, 1);
     bg.fillRoundedRect(-14, -18, 28, 36, 6);
     bg.fillTriangle(-8, 18, 8, 18, 0, 28);
 
     const text = smoothText(this.add.text(0, 0, '!', {
       fontSize: '22px',
       fontStyle: 'bold',
-      color: '#1a1a2e',
+      color: critical ? '#ffffff' : '#1a1a2e',
       fontFamily: GAME_FONT,
       resolution: 4,
     }).setOrigin(0.5));
@@ -440,7 +452,7 @@ export class GameScene extends Phaser.Scene {
     this.tweens.add({
       targets: container,
       y: center.y - 40,
-      duration: 500,
+      duration: critical ? 350 : 500,
       yoyo: true,
       repeat: -1,
       ease: 'Sine.easeInOut',
@@ -456,6 +468,75 @@ export class GameScene extends Phaser.Scene {
       this.missionGlow.destroy();
       this.missionGlow = null;
     }
+  }
+
+  private showSpeechBubble(fullText: string) {
+    this.hideSpeechBubble();
+    this.frozen = true;
+
+    const bubbleW = 220;
+    const bubbleH = 70;
+    const offsetX = 130;
+    const bubbleX = this.player.x + offsetX;
+    const bubbleY = this.player.y - 20;
+
+    const container = this.add.container(bubbleX, bubbleY).setDepth(100);
+
+    const bg = this.add.graphics();
+    // White fill, blue border
+    bg.fillStyle(0xffffff, 0.95);
+    bg.fillRoundedRect(-bubbleW / 2, -bubbleH / 2, bubbleW, bubbleH, 10);
+    bg.lineStyle(2, 0x4dc9f6, 0.8);
+    bg.strokeRoundedRect(-bubbleW / 2, -bubbleH / 2, bubbleW, bubbleH, 10);
+    // Triangle pointing left to the player
+    bg.fillStyle(0xffffff, 0.95);
+    bg.fillTriangle(-bubbleW / 2, -6, -bubbleW / 2, 6, -bubbleW / 2 - 10, 0);
+    bg.lineStyle(2, 0x4dc9f6, 0.8);
+    bg.lineBetween(-bubbleW / 2, -6, -bubbleW / 2 - 10, 0);
+    bg.lineBetween(-bubbleW / 2 - 10, 0, -bubbleW / 2, 6);
+
+    const textObj = this.add.text(0, 0, '', {
+      fontSize: '10px',
+      color: '#1a1a2e',
+      fontFamily: GAME_FONT,
+      wordWrap: { width: bubbleW - 24 },
+      align: 'left',
+      lineSpacing: 3,
+      resolution: 3,
+    }).setOrigin(0.5);
+
+    container.add([bg, textObj]);
+    this.speechBubble = container;
+    this.speechText = textObj;
+
+    // Type out the text character by character
+    let charIndex = 0;
+    this.speechTimer = this.time.addEvent({
+      delay: 30,
+      repeat: fullText.length - 1,
+      callback: () => {
+        charIndex++;
+        textObj.setText(fullText.slice(0, charIndex));
+      },
+    });
+
+    // Emit done event when typing finishes
+    this.time.delayedCall(fullText.length * 30 + 200, () => {
+      gameEvents.emit('SPEECH_BUBBLE_DONE');
+    });
+  }
+
+  private hideSpeechBubble() {
+    if (this.speechTimer) {
+      this.speechTimer.destroy();
+      this.speechTimer = null;
+    }
+    if (this.speechBubble) {
+      this.speechBubble.destroy();
+      this.speechBubble = null;
+      this.speechText = null;
+    }
+    this.frozen = false;
   }
 
   private isNearMarker(): boolean {
@@ -572,10 +653,10 @@ export class GameScene extends Phaser.Scene {
 
     const moving = vx !== 0 || vy !== 0;
     if (moving) {
-      // Horizontal wins on diagonals, like most top-down games.
       this.facing = vx < 0 ? 'left' : vx > 0 ? 'right' : vy < 0 ? 'up' : 'down';
       this.directionDot?.setRotation(Math.atan2(vy, vx) + Math.PI / 2);
       this.emitPosition();
+      playFootstep();
     }
     if (this.playerSprite && this.playerHead) {
       // Modular astronaut: side frames face right, so left is the same animation flipped.
