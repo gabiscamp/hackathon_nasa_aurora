@@ -201,7 +201,10 @@ export function checkCollapse(day: number): Collapse | null {
   else if (r.radiation >= RADIATION_GAME_OVER) cause = 'radiation';
   if (!cause) return null;
   const morning = lastReasons.day === day ? lastReasons.reasons : [];
-  const reasons = [...new Set([...morning, ...chainEffects(r).reasons])];
+  let reasons = [...new Set([...morning, ...chainEffects(r).reasons])];
+  // "No water" already says it all: drop the milder "water was low" line (same for food).
+  if (reasons.some((x) => x.startsWith('There was no water'))) reasons = reasons.filter((x) => !x.startsWith('Water was below'));
+  if (reasons.some((x) => x.startsWith('There was no food'))) reasons = reasons.filter((x) => !x.startsWith('Food was below'));
   const collapse: Collapse = { cause, day, reasons: reasons.length ? reasons : [CAUSE_LINE[cause]] };
   useMissionStore.setState({ collapse });
   return collapse;
