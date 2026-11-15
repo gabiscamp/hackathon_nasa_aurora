@@ -62,13 +62,13 @@ export function A11yDock() {
   const [optionsOpen, setOptionsOpen] = useState(false);
   return (
     <>
-      <div className="a11y-dock" role="group" aria-label="Accessibility">
+      <nav className="a11y-dock" aria-label="Accessibility">
         <ReadButton />
         <button type="button" className="gm-menu-btn a11y-btn" onClick={() => setOptionsOpen(true)}>
           <GearIcon />
           <span className="a11y-btn__text">Options</span>
         </button>
-      </div>
+      </nav>
       {optionsOpen && <OptionsDialog onClose={() => setOptionsOpen(false)} />}
     </>
   );
