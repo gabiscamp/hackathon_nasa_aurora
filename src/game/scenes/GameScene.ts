@@ -32,6 +32,7 @@ import {
   WALKABLE_AREAS,
   BLOCKED_AREAS,
   PLACEMENTS,
+  PIECES,
   STATION_SCALE,
   PLAYER_SPAWN,
   NPC_SPAWNS,
@@ -64,6 +65,8 @@ const FOLLOW_LERP = 0.25;
 const POSITION_EMIT_INTERVAL = 80;
 
 const INTERACT_DISTANCE = 80;
+/** Wall parts the crew walks under: above the player (10) and NPCs (9), below mission markers (15+). */
+const OVERHEAD_DEPTH = 11;
 /** Extra zoom when the camera flies to a mission spot. */
 const MISSION_ZOOM = 1.4;
 
@@ -74,6 +77,8 @@ export class GameScene extends Phaser.Scene {
   private directionDot: Phaser.GameObjects.Graphics | null = null;
   private playerSprite: Phaser.GameObjects.Sprite | null = null;
   private spaceBackdrop: Phaser.GameObjects.Image | null = null;
+  /** Silhouette of the pressurized modules; characters are clipped to it (WebGL only). */
+  private stationMask: Phaser.Display.Masks.BitmapMask | null = null;
   private backdropFit = { w: 0, h: 0, zoom: 0 };
   private spriteKey = '';
   /** Set when the player uses the modular astronaut (body + head) instead of a full sheet. */
@@ -224,14 +229,56 @@ export class GameScene extends Phaser.Scene {
       // the shimmer nearest-neighbour gives when it is scaled down.
       this.textures.get(key).setFilter(Phaser.Textures.FilterMode.LINEAR);
       const c = placedCenter(p);
-      this.add
-        .image(c.x, c.y, key)
+      const piece = () =>
+        this.add.image(c.x, c.y, key).setScale(STATION_SCALE).setAngle(p.angle).setFlip(p.flipX, p.flipY);
+      // Pieces stack between the backdrop (0) and the debug overlay (5).
+      piece().setDepth(1 + p.depth / 10);
+
+      // Hatch rings, end caps and south door walls drawn again over the crew, so walking
+      // through a doorway goes *under* the wall instead of over it (top-down look).
+      const def = PIECES[p.piece];
+      for (const r of def.overhead) {
+        // setCrop reads the rect in the flipped frame; convert from unflipped image px.
+        const cropX = p.flipX ? def.width - r.x - r.w : r.x;
+        const cropY = p.flipY ? def.height - r.y - r.h : r.y;
+        piece().setCrop(cropX, cropY, r.w, r.h).setDepth(OVERHEAD_DEPTH + p.depth / 10);
+      }
+    }
+    this.stationMask = this.createStationMask();
+  }
+
+  /**
+   * Silhouette of the pressurized modules. Characters are clipped to it, so a head that
+   * sticks up while walking through the hatch ring between two cylinders is hidden instead
+   * of showing over open space. Bitmap masks need WebGL; on Canvas characters stay unclipped.
+   */
+  private createStationMask(): Phaser.Display.Masks.BitmapMask | null {
+    if (this.renderer.type !== Phaser.WEBGL) return null;
+    const rt = this.make.renderTexture({ x: 0, y: 0, width: WORLD_WIDTH, height: WORLD_HEIGHT }, false).setOrigin(0, 0);
+    for (const p of PLACEMENTS) {
+      if (p.room === null) continue; // truss, radiators, solar wings: outside, nobody walks there
+      const c = placedCenter(p);
+      const img = this.make
+        .image({ x: c.x, y: c.y, key: stationTextureKey(p.piece) }, false)
         .setScale(STATION_SCALE)
         .setAngle(p.angle)
-        .setFlip(p.flipX, p.flipY)
-        // Pieces stack between the backdrop (0) and the debug overlay (5).
-        .setDepth(1 + p.depth / 10);
+        .setFlip(p.flipX, p.flipY);
+      rt.draw(img);
+      img.destroy();
     }
+    const mask = rt.createBitmapMask();
+    // Not on the display list, so the scene won't free it by itself.
+    let freed = false;
+    const free = () => {
+      if (freed) return;
+      freed = true;
+      mask.destroy();
+      rt.destroy();
+      this.stationMask = null;
+    };
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, free);
+    this.events.once(Phaser.Scenes.Events.DESTROY, free);
+    return mask;
   }
 
   /**
@@ -266,6 +313,7 @@ export class GameScene extends Phaser.Scene {
 
   private createPlayer() {
     this.player = this.add.container(PLAYER_SPAWN.x, PLAYER_SPAWN.y).setDepth(10);
+    if (this.stationMask) this.player.setMask(this.stationMask);
 
     // The player is the chosen crew's commander, drawn as the team's modular astronaut with
     // their face (McClain = cabeca-1). Her older 4×4 sheet is only a fallback.
@@ -313,6 +361,7 @@ export class GameScene extends Phaser.Scene {
 
   private createNPC(x: number, y: number, color: number, name: string, head: HeadId | null) {
     const npc = this.add.container(x, y).setDepth(9);
+    if (this.stationMask) npc.setMask(this.stationMask);
 
     if (head && this.textures.exists(astronautTextureKey(head))) {
       const sprite = this.add.sprite(0, 0, astronautTextureKey(head), 0).setOrigin(0.5, ASTRO_ORIGIN_Y);
