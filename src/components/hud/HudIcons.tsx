@@ -63,28 +63,6 @@ export function RadiationIcon({ size = 16 }: IconProps) {
   );
 }
 
-export function HeartIcon({ size = 16 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        d="M12 21s-7.5-4.6-9.3-9.4C1.4 8 3.6 4.5 7.1 4.5c2 0 3.6 1.1 4.9 2.8 1.3-1.7 2.9-2.8 4.9-2.8 3.5 0 5.7 3.5 4.4 7.1C19.5 16.4 12 21 12 21Z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
-
-export function SmileIcon({ size = 16 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2.4" />
-      <circle cx="9" cy="10" r="1.4" fill="currentColor" />
-      <circle cx="15" cy="10" r="1.4" fill="currentColor" />
-      <path d="M8 14.2c1 1.6 2.4 2.4 4 2.4s3-.8 4-2.4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 export function MapIcon({ size = 16 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
