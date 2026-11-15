@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useMissionStore } from '../../stores/useMissionStore';
-import { useResourceStore, type ResourceKey } from '../../stores/useResourceStore';
+import { SHOWN_RESOURCES, useResourceStore, type ResourceKey } from '../../stores/useResourceStore';
 import { useGameStore } from '../../stores/useGameStore';
 import { useDutyStore, availability, CREW_SLOTS, type CrewDuty } from '../../stores/useDutyStore';
 import {
@@ -48,8 +48,6 @@ function ResourceHints() {
   const water = useResourceStore((s) => s.water);
   const energy = useResourceStore((s) => s.energy);
   const oxygen = useResourceStore((s) => s.oxygen);
-  const health = useResourceStore((s) => s.health);
-  const satisfaction = useResourceStore((s) => s.satisfaction);
   const radiation = useResourceStore((s) => s.radiation);
 
   const resources: { key: ResourceKey; value: number }[] = [
@@ -57,8 +55,6 @@ function ResourceHints() {
     { key: 'water', value: water },
     { key: 'energy', value: energy },
     { key: 'oxygen', value: oxygen },
-    { key: 'health', value: health },
-    { key: 'satisfaction', value: satisfaction },
     { key: 'radiation', value: radiation },
   ];
 
@@ -82,7 +78,7 @@ function ResourceHints() {
 
 /** "Changes" list after a choice: e.g. Oxygen −3, Energy +2 (radiation up is bad). */
 function Changes({ changes }: { changes: Partial<Record<ResourceKey, number>> }) {
-  const entries = Object.entries(changes) as [ResourceKey, number][];
+  const entries = (Object.entries(changes) as [ResourceKey, number][]).filter(([k]) => SHOWN_RESOURCES.includes(k));
   if (entries.length === 0) return null;
   return (
     <div className="mission-changes" aria-label="What changed">

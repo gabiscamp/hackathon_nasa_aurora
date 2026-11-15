@@ -22,7 +22,6 @@ const ENDING_STATS = [
   { key: 'food', icon: '🍎', label: 'Food' },
   { key: 'water', icon: '💧', label: 'Water' },
   { key: 'oxygen', icon: '🫁', label: 'Oxygen' },
-  { key: 'health', icon: '❤️', label: 'Health' },
   { key: 'radiation', icon: '☢️', label: 'Radiation' },
   { key: 'energy', icon: '⚡', label: 'Energy' },
 ] as const;
