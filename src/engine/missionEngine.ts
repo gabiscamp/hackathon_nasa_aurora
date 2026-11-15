@@ -197,9 +197,9 @@ export function nextEventDay(fromDay: number): number | null {
   const { openEvents, scheduled, completedMissions } = useMissionStore.getState();
   if (openEvents.length > 0) return fromDay;
   const days = [
-    ...MISSIONS.filter((m) => m.day !== undefined && !m.followUpOnly && !completedMissions.includes(m.id)).map((m) => m.day!),
+    ...MISSIONS.filter((m) => fixedDay(m) !== undefined && !m.followUpOnly && !completedMissions.includes(m.id)).map((m) => fixedDay(m)!),
     ...scheduled.map((s) => Math.max(s.day, fromDay)),
-  ].filter((d) => d >= fromDay && d <= MISSION_LAST_DAY);
+  ].filter((d) => d >= fromDay && d <= missionLastDay());
   return days.length ? Math.min(...days) : null;
 }
 
@@ -223,6 +223,11 @@ let outcomeNotes: string[] = [];
 export const EARLY_END_DAY = 37;
 export function missionLastDay(): number {
   return useMissionStore.getState().flags.includes('early-end') ? EARLY_END_DAY : MISSION_LAST_DAY;
+}
+
+/** The day a fixed mission opens: the trip-ending ones follow the real last day (early return too). */
+export function fixedDay(m: Mission): number | undefined {
+  return m.fromEnd !== undefined ? missionLastDay() - m.fromEnd : m.day;
 }
 
 function addNews(text: string): void {
@@ -453,7 +458,7 @@ export function openDay(day: number): string[] {
   };
   for (const s of due) if (!s.unlessFlag || !flags.includes(s.unlessFlag)) add(s.missionId, s.patient);
   for (const m of MISSIONS) {
-    if (m.day !== day || m.followUpOnly || useMissionStore.getState().completedMissions.includes(m.id)) continue;
+    if (fixedDay(m) !== day || m.followUpOnly || useMissionStore.getState().completedMissions.includes(m.id)) continue;
     if ((m.skipIfFlag && flags.includes(m.skipIfFlag)) || (m.onlyIfFlag && !flags.includes(m.onlyIfFlag))) {
       // It will never happen (e.g. the plants died): close it so it is not waited for.
       useMissionStore.setState({ completedMissions: [...useMissionStore.getState().completedMissions, m.id] });

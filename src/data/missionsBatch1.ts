@@ -22,7 +22,7 @@ import type { Mission } from './missions';
 const SPACEWALK = 'Spacewalk';
 
 export const MISSIONS_BATCH_1: Mission[] = [
-  // ─── Missão 7: O Banheiro Quebrou (ISS, 2008) — Day 5, calm start ───
+  // ─── Missão 7: O Banheiro Quebrou (ISS, 2008) — Day 3, calm start ───
   {
     id: 'bathroom-broke',
     sourceNumber: 7,
@@ -100,7 +100,7 @@ export const MISSIONS_BATCH_1: Mission[] = [
     ],
   },
 
-  // ─── Missão 4: O Vazamento Invisível (ISS, 2004) — Day 10 ───
+  // ─── Missão 4: O Vazamento Invisível (ISS, 2004) — Day 5 ───
   {
     id: 'invisible-leak',
     sourceNumber: 4,
@@ -174,7 +174,7 @@ export const MISSIONS_BATCH_1: Mission[] = [
     ],
   },
 
-  // ─── Missão 6: O Problema Lento (ISS, 2007-2017) — Day 20 ───
+  // ─── Missão 6: O Problema Lento (ISS, 2007-2017) — Day 10 ───
   {
     id: 'slow-problem',
     sourceNumber: 6,
@@ -261,7 +261,7 @@ export const MISSIONS_BATCH_1: Mission[] = [
     ],
   },
 
-  // ─── Missão 5: Ar Tóxico (ISS, 2006) — Day 35 ───
+  // ─── Missão 5: Ar Tóxico (ISS, 2006) — Day 18 ───
   {
     id: 'toxic-air',
     sourceNumber: 5,
@@ -339,7 +339,7 @@ export const MISSIONS_BATCH_1: Mission[] = [
     ],
   },
 
-  // ─── Missão 8: Água Suja (ISS, 2009) — Day 40 ───
+  // ─── Missão 8: Água Suja (ISS, 2009) — Day 20 ───
   {
     id: 'dirty-water',
     sourceNumber: 8,
@@ -441,7 +441,7 @@ export const MISSIONS_BATCH_1: Mission[] = [
     ],
   },
 
-  // ─── Missão 3: Colisão! (MIR, junho 1997) — Day 48 ───
+  // ─── Missão 3: Colisão! (MIR, junho 1997) — Day 26 ───
   {
     id: 'supply-ship-crash',
     sourceNumber: 3,
@@ -522,7 +522,7 @@ export const MISSIONS_BATCH_1: Mission[] = [
     ],
   },
 
-  // ─── Missão 9: Quase Afogado no Espaço (ISS EVA-23, 2013) — Day 55 ───
+  // ─── Missão 9: Quase Afogado no Espaço (ISS EVA-23, 2013) — Day 28 ───
   {
     id: 'water-in-helmet',
     sourceNumber: 9,
@@ -621,7 +621,7 @@ export const MISSIONS_BATCH_1: Mission[] = [
     ],
   },
 
-  // ─── Missão 1: O Filtro Quebrado (Apollo 13, 1970) — Day 68 ───
+  // ─── Missão 1: O Filtro Quebrado (Apollo 13, 1970) — Day 34 ───
   {
     id: 'co2-filter-broke',
     sourceNumber: 1,
@@ -710,7 +710,7 @@ export const MISSIONS_BATCH_1: Mission[] = [
     ],
   },
 
-  // ─── Missão 2: Fogo na Estação (MIR, fevereiro 1997) — Day 72 (or earlier, after a candle) ───
+  // ─── Missão 2: Fogo na Estação (MIR, fevereiro 1997) — Day 36 (or earlier, after a candle) ───
   {
     id: 'fire-on-station',
     sourceNumber: 2,
@@ -795,7 +795,7 @@ export const MISSIONS_BATCH_1: Mission[] = [
     ],
   },
 
-  // ─── Missão 10: Dedo no Buraco (Soyuz MS-09, 2018) — Day 75 ───
+  // ─── Missão 10: Dedo no Buraco (Soyuz MS-09, 2018) — Day 38 ───
   {
     id: 'micrometeorite-hole',
     sourceNumber: 10,
@@ -922,7 +922,7 @@ export const MISSIONS_BATCH_1: Mission[] = [
       'The quick fix is holding the toilet together, but the water recycler is still off. You keep losing water every day.',
     act: 1,
     system: 'water',
-    room: 'bathroom',
+    room: 'engineering',
     icon: '♻️',
     severity: 'normal',
     nasaSource: 'ISS Water Recovery System',

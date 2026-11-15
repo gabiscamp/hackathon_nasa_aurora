@@ -19,8 +19,8 @@ Rooms follow the room guide at the end of `missoes.txt`. Days follow the 45-day 
 | M11 | `debris-storm` | Debris Storm! | Day 14 | `bridge` | 2 |
 | M12 | `radio-silence` | Total Silence | Day 23 | `bridge` | 2 |
 | M13 | `food-running-low` | Food Running Low | Day 30 | `storage` | 2 |
-| P1 | `crew-sick` | A Crew Member Is Sick | set off by another choice | `gym` | 2 |
-| P2 | `crew-very-sick` | Very Sick! | set off by another choice | `gym` | 2 |
+| P1 | `crew-sick` | A Crew Member Is Sick | set off by another choice | `quarters` | 2 |
+| P2 | `crew-very-sick` | Very Sick! | set off by another choice | `quarters` | 2 |
 | P3 | `mission-pantry` | The Mission Pantry | Day 1 | `storage` | 2 |
 | P4 | `pantry-shield` | Food as a Shield | Day 15 | `storage` | 2 |
 | P5 | `food-old-or-new` | Old Food or New Food? | Day 9, every 7 days | `storage` | 2 |
@@ -73,7 +73,7 @@ Extra missions that only happen because of an earlier choice (a temporary fix th
 | id | Title | Room | Batch |
 |---|---|---|---|
 | `toilet-fix` | Fix the Toilet | `bathroom` | 1 |
-| `water-recycler-repair` | Repair the Water Recycler | `bathroom` | 1 |
+| `water-recycler-repair` | Repair the Water Recycler | `engineering` | 1 |
 | `leak-lockdown` | Lockdown: Find the Leak | `engineering` | 1 |
 | `coolant-leak-urgent` | The Leak Got Worse | `airlock` | 1 |
 | `o2-machine-repair` | Repair the Oxygen Machine | `engineering` | 1 |
@@ -111,5 +111,5 @@ Missions written before `missoes.txt` (in `src/data/missions.ts`, `MISSIONS_BASE
 | `o2-machine-stopped` | O2 Machine Stopped! | Day 35 | `engineering` |
 | `maya-discovery` | Maya's Discovery | Day 39 | `lab` |
 | `transmit-or-save` | Transmit or Save Energy? | Day 43 | `bridge` |
-| `countdown-begins` | Countdown Begins | Day 44 | `bridge` |
-| `final-day` | The Final Day | Day 45 | `bridge` |
+| `countdown-begins` | Countdown Begins | Day 44 (Day 36 with the early return) | `bridge` |
+| `final-day` | The Final Day | Day 45 (Day 37 with the early return) | `bridge` |
