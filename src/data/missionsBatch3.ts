@@ -5,7 +5,7 @@ import type { Mission } from './missions';
  * Numbers come from the file's own references ("problema 8" = the first harvest, etc.).
  *
  * Links to problems that are not in the game yet are kept as flags/counters for later batches:
- *   P22 (contamination) ← trash kept in a module, P35 (stuck solar panel) ← trash thrown into space,
+ *   P35 (stuck solar panel) ← trash thrown into space,
  *   P44 (trash wall) ← compacted trash, P49 (not written in missoes.txt yet) ← bad days for morale.
  * Days follow the 45-day mission (the file's "day 80" became day 40).
  */
@@ -461,6 +461,8 @@ export const MISSIONS_BATCH_3: Mission[] = [
         onSuccess: {
           counter: { id: 'trash-stored', add: 1 },
           addConditions: [{ id: 'trash-smell', label: 'Trash stored nearby: a bit smelly', daily: [{ resource: 'satisfaction', delta: -1 }], days: 10 }],
+          // "Chance de contaminação aumenta por semana: 10%/25%/50% (vira o problema 22)": about 25% within 1-2 weeks.
+          followUps: [{ missionId: 'contamination-alert', afterDays: 7, afterDaysMax: 14, chance: 25 }],
         },
         narrative: '{crew} closed the trash in a module. It smells a bit, and the longer it stays, the more likely it is to cause contamination.',
       },

@@ -2,6 +2,7 @@ import type { ResourceKey } from '../stores/useResourceStore';
 import { MISSIONS_BATCH_1 } from './missionsBatch1';
 import { MISSIONS_BATCH_2 } from './missionsBatch2';
 import { MISSIONS_BATCH_3 } from './missionsBatch3';
+import { MISSIONS_BATCH_4 } from './missionsBatch4';
 
 export type MissionSeverity = 'normal' | 'critical';
 
@@ -210,107 +211,8 @@ export const MISSIONS_BASE: Mission[] = [
 
 
 
-  {
-    id: 'bath-day',
-    title: 'Bath Day',
-    description:
-      'It\'s been a week and the crew wants to clean up. But water is precious in space. A full shower uses a lot of water. Wet wipes use almost none.',
-    act: 1,
-    day: 4,
-    system: 'water',
-    room: 'quarters',
-    icon: '🚿',
-    severity: 'normal',
-    nasaSource: 'ISS Hygiene Procedures',
-    popup:
-      'On the ISS, astronauts don\'t take showers — there are none! They use wet towels and no-rinse shampoo. Water floats in space, so a shower would be a floating blob of water. Each astronaut gets about 4 liters of water per day for everything.',
-    choices: [
-      {
-        id: 'full-shower',
-        label: 'Let everyone have a quick shower',
-        icon: '🚿',
-        effects: [
-          { resource: 'water', delta: -8 },
-          { resource: 'satisfaction', delta: 10 },
-        ],
-        narrative:
-          'The crew feels amazing! A real shower after a week. Morale is high. But the water tanks dropped noticeably.',
-      },
-      {
-        id: 'wet-wipes',
-        label: 'Wet wipes only',
-        icon: '🧻',
-        effects: [
-          { resource: 'water', delta: -1 },
-          { resource: 'satisfaction', delta: -3 },
-        ],
-        narrative:
-          'The crew cleaned up with wet wipes. Not great, but water is saved. A few grumbles but everyone understands.',
-      },
-      {
-        id: 'half-and-half',
-        label: 'Showers for some, wipes for others',
-        icon: '🎲',
-        effects: [
-          { resource: 'water', delta: -4 },
-          { resource: 'satisfaction', delta: 3 },
-        ],
-        narrative:
-          'Two crew members got showers, two used wipes. Fair? Not really. But it saved some water while keeping spirits okay.',
-      },
-    ],
-  },
 
 
-  {
-    id: 'mars-shadow',
-    title: 'Mars Shadow',
-    description:
-      'The station is about to pass behind Mars. Solar panels will stop making energy. The battery can\'t power everything. What do you turn off?',
-    act: 1,
-    day: 6,
-    system: 'energy',
-    room: 'bridge',
-    icon: '⚡',
-    severity: 'normal',
-    nasaSource: 'ESA Mars Express',
-    nasaYear: 2006,
-    popup:
-      'The Mars Express probe passed up to 75 minutes in Mars\'s shadow every orbit. With weak batteries and 20% less sunlight than Earth, it entered survival mode — all science instruments off, power cut from 400W to 300W.',
-    choices: [
-      {
-        id: 'turn-off-lab',
-        label: 'Turn off the laboratory',
-        icon: '🔬',
-        effects: [{ resource: 'energy', delta: 8 }],
-        narrative:
-          'You turned off the lab. Science stops for today, but important systems keep running. The shadow will pass in a few hours.',
-      },
-      {
-        id: 'turn-off-greenhouse',
-        label: 'Turn off the greenhouse lights',
-        icon: '🌱',
-        effects: [
-          { resource: 'energy', delta: 5 },
-          { resource: 'food', delta: -3 },
-        ],
-        narrative:
-          'The greenhouse lights went dark. The plants will survive, but the next harvest will be a bit smaller.',
-      },
-      {
-        id: 'lower-heating',
-        label: 'Lower the heating',
-        icon: '❄️',
-        effects: [
-          { resource: 'energy', delta: 8 },
-          { resource: 'satisfaction', delta: -5 },
-          { resource: 'health', delta: -2 },
-        ],
-        narrative:
-          'It\'s getting cold! Mars averages -59°C and without full heating the station cools fast. Everyone puts on extra layers.',
-      },
-    ],
-  },
 
   {
     id: 'small-solar-storm',
@@ -668,57 +570,6 @@ export const MISSIONS_BASE: Mission[] = [
 
 
 
-  {
-    id: 'water-rationing',
-    title: 'Water Rationing',
-    description:
-      'Water reserves are getting low. The recycler can\'t keep up. You need to decide how to cut water use.',
-    act: 2,
-    day: 31,
-    system: 'water',
-    room: 'bridge',
-    icon: '💧',
-    severity: 'normal',
-    nasaSource: 'ISS ECLSS Water Budget',
-    popup:
-      'Each person on the ISS uses about 3.6 liters of water per day for drinking and food. The recycler recovers 98%, but that 2% loss adds up over months. On a Mars mission, every drop counts.',
-    choices: [
-      {
-        id: 'strict-rations',
-        label: 'Strict water limits for everyone',
-        icon: '📏',
-        effects: [
-          { resource: 'water', delta: 5 },
-          { resource: 'satisfaction', delta: -8 },
-          { resource: 'health', delta: -3 },
-        ],
-        narrative:
-          'Everyone gets exactly 2 liters per day. Enough to survive, but not comfortable. Dehydration headaches start.',
-      },
-      {
-        id: 'cut-non-essential',
-        label: 'Cut water to non-essential systems',
-        icon: '🔌',
-        effects: [
-          { resource: 'water', delta: 3 },
-          { resource: 'food', delta: -3 },
-          { resource: 'satisfaction', delta: -3 },
-        ],
-        narrative:
-          'Greenhouse and cleaning get less water. Plants slow down and things get dirtier, but drinking water is okay for now.',
-      },
-      {
-        id: 'emergency-ice',
-        label: 'Melt the emergency ice reserves',
-        icon: '🧊',
-        effects: [
-          { resource: 'water', delta: 8 },
-        ],
-        narrative:
-          'You melted the emergency ice. Plenty of water for now! But those reserves are your last resort — if things get worse later, you\'ll have nothing left.',
-      },
-    ],
-  },
 
   {
     id: 'earth-message',
@@ -1102,7 +953,7 @@ export const MISSIONS_BASE: Mission[] = [
  * Every mission in the game: the missions above plus the ones rewritten from the team's
  * missoes.txt, one batch of up to 10 at a time (src/data/missionsBatch1.ts = missions 1-10).
  */
-export const MISSIONS: Mission[] = [...MISSIONS_BASE, ...MISSIONS_BATCH_1, ...MISSIONS_BATCH_2, ...MISSIONS_BATCH_3];
+export const MISSIONS: Mission[] = [...MISSIONS_BASE, ...MISSIONS_BATCH_1, ...MISSIONS_BATCH_2, ...MISSIONS_BATCH_3, ...MISSIONS_BATCH_4];
 
 export function getMission(id: string): Mission | undefined {
   return MISSIONS.find((m) => m.id === id);
