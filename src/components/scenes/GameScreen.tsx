@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useGameStore } from '../../stores/useGameStore';
-import { useResourceStore } from '../../stores/useResourceStore';
+import { useResourceStore, type Resources } from '../../stores/useResourceStore';
 import { useMissionStore } from '../../stores/useMissionStore';
 import { pickMissionForDay } from '../../engine/eventResolver';
 import { MISSIONS } from '../../data/missions';
@@ -54,6 +54,7 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
   const tickDays = useResourceStore((s) => s.tickDays);
 
   const [missionOpen, setMissionOpen] = useState(false);
+  const [dayStart, setDayStart] = useState<Resources>(() => ({ ...useResourceStore.getState() }));
   const [alertPlayed, setAlertPlayed] = useState('');
 
   /** Day-skip overlay state */
@@ -122,6 +123,7 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
   };
 
   const handleSkipDone = () => {
+    setDayStart({ ...useResourceStore.getState() });
     setSkipInfo(null);
     nextPhase(); // briefing -> decision
   };
@@ -191,12 +193,7 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
 
       {phase === 'summary' && (
         <div className="game-overlay">
-          <DaySummary />
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 12 }}>
-            <Button variant="primary" onClick={handleEndDay}>
-              Next Day
-            </Button>
-          </div>
+          <DaySummary before={dayStart} onNextDay={handleEndDay} />
         </div>
       )}
 

@@ -250,8 +250,36 @@ export class GameScene extends Phaser.Scene {
       for (const r of def.overhead) {
         // setCrop reads the rect in the flipped frame; convert from unflipped image px.
         const cropX = p.flipX ? def.width - r.x - r.w : r.x;
-        const cropY = p.flipY ? def.height - r.y - r.h : r.y;
-        piece().setCrop(cropX, cropY, r.w, r.h).setDepth(OVERHEAD_DEPTH + p.depth / 10);
+        const isNodeHatch = p.piece === 'node' && r.y === 262;
+        const cropY = isNodeHatch ? 240 : p.flipY ? def.height - r.y - r.h : r.y;
+        const cropHeight = isNodeHatch ? 110 : r.h;
+        const overlay = piece().setCrop(cropX, cropY, r.w, cropHeight).setDepth(OVERHEAD_DEPTH + p.depth / 10);
+        if (isNodeHatch) {
+          // Cover the marked passage from the upper grey strip down to the
+          // curved inner rim; leave the opening beneath the rim unobstructed.
+          const s = STATION_SCALE;
+          const shape = this.make.graphics({}, false);
+          shape.fillStyle(0xffffff);
+          shape.fillRect((p.x + 118) * s, (p.y + 262) * s, 145 * s, 88 * s);
+          shape.fillRect((p.x + 417) * s, (p.y + 262) * s, 133 * s, 88 * s);
+          shape.fillPoints([
+            { x: (p.x + 263) * s, y: (p.y + 240) * s },
+            { x: (p.x + 417) * s, y: (p.y + 240) * s },
+            { x: (p.x + 417) * s, y: (p.y + 337) * s },
+            { x: (p.x + 400) * s, y: (p.y + 323) * s },
+            { x: (p.x + 375) * s, y: (p.y + 315) * s },
+            { x: (p.x + 340) * s, y: (p.y + 312) * s },
+            { x: (p.x + 305) * s, y: (p.y + 315) * s },
+            { x: (p.x + 280) * s, y: (p.y + 323) * s },
+            { x: (p.x + 263) * s, y: (p.y + 337) * s },
+          ], true);
+          const mask = shape.createGeometryMask();
+          overlay.setMask(mask);
+          this.events.once(Phaser.Scenes.Events.DESTROY, () => {
+            mask.destroy();
+            shape.destroy();
+          });
+        }
       }
     }
     this.stationMask = this.createStationMask();
