@@ -53,6 +53,8 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
   const clearMission = useMissionStore((s) => s.clearMission);
   const currentMission = useMissionStore((s) => s.currentMission);
   const openEvents = useMissionStore((s) => s.openEvents);
+  const news = useMissionStore((s) => s.news);
+  const [newsSeenDay, setNewsSeenDay] = useState(0);
   const tick = useResourceStore((s) => s.tick);
   const tickDays = useResourceStore((s) => s.tickDays);
 
@@ -166,6 +168,20 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
               </span>
             )}
           </div>
+        )}
+
+        {phase === 'decision' && !missionOpen && !skipInfo && news.length > 0 && newsSeenDay !== day && (
+          <section className="game-news" role="status" aria-label="Station news" data-read>
+            <h2 className="game-news__title">Station news</h2>
+            <ul>
+              {news.map((n) => (
+                <li key={n}>{n}</li>
+              ))}
+            </ul>
+            <button type="button" className="game-news__ok" onClick={() => setNewsSeenDay(day)}>
+              Got it
+            </button>
+          </section>
         )}
 
         {missionOpen && currentMission && (

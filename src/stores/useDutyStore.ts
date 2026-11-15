@@ -23,19 +23,36 @@ export interface DutyTask {
   untilDay: number;
 }
 
+/**
+ * A sick crew member (missoes.txt problems 1 and 2). Personal state, not a station resource.
+ *   pending   = just got sick, the player has not decided yet (can't work)
+ *   rest      = resting with a caretaker (recovers fast, can infect others, others overwork)
+ *   isolation = alone in quarantine (slower, can't infect anyone)
+ *   working   = keeps working in an emergency (slow, very contagious, can get worse)
+ *   severe    = terribly sick: needs a caretaker until untilDay
+ */
+export interface Illness {
+  mode: 'pending' | 'rest' | 'isolation' | 'working' | 'severe';
+  /** Day the current treatment started (recovery chances grow day by day). */
+  sinceDay: number;
+  caretaker?: CrewSlot;
+  untilDay?: number;
+}
+
 export interface CrewDuty {
   /** 0..4 (see FATIGUE_*). Personal state, not a station resource. */
   fatigue: number;
   task: DutyTask | null;
   /** Can't be sent until after this day (resting after an exhausting or scary job). */
   restUntilDay: number;
+  illness?: Illness | null;
 }
 
 type DutyRecord = Record<CrewSlot, CrewDuty>;
 
 function freshCrew(): DutyRecord {
   const record = {} as DutyRecord;
-  for (const slot of CREW_SLOTS) record[slot] = { fatigue: 0, task: null, restUntilDay: 0 };
+  for (const slot of CREW_SLOTS) record[slot] = { fatigue: 0, task: null, restUntilDay: 0, illness: null };
   return record;
 }
 
@@ -62,9 +79,10 @@ export const useDutyStore = create<DutyState>()(
   ),
 );
 
-export type CrewAvailability = 'free' | 'busy' | 'resting';
+export type CrewAvailability = 'free' | 'busy' | 'resting' | 'sick';
 
 export function availability(duty: CrewDuty, day: number): CrewAvailability {
+  if (duty.illness && duty.illness.mode !== 'working') return 'sick';
   if (duty.restUntilDay >= day) return 'resting';
   if (duty.task && duty.task.untilDay >= day) return 'busy';
   return 'free';

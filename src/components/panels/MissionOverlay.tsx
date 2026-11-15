@@ -2,13 +2,16 @@ import { useState, useCallback } from 'react';
 import { useMissionStore } from '../../stores/useMissionStore';
 import { useResourceStore, type ResourceKey } from '../../stores/useResourceStore';
 import { useGameStore } from '../../stores/useGameStore';
-import { useDutyStore, availability } from '../../stores/useDutyStore';
+import { useDutyStore, availability, CREW_SLOTS, type CrewDuty } from '../../stores/useDutyStore';
 import {
   choiceState,
   crewNeed,
   deferMission,
+  fillPatient,
+  patientOf,
   pickOutsideCrew,
   sendCrew,
+  sideRiskChance,
   successChance,
   type MissionResult,
 } from '../../engine/missionEngine';
@@ -97,15 +100,20 @@ function Changes({ changes }: { changes: Partial<Record<ResourceKey, number>> })
 }
 
 /** Short facts about a choice before picking it: people, best role, time, chance, temporary. */
-function ChoiceMeta({ choice, lockedReason }: { choice: Choice; lockedReason: string | null }) {
+function ChoiceMeta({ choice, lockedReason, patientName, outside }: { choice: Choice; lockedReason: string | null; patientName: string; outside: boolean }) {
   const need = crewNeed(choice);
   const people = need.everyone
     ? 'Whole crew'
     : need.min === 0
       ? need.max
         ? `+${need.max} helper`
-        : 'Only the person outside'
-      : `${need.min}${need.max && need.max > need.min ? `–${need.max}` : ''} ${need.min === 1 && !need.max ? 'person' : 'people'}`;
+        : outside
+          ? 'Only the person outside'
+          : `Only ${patientName}`
+      : need.only
+        ? `Only the ${need.only.map(slotTitle).join(' or ')}`
+        : `${need.min}${need.max && need.max > need.min ? `–${need.max}` : ''} ${need.min === 1 && !need.max ? 'person' : 'people'}`;
+  const risk = sideRiskChance(choice.sideRisk);
   return (
     <span className="mission-choice__meta">
       <span className="choice-tag">{people}</span>
@@ -113,12 +121,20 @@ function ChoiceMeta({ choice, lockedReason }: { choice: Choice; lockedReason: st
       {need.best && <span className="choice-tag">Best: {need.best.map(slotTitle).join(' or ')}</span>}
       {choice.time && <span className="choice-tag">{choice.time}</span>}
       {(choice.busyDays ?? 0) > 0 && <span className="choice-tag choice-tag--warn">Busy {(choice.busyDays ?? 0) + 1} days</span>}
-      {choice.successRate !== undefined && <span className="choice-tag choice-tag--warn">Risky: {choice.successRate}% chance</span>}
+      {choice.successRate !== undefined && !choice.noVerdict && (
+        <span className="choice-tag choice-tag--warn">Risky: {choice.successRate}% chance</span>
+      )}
+      {risk !== null && <span className="choice-tag choice-tag--warn">{risk}% risk: {choice.sideRisk!.effects.map((e) => e.resource).join(', ')}</span>}
       {choice.temporary && <span className="choice-tag choice-tag--warn">Temporary fix</span>}
       {choice.needsCandles && <span className="choice-tag">Uses {choice.needsCandles} oxygen candle{choice.needsCandles > 1 ? 's' : ''}</span>}
       {lockedReason && <span className="choice-tag choice-tag--bad">{lockedReason}</span>}
     </span>
   );
+}
+
+/** Caring for a sick crew member (stays with the patient during "whole crew" choices). */
+function isCaringFor(d: CrewDuty): boolean {
+  return d.task?.missionId === 'crew-sick' || d.task?.missionId === 'crew-very-sick';
 }
 
 type Phase = 'intro' | 'choices' | 'crew' | 'result' | 'popup';
@@ -155,15 +171,23 @@ export function MissionOverlay({ onComplete }: MissionOverlayProps) {
   void lockedChoices;
   const choices = mission.choices.map((c) => ({ c, state: choiceState(mission, c) })).filter((x) => !x.state.hidden);
 
-  const description = mission.description.split('{outside}').join(outsideName);
+  const fill = (text: string) => fillPatient(text.split('{outside}').join(outsideName), mission.id);
+  const description = fill(mission.description);
+  const patient = patientOf(mission.id);
+  const patientName = patient ? roster.find((r) => r.slot === patient)?.firstName ?? 'the patient' : 'the patient';
 
   const pickChoice = (c: Choice) => {
     playChoiceSound();
     setChoice(c);
     const need = crewNeed(c);
-    // The whole crew goes, or only the person already outside: no picking needed.
-    if (need.everyone || (outside && need.min === 0 && !need.max)) {
-      const slots: CrewSlot[] = need.everyone ? ['commander', 'engineer', 'medic', 'scientist'] : [outside!];
+    // The whole crew goes, or only the person already outside / the patient: no picking needed.
+    // "Whole crew" = everyone who can act: not the sick, and caretakers stay with their patient.
+    if (need.everyone || (need.min === 0 && !need.max)) {
+      const slots: CrewSlot[] = need.everyone
+        ? CREW_SLOTS.filter((s) => availability(duty[s], day) !== 'sick' && !isCaringFor(duty[s]))
+        : outside
+          ? [outside]
+          : [];
       finish(c, slots);
     } else {
       setPhase('crew');
@@ -216,7 +240,7 @@ export function MissionOverlay({ onComplete }: MissionOverlayProps) {
         {deferred && (
           <div className="mission-overlay__body">
             <div className="mission-overlay__terminal">
-              You decided to deal with it tomorrow. {mission.defer ? mission.defer.text : ''}
+              You decided to deal with it tomorrow. {mission.defer ? fill(mission.defer.text) : ''}
             </div>
             <Changes changes={deferred} />
             <button className="mission-btn mission-btn--primary" onClick={onComplete} autoFocus>
@@ -255,7 +279,7 @@ export function MissionOverlay({ onComplete }: MissionOverlayProps) {
                   <span className="mission-choice__icon">{c.icon}</span>
                   <span className="mission-choice__content">
                     <span className="mission-choice__label">{c.label}</span>
-                    <ChoiceMeta choice={c} lockedReason={state.lockedReason} />
+                    <ChoiceMeta choice={c} lockedReason={state.lockedReason} patientName={patientName} outside={!!outside} />
                   </span>
                 </button>
               ))}
@@ -263,7 +287,7 @@ export function MissionOverlay({ onComplete }: MissionOverlayProps) {
             {mission.defer && (
               <button className="mission-defer" onClick={handleDefer}>
                 Deal with it tomorrow
-                <span className="mission-defer__cost">{mission.defer.text}</span>
+                <span className="mission-defer__cost">{fill(mission.defer.text)}</span>
               </button>
             )}
             {mission.defer === false && <p className="mission-overlay__hint">There is no time to wait: you must act now.</p>}
@@ -284,7 +308,7 @@ export function MissionOverlay({ onComplete }: MissionOverlayProps) {
 
         {!deferred && phase === 'result' && result && (
           <div className="mission-overlay__body">
-            {choice && choice.successRate !== undefined && (
+            {choice && choice.successRate !== undefined && !result.noVerdict && (
               <p className={`mission-outcome ${result.success ? 'mission-outcome--good' : 'mission-outcome--bad'}`}>
                 {result.success ? 'It worked!' : 'It did not work.'}
               </p>

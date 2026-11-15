@@ -49,14 +49,16 @@ export function CrewPicker({ mission, choice, day, lockedSlot, chanceFor, onBack
   const canTryFewer = !enough && !!need.allowFewer && picked.length >= 1;
   const chance = chanceFor(picked);
   const pulled = picked.filter((s) => availability(duty[s], day) === 'busy');
-  const freeOthers = CREW_SLOTS.filter((s) => s !== lockedSlot && availability(duty[s], day) === 'free').length;
+  const freeOthers = CREW_SLOTS.filter(
+    (s) => s !== lockedSlot && availability(duty[s], day) === 'free' && (!need.only || need.only.includes(s)),
+  ).length;
 
   return (
     <div className="mission-overlay__body crew-picker">
       <p className="mission-overlay__prompt">
         Who goes? <strong>{choice.label}</strong> needs {need.min === 0 ? `up to ${max}` : need.min}
-        {need.max && need.max > need.min ? `–${need.max}` : ''} {need.min === 1 && !need.max ? 'person' : 'people'}
-        {need.best ? `. Best: ${need.best.map(slotTitle).join(' or ')} (+${SPECIALIST_BONUS}% chance)` : ''}.
+        {need.max && need.max > need.min ? `–${need.max}` : ''} {max === 1 ? 'person' : 'people'}
+        {need.best ? `. Best: ${need.best.map(slotTitle).join(' or ')}${chanceFor([]) !== null ? ` (+${SPECIALIST_BONUS}% chance)` : ''}` : ''}.
       </p>
       {freeOthers < need.min && (
         <p className="crew-picker__warn" role="status">
@@ -81,18 +83,23 @@ export function CrewPicker({ mission, choice, day, lockedSlot, chanceFor, onBack
           const isBest = need.best?.includes(slot);
           const task = d.task;
           const taskMission = task ? getMission(task.missionId) : undefined;
-          const stopText = taskMission?.choices.find((c) => c.id === task?.choiceId)?.onInterrupt?.text;
+          const caring = task?.missionId === 'crew-sick' || task?.missionId === 'crew-very-sick';
+          const stopText = caring
+            ? 'The sick crew member will be left alone and get better more slowly.'
+            : taskMission?.choices.find((c) => c.id === task?.choiceId)?.onInterrupt?.text;
+          const notAllowed = !!need.only && !need.only.includes(slot);
           return (
             <li key={slot}>
               <button
                 type="button"
                 className={`crew-card crew-card--${state} ${selected ? 'crew-card--selected' : ''}`}
                 aria-pressed={selected}
-                disabled={state === 'resting'}
+                disabled={state === 'resting' || state === 'sick' || notAllowed}
                 onClick={() => toggle(slot)}
               >
                 {cardBody(slot)}
-                {isBest && <span className="crew-card__best">Best for this job</span>}
+                {isBest && !notAllowed && <span className="crew-card__best">Best for this job</span>}
+                {notAllowed && <span className="crew-card__note">Only the {need.only!.map(slotTitle).join(' or ')} can do this</span>}
                 {state === 'busy' && selected && (
                   <span className="crew-card__note crew-card__note--warn">
                     This stops "{task?.label}". {stopText ?? 'Progress is lost.'}

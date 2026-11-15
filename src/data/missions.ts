@@ -1,5 +1,6 @@
 import type { ResourceKey } from '../stores/useResourceStore';
 import { MISSIONS_BATCH_1 } from './missionsBatch1';
+import { MISSIONS_BATCH_2 } from './missionsBatch2';
 
 export type MissionSeverity = 'normal' | 'critical';
 
@@ -23,6 +24,20 @@ export interface CrewNeed {
   allowFewer?: boolean;
   /** The whole crew takes part (evacuation, everybody rests). Busy jobs are stopped. */
   everyone?: boolean;
+  /** Only these people can do it (e.g. the medic examines the food). */
+  only?: CrewSlot[];
+}
+
+/** A second, independent risk of a choice (e.g. "10% chance to rip food packets"). */
+export interface SideRisk {
+  /** Chance in %. */
+  chance: number;
+  /** Chance grows with a counter (e.g. weeks of eating the newest food first): steps[counter]. */
+  steps?: { counter: string; chances: number[] };
+  effects: ChoiceEffect[];
+  text: string;
+  /** No risk while this station condition is active (e.g. the medic checked the pantry). */
+  unlessCondition?: string;
 }
 
 /** A mission that this choice can set off later (a chained consequence). */
@@ -37,6 +52,8 @@ export interface FollowUp {
   chance?: number;
   /** Does not happen if this flag is set by the time it is due (e.g. the problem was fixed for good). */
   unlessFlag?: string;
+  /** For patient missions: the same crew member stays the patient (sick → very sick). */
+  samePatient?: boolean;
 }
 
 /** A lasting state of the station (a temporary fix, smoke, a broken machine). Uses only the 7 resources. */
@@ -67,6 +84,10 @@ export interface Outcome {
   crewFatigue?: number;
   /** The crew sent must rest this many days after (they can't be sent). */
   crewRestDays?: number;
+  /** Patient missions: how the sick crew member is treated (missoes.txt, problems 1 and 2). */
+  illness?: 'rest' | 'isolation' | 'working' | 'severe';
+  /** Changes a counter (e.g. weeks in a row eating the newest food). */
+  counter?: { id: string; add?: number; reset?: boolean };
 }
 
 export interface Choice {
@@ -101,6 +122,11 @@ export interface Choice {
   onDone?: Outcome;
   /** If the crew is pulled off this job before it ends. */
   onInterrupt?: { effects: ChoiceEffect[]; text: string; resumeMissionId?: string };
+  /** Plain luck, not skill (e.g. how strong the storm is): no "It worked!", crew does not change the chance. */
+  noVerdict?: boolean;
+  /** A spacewalk: helped by extra food for spacewalkers (problem 6). */
+  spacewalk?: boolean;
+  sideRisk?: SideRisk;
 }
 
 export interface Mission {
@@ -126,8 +152,16 @@ export interface Mission {
   crewOutside?: boolean;
   /** Popup badge: real history, a NASA simulation, or a space tip (for follow-ups). */
   factKind?: 'history' | 'simulation' | 'tip';
-  /** Number of the mission in the team's missoes.txt. */
+  /** Number of the mission in the team's missoes.txt ("Missões detalhadas"). */
   sourceNumber?: number;
+  /** Id in missoes.txt: "M11" = detailed mission 11, "P3" = problem 3 (second part of the file). */
+  sourceRef?: string;
+  /** Comes back every N days until the mission ends (weekly choices). */
+  repeatEveryDays?: number;
+  /** Can happen more than once (e.g. someone gets sick). */
+  repeatable?: boolean;
+  /** About one sick crew member: {patient} in the texts. */
+  patient?: boolean;
 }
 
 /** Missions written before crew assignment existed need one person, two at most. */
@@ -138,45 +172,6 @@ export const MISSIONS_BASE: Mission[] = [
   // ACT 1 — Days 1-15 — Easy, learning
   // ═══════════════════════════════════════════════════════════════
 
-  {
-    id: 'mission-pantry',
-    title: 'The Mission Pantry',
-    description:
-      'The ship is being loaded before launch. You can bring more freeze-dried food or more ready-to-eat meals. This choice will affect the whole mission.',
-    act: 1,
-    day: 1,
-    system: 'food',
-    room: 'storage',
-    icon: '🍽',
-    severity: 'normal',
-    nasaSource: 'ISS ECLSS / NASA food research',
-    popup:
-      'On the ISS, freeze-dried meals last about 2 years but need water to prepare. Ready meals are tastier but take more cargo space. For a Mars mission, NASA needs food that lasts 5 years!',
-    choices: [
-      {
-        id: 'freeze-dried',
-        label: 'More freeze-dried food',
-        icon: '📦',
-        effects: [
-          { resource: 'food', delta: 0 },
-          { resource: 'water', delta: -5 },
-        ],
-        narrative:
-          'Good choice, Commander! You loaded freeze-dried food. It lasts longer, but every meal needs water to prepare. Water consumption will be a bit higher.',
-      },
-      {
-        id: 'ready-meals',
-        label: 'More ready-to-eat meals',
-        icon: '🍱',
-        effects: [
-          { resource: 'food', delta: -10 },
-          { resource: 'satisfaction', delta: 10 },
-        ],
-        narrative:
-          'The crew cheered when they saw the ready meals! Tastier food boosts morale. But there\'s less of it — you\'ll need to be careful with rationing later.',
-      },
-    ],
-  },
 
 
   {
@@ -408,107 +403,11 @@ export const MISSIONS_BASE: Mission[] = [
     ],
   },
 
-  {
-    id: 'food-old-or-new',
-    title: 'Food Old or New',
-    description:
-      'Some food packages are close to their expiration date. The vitamins inside break down over time. Do you eat the old food first or save it?',
-    act: 1,
-    day: 13,
-    system: 'food',
-    room: 'storage',
-    icon: '📅',
-    severity: 'normal',
-    nasaSource: 'NASA Food Technology',
-    popup:
-      'NASA found that after 2 years, vitamins in space food drop by 30-50%. Vitamin C is the worst — it can lose 75% in 3 years. That\'s why growing fresh food on a Mars mission is so important.',
-    choices: [
-      {
-        id: 'eat-old-first',
-        label: 'Eat the older food first',
-        icon: '📦',
-        effects: [
-          { resource: 'food', delta: -2 },
-          { resource: 'health', delta: -3 },
-        ],
-        narrative:
-          'You ate the older food. It tasted fine but had fewer vitamins. Maya noted the crew\'s nutrition levels are a bit lower.',
-      },
-      {
-        id: 'mix-old-new',
-        label: 'Mix old and new together',
-        icon: '🔀',
-        effects: [
-          { resource: 'food', delta: -1 },
-          { resource: 'health', delta: -1 },
-        ],
-        narrative:
-          'You mixed old and new food in every meal. Balanced approach! Nutrition isn\'t perfect but nothing goes to waste.',
-      },
-      {
-        id: 'throw-out-old',
-        label: 'Get rid of the expired food',
-        icon: '🗑️',
-        effects: [
-          { resource: 'food', delta: -8 },
-          { resource: 'health', delta: 3 },
-        ],
-        narrative:
-          'You threw out the old food. The crew gets better nutrition, but you just lost a chunk of your food supply.',
-      },
-    ],
-  },
 
   // ═══════════════════════════════════════════════════════════════
   // ACT 2 — Days 26-65 — Hard, cascading crises
   // ═══════════════════════════════════════════════════════════════
 
-  {
-    id: 'debris-storm',
-    title: 'Debris Storm!',
-    description:
-      'An old satellite broke apart and over 1500 pieces of debris are heading your way. Metal moving at 7 km/s — faster than a bullet!',
-    act: 2,
-    day: 14,
-    system: 'shielding',
-    room: 'bridge',
-    icon: '🛰️',
-    severity: 'critical',
-    nasaSource: 'ISS Debris Avoidance',
-    nasaYear: 2021,
-    popup:
-      'In 2021, the ISS had to dodge debris 3 times. Once, the crew sheltered in Soyuz capsules. At orbital speeds, even a paint fleck can crack a window. NASA tracks over 27,000 pieces of space junk.',
-    choices: [
-      {
-        id: 'escape-pods',
-        label: 'Everyone to escape pods',
-        icon: '🚀',
-        effects: [{ resource: 'satisfaction', delta: -8 }],
-        narrative:
-          'Everyone squeezed into the escape capsules for 2 hours. The debris passed without hitting the station. Safe!',
-      },
-      {
-        id: 'dodge-station',
-        label: 'Fire thrusters to dodge',
-        icon: '🎯',
-        effects: [{ resource: 'energy', delta: -8 }],
-        narrative:
-          'The pilot calculated a perfect dodge. Thrusters fired and the station moved to safety. But fuel is limited.',
-        successRate: 85,
-        failNarrative:
-          'The dodge wasn\'t enough. A small piece clipped a solar panel!',
-        failEffects: [{ resource: 'energy', delta: -15 }],
-      },
-      {
-        id: 'shelter-core',
-        label: 'Shelter in the most protected room',
-        icon: '🛡️',
-        effects: [{ resource: 'satisfaction', delta: -5 }],
-        narrative:
-          'The crew moved to the most shielded section. The debris passed safely. Less disruptive than the pods.',
-      },
-    ],
-  },
 
   {
     id: 'big-solar-storm',
@@ -676,61 +575,6 @@ export const MISSIONS_BASE: Mission[] = [
     ],
   },
 
-  {
-    id: 'radio-silence',
-    title: 'Radio Silence',
-    description:
-      'You can\'t reach Earth. No messages in, no messages out. You don\'t know if the problem is on your end or Earth\'s. You are alone.',
-    act: 2,
-    day: 23,
-    system: 'communication',
-    room: 'bridge',
-    icon: '📡',
-    severity: 'critical',
-    nasaSource: 'NASA CHAPEA Mars Simulation',
-    nasaYear: 2025,
-    popup:
-      'During NASA\'s CHAPEA Mars experiment, the 4-person crew went 2 full weeks without ANY communication from outside. They had to make every decision alone. This is what a real Mars mission would be like.',
-    choices: [
-      {
-        id: 'stay-calm',
-        label: 'Stay calm and keep the routine',
-        icon: '😌',
-        effects: [{ resource: 'satisfaction', delta: -5 }],
-        narrative:
-          'You told the crew to follow the normal schedule. Communication came back in 2 days — just a glitch on Earth\'s side.',
-      },
-      {
-        id: 'boost-antenna',
-        label: 'Redirect power to the antenna',
-        icon: '📡',
-        effects: [
-          { resource: 'energy', delta: -8 },
-          { resource: 'satisfaction', delta: 3 },
-        ],
-        narrative:
-          'You boosted the signal. Got through! Earth says it was a minor equipment problem on their end.',
-        successRate: 70,
-        failNarrative:
-          'Still no contact. You used extra energy for nothing. The crew is worried.',
-        failEffects: [
-          { resource: 'energy', delta: -8 },
-          { resource: 'satisfaction', delta: -10 },
-        ],
-      },
-      {
-        id: 'emergency-protocol',
-        label: 'Activate emergency procedures',
-        icon: '🚨',
-        effects: [
-          { resource: 'energy', delta: -5 },
-          { resource: 'satisfaction', delta: -12 },
-        ],
-        narrative:
-          'You assumed the worst and prepared for emergency. It was just a glitch. But the crew is now nervous.',
-      },
-    ],
-  },
 
   {
     id: 'crew-fight',
@@ -940,59 +784,6 @@ export const MISSIONS_BASE: Mission[] = [
     ],
   },
 
-  {
-    id: 'food-running-low',
-    title: 'Food Running Low',
-    description:
-      'You counted the food supply. There\'s enough to last, but only if you eat smaller portions. The crew is already hungry from hard work.',
-    act: 2,
-    day: 30,
-    system: 'food',
-    room: 'storage',
-    icon: '🍽',
-    severity: 'normal',
-    nasaSource: 'NASA Mars Mission Planning',
-    popup:
-      'NASA plans for each astronaut to eat about 2,500 calories per day. But in space, astronauts often lose their appetite and eat less. On a Mars mission, food resupply is impossible — what you bring is all you get.',
-    choices: [
-      {
-        id: 'ration-equally',
-        label: 'Everyone eats the same smaller amount',
-        icon: '⚖️',
-        effects: [
-          { resource: 'food', delta: 3 },
-          { resource: 'satisfaction', delta: -8 },
-          { resource: 'health', delta: -3 },
-        ],
-        narrative:
-          'Everyone gets the same smaller portions. Fair, but the crew is hungry. Less energy for work. Food will last longer though.',
-      },
-      {
-        id: 'greenhouse-boost',
-        label: 'Push the greenhouse to grow more',
-        icon: '🌱',
-        effects: [
-          { resource: 'food', delta: 5 },
-          { resource: 'energy', delta: -5 },
-          { resource: 'water', delta: -3 },
-        ],
-        narrative:
-          'You boosted the greenhouse lights and watering. More food coming, but it costs energy and water. The next harvest should help.',
-      },
-      {
-        id: 'skip-meals',
-        label: 'Skip one meal a day',
-        icon: '⏭️',
-        effects: [
-          { resource: 'food', delta: 5 },
-          { resource: 'health', delta: -5 },
-          { resource: 'satisfaction', delta: -10 },
-        ],
-        narrative:
-          'The crew skips lunch. Food lasts longer, but everyone is weaker and grumpy. Mistakes start happening.',
-      },
-    ],
-  },
 
   {
     id: 'water-rationing',
@@ -1541,7 +1332,7 @@ export const MISSIONS_BASE: Mission[] = [
  * Every mission in the game: the missions above plus the ones rewritten from the team's
  * missoes.txt, one batch of up to 10 at a time (src/data/missionsBatch1.ts = missions 1-10).
  */
-export const MISSIONS: Mission[] = [...MISSIONS_BASE, ...MISSIONS_BATCH_1];
+export const MISSIONS: Mission[] = [...MISSIONS_BASE, ...MISSIONS_BATCH_1, ...MISSIONS_BATCH_2];
 
 export function getMission(id: string): Mission | undefined {
   return MISSIONS.find((m) => m.id === id);

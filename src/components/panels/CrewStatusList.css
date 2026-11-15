@@ -93,3 +93,8 @@
 .crew-status__tired--4 {
   color: #f87171;
 }
+
+.crew-status__row--sick .crew-status__what {
+  color: #f87171;
+  font-weight: 600;
+}

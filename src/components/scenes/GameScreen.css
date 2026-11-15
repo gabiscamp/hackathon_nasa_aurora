@@ -140,3 +140,44 @@
     font-size: 18px;
   }
 }
+
+/* Morning news (someone got better, got sick…): below the top buttons, above the world. */
+.game-news {
+  position: absolute;
+  top: 104px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9;
+  width: min(520px, calc(100% - 24px));
+  padding: 12px 16px;
+  font-size: 17px;
+  line-height: 1.4;
+  color: #f0ece4;
+  background: rgba(10, 14, 32, 0.95);
+  border: 2px solid rgba(77, 201, 246, 0.6);
+  border-radius: 12px;
+}
+
+.game-news__title {
+  margin: 0 0 6px;
+  font-size: 18px;
+  color: #4dc9f6;
+}
+
+.game-news ul {
+  margin: 0 0 10px;
+  padding-left: 20px;
+}
+
+.game-news__ok {
+  min-height: 44px;
+  padding: 6px 18px;
+  font: inherit;
+  font-weight: 700;
+}
+
+@media (max-width: 960px) {
+  .game-news {
+    top: 230px;
+  }
+}

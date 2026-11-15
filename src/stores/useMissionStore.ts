@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { MISSIONS, type Mission, type StationCondition } from '../data/missions';
+import { MISSIONS, type CrewSlot, type Mission, type StationCondition } from '../data/missions';
 import type { Resources } from './useResourceStore';
 
 /** A follow-up mission waiting for its day (set off by an earlier choice). */
@@ -8,6 +8,8 @@ export interface ScheduledEvent {
   missionId: string;
   day: number;
   unlessFlag?: string;
+  /** Patient missions: who is sick (kept from the mission that set it off). */
+  patient?: CrewSlot;
 }
 
 /** A lasting station condition, with the day it started (and ends, when it has a length). */
@@ -44,6 +46,12 @@ interface MissionState {
   lockedChoices: Record<string, string[]>;
   /** Resources when the player started the day (the day summary compares with it). */
   dayStart: Resources | null;
+  /** Who is sick in each open patient mission. */
+  patients: Record<string, CrewSlot>;
+  /** Counters set by choices (e.g. weeks in a row eating the newest food). */
+  counters: Record<string, number>;
+  /** What happened this morning (someone got better, got sick…), shown when the day starts. */
+  news: string[];
 
   setMission: (mission: Mission) => void;
   completeMission: (missionId: string) => void;
@@ -66,6 +74,9 @@ export const useMissionStore = create<MissionState>()(
       decisions: [],
       lockedChoices: {},
       dayStart: null,
+      patients: {},
+      counters: {},
+      news: [],
 
       setMission: (mission) => set({ currentMission: mission }),
 
@@ -104,12 +115,15 @@ export const useMissionStore = create<MissionState>()(
           decisions: [],
           lockedChoices: {},
           dayStart: null,
+          patients: {},
+          counters: {},
+          news: [],
         }),
     }),
     {
       name: 'aurora-mission-store',
-      version: 2,
-      // v1 saves had only currentMission + completedMissions: the new lists start empty.
+      version: 3,
+      // v1/v2 saves had only currentMission + completedMissions: the new lists start empty.
       migrate: (persisted) => {
         const old = (persisted ?? {}) as Partial<MissionState>;
         return {
@@ -123,6 +137,9 @@ export const useMissionStore = create<MissionState>()(
           decisions: old.decisions ?? [],
           lockedChoices: old.lockedChoices ?? {},
           dayStart: old.dayStart ?? null,
+          patients: old.patients ?? {},
+          counters: old.counters ?? {},
+          news: old.news ?? [],
         } as MissionState;
       },
     },

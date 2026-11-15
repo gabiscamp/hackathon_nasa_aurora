@@ -157,6 +157,7 @@ export const MISSIONS_BATCH_1: Mission[] = [
       },
       {
         id: 'eva-inspect',
+        spacewalk: true,
         label: 'Check from outside',
         icon: '🧑‍🚀',
         crew: { min: 1, best: ['engineer'] },
@@ -198,6 +199,7 @@ export const MISSIONS_BATCH_1: Mission[] = [
     choices: [
       {
         id: 'fix-now-eva',
+        spacewalk: true,
         label: 'Fix it now with a spacewalk',
         icon: '🧑‍🚀',
         crew: { min: 1, best: ['engineer'] },
@@ -593,6 +595,7 @@ export const MISSIONS_BATCH_1: Mission[] = [
       },
       {
         id: 'buddy-rescue',
+        spacewalk: true,
         label: 'Send a buddy to help',
         icon: '🤝',
         crew: { min: 1, max: 1 },
@@ -1010,6 +1013,7 @@ export const MISSIONS_BATCH_1: Mission[] = [
     choices: [
       {
         id: 'two-person-eva',
+        spacewalk: true,
         label: 'Two-person spacewalk',
         icon: '🧑‍🚀',
         crew: { min: 2, max: 2, best: ['engineer'], allowFewer: true },
@@ -1184,6 +1188,7 @@ export const MISSIONS_BATCH_1: Mission[] = [
     choices: [
       {
         id: 'spacewalk',
+        spacewalk: true,
         label: SPACEWALK,
         icon: '🧑‍🚀',
         crew: { min: 1, max: 2, best: ['engineer'] },

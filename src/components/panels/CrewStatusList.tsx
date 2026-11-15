@@ -6,14 +6,28 @@ import { useCrewRoster } from './useCrewRoster';
 import './CrewStatusList.css';
 
 /** One line of text about what a crew member is doing on `day`. */
+const SICK_TEXT: Record<string, string> = {
+  pending: 'Sick: needs a decision',
+  rest: 'Sick: resting with care',
+  isolation: 'Sick: in isolation',
+  severe: 'Very sick: needs constant care',
+};
+
 export function dutyText(duty: CrewDuty, day: number): string {
   const state = availability(duty, day);
+  if (state === 'sick' && duty.illness) {
+    const until = duty.illness.untilDay ? ` until Day ${duty.illness.untilDay}` : '';
+    return `${SICK_TEXT[duty.illness.mode] ?? 'Sick'}${until}`;
+  }
   if (state === 'resting') return `Resting until Day ${duty.restUntilDay}`;
   if (state === 'busy' && duty.task) {
     const room = ROOM_NAMES[duty.task.room as RoomId] ?? duty.task.room;
     const until = duty.task.untilDay > day ? ` until Day ${duty.task.untilDay}` : ' today';
-    return `Busy: ${duty.task.label} (${room})${until}`;
+    const sick = duty.illness?.mode === 'working' ? ' · sick, still working' : '';
+    if (duty.task.missionId === 'crew-sick' || duty.task.missionId === 'crew-very-sick') return `Busy: ${duty.task.label}${sick}`;
+    return `Busy: ${duty.task.label} (${room})${until}${sick}`;
   }
+  if (duty.illness?.mode === 'working') return 'Sick, but still working';
   return 'Free';
 }
 

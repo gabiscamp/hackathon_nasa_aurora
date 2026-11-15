@@ -47,6 +47,7 @@
 }
 
 .crew-card--resting,
+.crew-card--sick,
 .crew-card:disabled {
   opacity: 0.55;
   cursor: not-allowed;
@@ -93,7 +94,8 @@
   color: #fbbf24;
 }
 
-.crew-card--resting .crew-card__state {
+.crew-card--resting .crew-card__state,
+.crew-card--sick .crew-card__state {
   color: #f87171;
 }
 
