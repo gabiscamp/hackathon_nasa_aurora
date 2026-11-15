@@ -1,6 +1,7 @@
 import type { ResourceKey } from '../stores/useResourceStore';
 import { MISSIONS_BATCH_1 } from './missionsBatch1';
 import { MISSIONS_BATCH_2 } from './missionsBatch2';
+import { MISSIONS_BATCH_3 } from './missionsBatch3';
 
 export type MissionSeverity = 'normal' | 'critical';
 
@@ -38,6 +39,8 @@ export interface SideRisk {
   text: string;
   /** No risk while this station condition is active (e.g. the medic checked the pantry). */
   unlessCondition?: string;
+  /** Flags set when it happens (e.g. 'pests' cancels a future harvest). */
+  setFlags?: string[];
 }
 
 /** A mission that this choice can set off later (a chained consequence). */
@@ -54,6 +57,18 @@ export interface FollowUp {
   unlessFlag?: string;
   /** For patient missions: the same crew member stays the patient (sick → very sick). */
   samePatient?: boolean;
+  /** Only when a counter has reached this (e.g. food thrown away 3 times → trash problem). */
+  requiresCounter?: { id: string; atLeast: number };
+}
+
+/** Resources that change later (e.g. replanted lettuce gives food in 15 days). */
+export interface DelayedEffect {
+  afterDays: number;
+  effects: ChoiceEffect[];
+  /** Morning news when it happens. */
+  text: string;
+  /** Cancelled if this flag is set by then (e.g. pests ate the plants). */
+  unlessFlag?: string;
 }
 
 /** A lasting state of the station (a temporary fix, smoke, a broken machine). Uses only the 7 resources. */
@@ -67,6 +82,10 @@ export interface StationCondition {
   days?: number;
   /** Makes every job harder while it lasts (in %). */
   successPenalty?: number;
+  /** Starts this many days later (e.g. the bigger greenhouse feeds the crew from day 3). */
+  startsInDays?: number;
+  /** Chance (%) each day that someone gets sick (problem 1), growing day by day: [day 1, day 2, …]. */
+  sickChance?: number[];
 }
 
 /** What else a choice does, besides changing resources. */
@@ -88,6 +107,7 @@ export interface Outcome {
   illness?: 'rest' | 'isolation' | 'working' | 'severe';
   /** Changes a counter (e.g. weeks in a row eating the newest food). */
   counter?: { id: string; add?: number; reset?: boolean };
+  delayed?: DelayedEffect[];
 }
 
 export interface Choice {
@@ -114,6 +134,14 @@ export interface Choice {
   needsCandles?: number;
   /** Not offered when this flag is set. */
   hiddenIfFlag?: string;
+  /** Only offered when this flag is set (e.g. lettuce saved for the party). */
+  requiresFlag?: string;
+  /** Not offered while this station condition is active (e.g. no video call without radio contact). */
+  hiddenIfCondition?: string;
+  /** Extra effects when a "Best:" specialist is sent (e.g. the medic gives the vitamins: +15 instead of +10). */
+  bestBonus?: ChoiceEffect[];
+  /** A limited stock (e.g. 3 uses of vitamin supplements): locked when the counter reaches max. */
+  maxUses?: { counter: string; max: number };
   /** If it fails, the mission comes back at once without this choice. */
   retryOnFail?: boolean;
   onSuccess?: Outcome;
@@ -162,6 +190,14 @@ export interface Mission {
   repeatable?: boolean;
   /** About one sick crew member: {patient} in the texts. */
   patient?: boolean;
+  /** About one crew member who is not sick (the birthday person): {honoree} in the texts. */
+  honoree?: boolean;
+  /** Happens by itself when a station bar crosses a line (once, or again if repeatable). */
+  trigger?: { resource: ResourceKey; below?: number; above?: number; fromDay?: number; chance?: number };
+  /** A fixed-day mission comes later if this flag is set (e.g. the harvest is 3 days late). */
+  delayIfFlag?: { flag: string; days: number };
+  /** A fixed-day mission does not happen if this flag is set (e.g. the plants died). */
+  skipIfFlag?: string;
 }
 
 /** Missions written before crew assignment existed need one person, two at most. */
@@ -349,59 +385,6 @@ export const MISSIONS_BASE: Mission[] = [
   },
 
 
-  {
-    id: 'first-harvest',
-    title: 'First Harvest',
-    description:
-      'The greenhouse lettuce is ready! Fresh food in space is rare and precious. But do you eat it now or save it for when food runs low?',
-    act: 1,
-    day: 12,
-    system: 'food',
-    room: 'lab',
-    icon: '🥬',
-    severity: 'normal',
-    nasaSource: 'NASA Veggie Experiment',
-    nasaYear: 2015,
-    popup:
-      'In 2015, ISS astronauts ate space-grown lettuce for the first time! The Veggie experiment grew red romaine lettuce under LED lights. Astronaut Scott Kelly said it tasted "awesome." Fresh food also gives vitamins that packaged food loses over time.',
-    choices: [
-      {
-        id: 'eat-now',
-        label: 'Fresh salad for everyone tonight',
-        icon: '🥗',
-        effects: [
-          { resource: 'food', delta: 5 },
-          { resource: 'satisfaction', delta: 8 },
-          { resource: 'health', delta: 3 },
-        ],
-        narrative:
-          'The crew had their first fresh meal in space! The lettuce was crunchy and green. Everyone felt healthier and happier.',
-      },
-      {
-        id: 'save-it',
-        label: 'Store it for later',
-        icon: '📦',
-        effects: [
-          { resource: 'food', delta: 8 },
-          { resource: 'satisfaction', delta: -2 },
-        ],
-        narrative:
-          'You stored the lettuce for later. Smart planning! But the crew was hoping for fresh food today.',
-      },
-      {
-        id: 'replant-half',
-        label: 'Eat half, replant the other half',
-        icon: '🌱',
-        effects: [
-          { resource: 'food', delta: 3 },
-          { resource: 'satisfaction', delta: 5 },
-          { resource: 'health', delta: 2 },
-        ],
-        narrative:
-          'You ate some and replanted the roots. Small salad tonight, bigger harvest next time. The crew liked the balance.',
-      },
-    ],
-  },
 
 
   // ═══════════════════════════════════════════════════════════════
@@ -524,56 +507,6 @@ export const MISSIONS_BASE: Mission[] = [
   },
 
 
-  {
-    id: 'trash-piling-up',
-    title: 'Trash Piling Up',
-    description:
-      'There\'s nowhere to throw trash in space. Bags of garbage are piling up. The smell is getting bad and it\'s taking up space the crew needs.',
-    act: 2,
-    day: 21,
-    system: 'health',
-    room: 'storage',
-    icon: '🗑️',
-    severity: 'normal',
-    nasaSource: 'ISS Waste Management',
-    popup:
-      'On the ISS, trash is packed into empty cargo ships that burn up in the atmosphere. On a Mars mission, there\'s no cargo ship — you\'re stuck with your trash! NASA is researching ways to turn trash into useful things like radiation shielding.',
-    choices: [
-      {
-        id: 'compact-store',
-        label: 'Compact it and store it tightly',
-        icon: '📦',
-        effects: [
-          { resource: 'satisfaction', delta: -5 },
-          { resource: 'health', delta: -2 },
-        ],
-        narrative:
-          'You crushed the trash into tight cubes. It takes less space but the smell lingers. The crew is not happy about living near garbage.',
-      },
-      {
-        id: 'airlock-dump',
-        label: 'Dump it out the airlock',
-        icon: '🚀',
-        effects: [
-          { resource: 'oxygen', delta: -3 },
-          { resource: 'satisfaction', delta: 5 },
-        ],
-        narrative:
-          'You vented the trash into space. Clean station! But you lost a bit of air each time the airlock opened, and now there\'s more space junk.',
-      },
-      {
-        id: 'recycle-what-you-can',
-        label: 'Sort and recycle what you can',
-        icon: '♻️',
-        effects: [
-          { resource: 'energy', delta: -3 },
-          { resource: 'satisfaction', delta: 3 },
-        ],
-        narrative:
-          'The crew spent a day sorting trash. Some plastics were melted for 3D printing, food waste went to compost for the greenhouse. Good work!',
-      },
-    ],
-  },
 
 
   {
@@ -733,56 +666,6 @@ export const MISSIONS_BASE: Mission[] = [
   },
 
 
-  {
-    id: 'birthday-on-station',
-    title: 'Birthday on the Station!',
-    description:
-      'It\'s a crew member\'s birthday! How do you celebrate when you\'re millions of kilometers from home?',
-    act: 2,
-    day: 29,
-    system: 'morale',
-    room: 'common',
-    icon: '🎂',
-    severity: 'normal',
-    nasaSource: 'ISS Birthday Traditions',
-    popup:
-      'Astronaut Scott Kelly celebrated two birthdays on the ISS during his year in space. NASA sent a special tortilla "cake" and the crew sang Happy Birthday in zero gravity. Birthday cards from family were emailed up.',
-    choices: [
-      {
-        id: 'full-party',
-        label: 'Throw a full party with extra food',
-        icon: '🎉',
-        effects: [
-          { resource: 'food', delta: -5 },
-          { resource: 'satisfaction', delta: 15 },
-          { resource: 'energy', delta: -2 },
-        ],
-        narrative:
-          'The crew made a tortilla cake, decorated the common room, and took the day easy. Best day on the station so far!',
-      },
-      {
-        id: 'small-celebration',
-        label: 'A small celebration after work',
-        icon: '🎈',
-        effects: [
-          { resource: 'food', delta: -2 },
-          { resource: 'satisfaction', delta: 8 },
-        ],
-        narrative:
-          'After a normal work day, you had a small dessert and sang Happy Birthday. Simple but meaningful.',
-      },
-      {
-        id: 'normal-day',
-        label: 'Sorry, we need to keep working',
-        icon: '📋',
-        effects: [
-          { resource: 'satisfaction', delta: -8 },
-        ],
-        narrative:
-          'You kept the normal schedule. The birthday person said they understood, but they looked disappointed. The rest of the crew was quiet.',
-      },
-    ],
-  },
 
 
   {
@@ -1061,120 +944,7 @@ export const MISSIONS_BASE: Mission[] = [
     ],
   },
 
-  {
-    id: 'cargo-ship-collision',
-    title: 'Cargo Ship Collision!',
-    description:
-      'An unmanned cargo ship approaching the station lost its navigation. It\'s drifting toward you! You have minutes to react.',
-    act: 3,
-    day: 40,
-    system: 'shielding',
-    room: 'bridge',
-    icon: '🚀',
-    severity: 'critical',
-    nasaSource: 'MIR-Progress Collision',
-    nasaYear: 1997,
-    popup:
-      'THIS REALLY HAPPENED! In 1997, an unmanned Progress cargo ship crashed into the MIR space station during a docking test. It punctured the Spektr module, causing rapid decompression. The crew had to seal the module in minutes to survive.',
-    choices: [
-      {
-        id: 'dodge-thrusters',
-        label: 'Fire thrusters to move away',
-        icon: '🎯',
-        effects: [
-          { resource: 'energy', delta: -12 },
-        ],
-        narrative:
-          'The pilot fired thrusters and the station dodged just in time! The cargo ship drifted past. But you used a lot of fuel.',
-        successRate: 75,
-        failNarrative:
-          'Not enough time! The cargo ship clipped the station. A module is damaged and losing air.',
-        failEffects: [
-          { resource: 'energy', delta: -10 },
-          { resource: 'oxygen', delta: -15 },
-          { resource: 'health', delta: -8 },
-        ],
-      },
-      {
-        id: 'remote-redirect',
-        label: 'Try to redirect the cargo ship remotely',
-        icon: '📡',
-        effects: [{ resource: 'energy', delta: -5 }],
-        narrative:
-          'You sent commands to the cargo ship\'s thrusters. It turned just enough to miss! The cargo is lost in space though.',
-        successRate: 55,
-        failNarrative:
-          'The cargo ship didn\'t respond. It scraped along the hull, damaging solar panels.',
-        failEffects: [
-          { resource: 'energy', delta: -15 },
-          { resource: 'satisfaction', delta: -10 },
-        ],
-      },
-      {
-        id: 'brace-evacuate',
-        label: 'Brace for impact and prepare to seal rooms',
-        icon: '🛡️',
-        effects: [
-          { resource: 'oxygen', delta: -8 },
-          { resource: 'satisfaction', delta: -12 },
-          { resource: 'health', delta: -5 },
-        ],
-        narrative:
-          'The ship hit and punctured one module. The crew sealed it in seconds — practiced this drill many times. You lost that module\'s equipment but everyone is alive.',
-      },
-    ],
-  },
 
-  {
-    id: 'who-eats-more',
-    title: 'Who Eats More?',
-    description:
-      'The food tracking system shows someone is eating extra portions at night. Food is running low. Do you investigate or trust the crew?',
-    act: 3,
-    day: 42,
-    system: 'food',
-    room: 'common',
-    icon: '🍪',
-    severity: 'normal',
-    nasaSource: 'NASA Behavioral Health / Submarine Studies',
-    popup:
-      'In isolated environments like submarines and Antarctic stations, stress eating is very common. NASA studies show astronauts may eat more when anxious. On a Mars mission, food is limited and every calorie is tracked.',
-    choices: [
-      {
-        id: 'investigate',
-        label: 'Check the camera recordings',
-        icon: '📹',
-        effects: [
-          { resource: 'satisfaction', delta: -8 },
-          { resource: 'food', delta: 2 },
-        ],
-        narrative:
-          'You found who it was. They were stress eating from anxiety. You talked to them privately. They apologized. But the crew feels watched.',
-      },
-      {
-        id: 'lock-food',
-        label: 'Lock the food storage',
-        icon: '🔒',
-        effects: [
-          { resource: 'food', delta: 3 },
-          { resource: 'satisfaction', delta: -10 },
-        ],
-        narrative:
-          'Nobody can snack anymore. Food is safe but the crew feels like prisoners. Trust is damaged.',
-      },
-      {
-        id: 'group-talk',
-        label: 'Talk to the whole crew about it',
-        icon: '🗣️',
-        effects: [
-          { resource: 'food', delta: 1 },
-          { resource: 'satisfaction', delta: 3 },
-        ],
-        narrative:
-          'You brought it up gently at a crew meeting. The person admitted it on their own. The crew was understanding — everyone is stressed. Problem solved with trust.',
-      },
-    ],
-  },
 
   {
     id: 'transmit-or-save',
@@ -1332,7 +1102,7 @@ export const MISSIONS_BASE: Mission[] = [
  * Every mission in the game: the missions above plus the ones rewritten from the team's
  * missoes.txt, one batch of up to 10 at a time (src/data/missionsBatch1.ts = missions 1-10).
  */
-export const MISSIONS: Mission[] = [...MISSIONS_BASE, ...MISSIONS_BATCH_1, ...MISSIONS_BATCH_2];
+export const MISSIONS: Mission[] = [...MISSIONS_BASE, ...MISSIONS_BATCH_1, ...MISSIONS_BATCH_2, ...MISSIONS_BATCH_3];
 
 export function getMission(id: string): Mission | undefined {
   return MISSIONS.find((m) => m.id === id);

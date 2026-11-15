@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { MISSIONS, type CrewSlot, type Mission, type StationCondition } from '../data/missions';
+import { MISSIONS, type ChoiceEffect, type CrewSlot, type Mission, type StationCondition } from '../data/missions';
 import type { Resources } from './useResourceStore';
 
 /** A follow-up mission waiting for its day (set off by an earlier choice). */
@@ -52,6 +52,8 @@ interface MissionState {
   counters: Record<string, number>;
   /** What happened this morning (someone got better, got sick…), shown when the day starts. */
   news: string[];
+  /** Resources that change on a later day (a harvest, a surprise). */
+  pendingEffects: { day: number; effects: ChoiceEffect[]; text: string; unlessFlag?: string }[];
 
   setMission: (mission: Mission) => void;
   completeMission: (missionId: string) => void;
@@ -77,6 +79,7 @@ export const useMissionStore = create<MissionState>()(
       patients: {},
       counters: {},
       news: [],
+      pendingEffects: [],
 
       setMission: (mission) => set({ currentMission: mission }),
 
@@ -118,11 +121,12 @@ export const useMissionStore = create<MissionState>()(
           patients: {},
           counters: {},
           news: [],
+          pendingEffects: [],
         }),
     }),
     {
       name: 'aurora-mission-store',
-      version: 3,
+      version: 4,
       // v1/v2 saves had only currentMission + completedMissions: the new lists start empty.
       migrate: (persisted) => {
         const old = (persisted ?? {}) as Partial<MissionState>;
@@ -140,6 +144,7 @@ export const useMissionStore = create<MissionState>()(
           patients: old.patients ?? {},
           counters: old.counters ?? {},
           news: old.news ?? [],
+          pendingEffects: old.pendingEffects ?? [],
         } as MissionState;
       },
     },

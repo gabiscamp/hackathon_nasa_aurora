@@ -104,7 +104,8 @@ export function patientOf(missionId: string): CrewSlot | undefined {
 /** Replaces {patient} with the sick crew member's name. */
 export function fillPatient(text: string, missionId: string): string {
   const p = patientOf(missionId);
-  return text.split('{patient}').join(p ? crewName(p) : 'A crew member');
+  const name = p ? crewName(p) : 'A crew member';
+  return text.split('{patient}').join(name).split('{honoree}').join(name);
 }
 
 // ───────────────────────── Choices ─────────────────────────
@@ -124,6 +125,11 @@ function canBeSent(slot: CrewSlot, day: number): boolean {
 export function choiceState(mission: Mission, choice: Choice, day: number = currentDay()): ChoiceState {
   const { flags, candles, lockedChoices } = useMissionStore.getState();
   if (choice.hiddenIfFlag && flags.includes(choice.hiddenIfFlag)) return { hidden: true, lockedReason: null };
+  if (choice.requiresFlag && !flags.includes(choice.requiresFlag)) return { hidden: true, lockedReason: null };
+  if (choice.hiddenIfCondition && activeConditions(day).some((c) => c.id === choice.hiddenIfCondition)) return { hidden: true, lockedReason: null };
+  if (choice.maxUses && (useMissionStore.getState().counters[choice.maxUses.counter] ?? 0) >= choice.maxUses.max) {
+    return { hidden: false, lockedReason: 'None left' };
+  }
   if ((lockedChoices[mission.id] ?? []).includes(choice.id)) return { hidden: true, lockedReason: null };
   const only = crewNeed(choice).only;
   // "Se o médico estiver cuidando de alguém, essa escolha some": an only-specialist who is sick,
@@ -171,7 +177,9 @@ export function successChance(choice: Choice, slots: CrewSlot[], day: number): n
 // ───────────────────────── Days and events ─────────────────────────
 
 function activeConditions(day: number): ActiveCondition[] {
-  return useMissionStore.getState().conditions.filter((c) => c.untilDay === undefined || c.untilDay >= day);
+  return useMissionStore
+    .getState()
+    .conditions.filter((c) => c.startDay <= day && (c.untilDay === undefined || c.untilDay >= day));
 }
 
 /** Missions that can't happen again once solved (repeatable ones can). */
@@ -329,7 +337,39 @@ function dayTick(day: number): void {
 
   const { conditions } = useMissionStore.getState();
   for (const c of conditions) {
-    if (c.startDay < day && (c.untilDay === undefined || c.untilDay >= day)) applyEffects(useResourceStore.getState(), c.daily);
+    if (c.startDay < day && (c.untilDay === undefined || c.untilDay >= day)) {
+      applyEffects(useResourceStore.getState(), c.daily);
+      // Some lasting problems can make someone sick, more likely each day (e.g. no vitamins).
+      if (c.sickChance?.length) {
+        const chance = c.sickChance[Math.min(day - c.startDay - 1, c.sickChance.length - 1)];
+        const who = pickHealthy();
+        if (who && rollSuccess(chance)) startSickness(who, day, `got sick (${c.label.toLowerCase()}).`);
+      }
+    }
+  }
+
+  // Effects that were waiting for today (a harvest, a surprise in the pantry…).
+  const pending = useMissionStore.getState().pendingEffects;
+  const flagsNow = useMissionStore.getState().flags;
+  for (const p of pending.filter((x) => x.day <= day)) {
+    if (p.unlessFlag && flagsNow.includes(p.unlessFlag)) continue;
+    applyEffects(useResourceStore.getState(), p.effects);
+    addNews(p.text);
+  }
+  useMissionStore.setState({ pendingEffects: pending.filter((x) => x.day > day) });
+
+  // Missions that start by themselves when a bar crosses a line (e.g. food below 20).
+  const res = useResourceStore.getState();
+  for (const m of MISSIONS) {
+    const t = m.trigger;
+    if (!t || isClosed(m.id) || day < (t.fromDay ?? 1)) continue;
+    const st = useMissionStore.getState();
+    if (st.openEvents.includes(m.id) || st.scheduled.some((x) => x.missionId === m.id)) continue;
+    const v = res[t.resource];
+    const crossed = (t.below !== undefined && v < t.below) || (t.above !== undefined && v > t.above);
+    if (crossed && rollSuccess(t.chance ?? 100)) {
+      useMissionStore.setState({ scheduled: [...st.scheduled, { missionId: m.id, day }] });
+    }
   }
   useMissionStore.setState({
     conditions: useMissionStore.getState().conditions.filter((c) => c.untilDay === undefined || c.untilDay >= day),
@@ -354,12 +394,12 @@ export function advanceTo(toDay: number): void {
 /** Gives a patient mission its sick crew member (the one set off, or someone healthy). */
 function assignPatient(missionId: string, day: number, preferred?: CrewSlot): void {
   const m = getMission(missionId);
-  if (!m?.patient) return;
+  if (!m?.patient && !m?.honoree) return;
   const patients = useMissionStore.getState().patients;
   const patient = preferred ?? patients[missionId] ?? pickHealthy();
   if (!patient) return;
   const ill = useDutyStore.getState().crew[patient].illness;
-  if (!ill) setIllness(patient, { mode: 'pending', sinceDay: day });
+  if (m.patient && !ill) setIllness(patient, { mode: 'pending', sinceDay: day });
   useMissionStore.setState({ patients: { ...useMissionStore.getState().patients, [missionId]: patient } });
 }
 
@@ -375,7 +415,19 @@ export function openDay(day: number): string[] {
     assignPatient(id, day, patient);
   };
   for (const s of due) if (!s.unlessFlag || !flags.includes(s.unlessFlag)) add(s.missionId, s.patient);
-  for (const m of MISSIONS) if (m.day === day && !m.followUpOnly && !useMissionStore.getState().completedMissions.includes(m.id)) add(m.id);
+  for (const m of MISSIONS) {
+    if (m.day !== day || m.followUpOnly || useMissionStore.getState().completedMissions.includes(m.id)) continue;
+    if (m.skipIfFlag && flags.includes(m.skipIfFlag)) {
+      // It will never happen (e.g. the plants died): close it so it is not waited for.
+      useMissionStore.setState({ completedMissions: [...useMissionStore.getState().completedMissions, m.id] });
+      continue;
+    }
+    if (m.delayIfFlag && flags.includes(m.delayIfFlag.flag) && !keep.some((k) => k.missionId === m.id)) {
+      keep.push({ missionId: m.id, day: day + m.delayIfFlag.days });
+      continue;
+    }
+    add(m.id);
+  }
   const r = useResourceStore.getState();
   useMissionStore.setState({
     openEvents: open,
@@ -398,6 +450,7 @@ export function openDay(day: number): string[] {
 function schedule(followUps: FollowUp[], day: number, fromMissionId?: string): string[] {
   const startedNow: string[] = [];
   for (const f of followUps) {
+    if (f.requiresCounter && (useMissionStore.getState().counters[f.requiresCounter.id] ?? 0) < f.requiresCounter.atLeast) continue;
     if (f.chance !== undefined && !rollSuccess(f.chance)) continue;
     const mission = getMission(f.missionId);
     if (!mission) continue;
@@ -428,17 +481,26 @@ function applyOutcome(outcome: Outcome, slots: CrewSlot[], day: number, missionI
   for (const c of outcome.addConditions ?? []) {
     conditions = [
       ...conditions.filter((x) => x.id !== c.id),
-      { ...c, startDay: day, untilDay: c.days !== undefined ? day + c.days : undefined },
+      {
+        ...c,
+        startDay: day + (c.startsInDays ?? 0),
+        untilDay: c.days !== undefined ? day + (c.startsInDays ?? 0) + c.days : undefined,
+      },
     ];
   }
   let flags = state.flags.filter((f) => !(outcome.clearFlags ?? []).includes(f));
   for (const f of outcome.setFlags ?? []) if (!flags.includes(f)) flags = [...flags, f];
   const counters = { ...state.counters };
   if (outcome.counter) counters[outcome.counter.id] = outcome.counter.reset ? 0 : (counters[outcome.counter.id] ?? 0) + (outcome.counter.add ?? 1);
+  const pendingEffects = [
+    ...state.pendingEffects,
+    ...(outcome.delayed ?? []).map((d) => ({ day: day + d.afterDays, effects: d.effects, text: d.text, unlessFlag: d.unlessFlag })),
+  ];
   useMissionStore.setState({
     conditions,
     flags,
     counters,
+    pendingEffects,
     candles: Math.max(0, state.candles + (outcome.candles ?? 0)),
   });
 
@@ -557,7 +619,12 @@ export function sendCrew(mission: Mission, choice: Choice, slots: CrewSlot[], da
   // Plain luck (noVerdict) uses the written chance; skill jobs use the crew's chance.
   const chance = choice.noVerdict && choice.successRate !== undefined ? choice.successRate : successChance(choice, slots, day);
   const success = chance === null ? true : rollSuccess(chance);
-  const effects = success ? choice.effects : (choice.failEffects ?? choice.effects);
+  const need = crewNeed(choice);
+  const specialist = !!need.best && slots.some((s) => need.best!.includes(s));
+  const effects = [
+    ...(success ? choice.effects : (choice.failEffects ?? choice.effects)),
+    ...(success && specialist ? (choice.bestBonus ?? []) : []),
+  ];
   const changes = applyAndMeasure(effects);
 
   // A second risk that does not depend on success (e.g. ripping food packets while moving them).
@@ -565,6 +632,10 @@ export function sendCrew(mission: Mission, choice: Choice, slots: CrewSlot[], da
   if (choice.sideRisk && riskChance !== null && rollSuccess(riskChance)) {
     const extra = applyAndMeasure(choice.sideRisk.effects);
     for (const [k, v] of Object.entries(extra) as [ResourceKey, number][]) changes[k] = (changes[k] ?? 0) + v;
+    if (choice.sideRisk.setFlags?.length) {
+      const f = useMissionStore.getState().flags;
+      useMissionStore.setState({ flags: [...f, ...choice.sideRisk.setFlags.filter((x) => !f.includes(x))] });
+    }
     notes.push(choice.sideRisk.text);
   }
 
@@ -680,6 +751,7 @@ export function validateMissions(validRooms: readonly string[]): string[] {
           if (f.missionId === m.id) errors.push(`${m.id}/${c.id}: a mission schedules itself (use repeatEveryDays).`);
         }
       }
+      if (c.maxUses && !(c.onSuccess?.counter?.id === c.maxUses.counter)) errors.push(`${m.id}/${c.id}: maxUses without a counter in onSuccess.`);
       const resume = c.onInterrupt?.resumeMissionId;
       if (resume && !ids.has(resume)) errors.push(`${m.id}/${c.id}: resume mission "${resume}" does not exist.`);
     }
