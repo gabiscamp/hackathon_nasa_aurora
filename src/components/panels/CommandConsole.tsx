@@ -6,12 +6,14 @@ import { useNarrativeStore } from '../../stores/useNarrativeStore';
 import { resolveChoice } from '../../engine/eventResolver';
 import { applyConsequences } from '../../engine/resourceEngine';
 import { Button } from '../ui/Button';
+import { CREW_ROLES } from '../../data/crew';
 
 export function CommandConsole() {
   const mission = useMissionStore((s) => s.currentMission);
   const completeMission = useMissionStore((s) => s.completeMission);
   const applyDelta = useResourceStore((s) => s.applyDelta);
   const updateCrew = useCrewStore((s) => s.updateCrew);
+  const crew = useCrewStore((s) => s.crew);
   const nextPhase = useGameStore((s) => s.nextPhase);
   const pushDialogue = useNarrativeStore((s) => s.pushDialogue);
 
@@ -25,7 +27,13 @@ export function CommandConsole() {
 
     applyConsequences({ applyDelta }, { updateCrew }, result.consequences);
 
-    pushDialogue(result.narrative);
+    // Mission texts say {engineer}, {medic}, {scientist}: fill in the chosen crew's first names.
+    let narrative = result.narrative;
+    for (const role of CREW_ROLES) {
+      const firstName = crew[role].name.split(' ')[0];
+      narrative = narrative.replaceAll(`{${role}}`, firstName);
+    }
+    pushDialogue(narrative);
     completeMission(mission.id);
     nextPhase();
   };

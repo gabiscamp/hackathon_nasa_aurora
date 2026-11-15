@@ -12,9 +12,16 @@ import { Button } from '../ui/Button';
 import { getAct } from '../panels/DayTracker';
 import { PhaserGame } from '../../game/PhaserGame';
 import { Hud } from '../hud/Hud';
+import { PauseMenu } from '../hud/PauseMenu';
 import './GameScreen.css';
 
-export function GameScreen() {
+interface GameScreenProps {
+  onMainMenu: () => void;
+  onOpenCredits: () => void;
+  creditsOpen: boolean;
+}
+
+export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScreenProps) {
   const day = useGameStore((s) => s.day);
   const phase = useGameStore((s) => s.phase);
   const nextPhase = useGameStore((s) => s.nextPhase);
@@ -40,6 +47,7 @@ export function GameScreen() {
       <div className="game-stage">
         <PhaserGame className="station-view" />
         <Hud />
+        <PauseMenu onMainMenu={onMainMenu} onOpenCredits={onOpenCredits} suspended={creditsOpen} />
 
         {phase === 'decision' && (
           <div className="game-decision">

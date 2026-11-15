@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { MISSIONS, type Mission } from '../data/missions';
 
 interface MissionState {
@@ -12,33 +13,39 @@ interface MissionState {
   reset: () => void;
 }
 
-export const useMissionStore = create<MissionState>()((set, get) => ({
-  currentMission: null,
-  completedMissions: [],
-
-  setMission: (mission) => set({ currentMission: mission }),
-
-  completeMission: (missionId) =>
-    set((state) => ({
-      completedMissions: [...state.completedMissions, missionId],
+// Saved in the browser so "Continue mission" keeps finished missions.
+export const useMissionStore = create<MissionState>()(
+  persist(
+    (set, get) => ({
       currentMission: null,
-    })),
+      completedMissions: [],
 
-  clearMission: () => set({ currentMission: null }),
+      setMission: (mission) => set({ currentMission: mission }),
 
-  getMissionForDay: (day, act) => {
-    const { completedMissions } = get();
-    const fixed = MISSIONS.find(
-      (m) => m.day === day && !completedMissions.includes(m.id),
-    );
-    if (fixed) return fixed;
+      completeMission: (missionId) =>
+        set((state) => ({
+          completedMissions: [...state.completedMissions, missionId],
+          currentMission: null,
+        })),
 
-    const pool = MISSIONS.filter(
-      (m) => m.act === act && !m.day && !completedMissions.includes(m.id),
-    );
-    if (pool.length === 0) return null;
-    return pool[Math.floor(Math.random() * pool.length)];
-  },
+      clearMission: () => set({ currentMission: null }),
 
-  reset: () => set({ currentMission: null, completedMissions: [] }),
-}));
+      getMissionForDay: (day, act) => {
+        const { completedMissions } = get();
+        const fixed = MISSIONS.find(
+          (m) => m.day === day && !completedMissions.includes(m.id),
+        );
+        if (fixed) return fixed;
+
+        const pool = MISSIONS.filter(
+          (m) => m.act === act && !m.day && !completedMissions.includes(m.id),
+        );
+        if (pool.length === 0) return null;
+        return pool[Math.floor(Math.random() * pool.length)];
+      },
+
+      reset: () => set({ currentMission: null, completedMissions: [] }),
+    }),
+    { name: 'aurora-mission-store' },
+  ),
+);

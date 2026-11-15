@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { gameEvents, EVENTS, type PlayerMovedPayload } from '../../game/events';
 import { WALKABLE_AREAS, NPC_SPAWNS, PLAYER_SPAWN } from '../../game/world/shipLayout';
 import { useCrewStore } from '../../stores/useCrewStore';
+import { CREW_ROLES } from '../../data/crew';
 
 /** Square region of the world (ship bounds) shown inside the round minimap. */
 const VIEW = { x: 290, y: -50, size: 1040 } as const;
@@ -38,8 +39,8 @@ export function Minimap() {
           ))}
         </g>
         {/* crew */}
-        {Object.entries(NPC_SPAWNS).map(([id, npc]) => (
-          <circle key={id} cx={npc.x} cy={npc.y - 14} r="28" fill={crew[id]?.color ?? '#f0ece4'} stroke="#0a0e27" strokeWidth="8" />
+        {CREW_ROLES.map((role) => (
+          <circle key={role} cx={NPC_SPAWNS[role].x} cy={NPC_SPAWNS[role].y - 14} r="28" fill={crew[role].color} stroke="#0a0e27" strokeWidth="8" />
         ))}
         {/* player */}
         <circle cx={pos.x} cy={pos.y - 14} r="60" fill="rgba(245, 166, 35, 0.3)" className="hud-minimap__ping" />

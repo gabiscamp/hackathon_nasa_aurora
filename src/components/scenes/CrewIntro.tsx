@@ -1,113 +1,186 @@
-import { useState } from 'react';
-import { CREW_DEFINITIONS } from '../../data/crew';
-import { ProgressBar } from '../ui/ProgressBar';
-import { Button } from '../ui/Button';
+import { useEffect, useState } from 'react';
+import { commanderLabel } from '../../data/crew';
+import { getTeam } from '../../data/crews';
+import type { SeatProfile } from '../../data/astronauts';
+import { useCrewStore } from '../../stores/useCrewStore';
+import { RoleIcon } from '../ui/RoleIcon';
+import { ScreenNav } from '../ui/ScreenNav';
 import './CrewIntro.css';
 
 interface CrewIntroProps {
   playerName: string;
   onContinue: () => void;
+  onBack: () => void;
 }
 
-const ROLE_ICONS: Record<string, string> = {
-  engineer: '🔧',
-  medic: '💚',
-  scientist: '🔬',
-};
+function firstName(seat: SeatProfile): string {
+  return seat.name.split(' ')[0];
+}
 
-export function CrewIntro({ playerName, onContinue }: CrewIntroProps) {
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const [viewedAll, setViewedAll] = useState(false);
-  const [viewed, setViewed] = useState<Set<number>>(new Set());
+/**
+ * "Meet your crew" (team briefing, screen 3): the player taps each astronaut to see
+ * their profile. Commander (the player) first. Keys: ← → or 1–4 switch profiles.
+ */
+export function CrewIntro({ playerName, onContinue, onBack }: CrewIntroProps) {
+  const teamId = useCrewStore((s) => s.teamId);
+  const team = getTeam(teamId);
+  const members = [team.commander, ...team.seats];
 
-  const handleSelect = (i: number) => {
-    setSelectedIndex(i);
-    const next = new Set(viewed);
-    next.add(i);
-    setViewed(next);
-    if (next.size === CREW_DEFINITIONS.length) {
-      setViewedAll(true);
-    }
+  const [index, setIndex] = useState(0);
+  const [seen, setSeen] = useState<Set<number>>(() => new Set([0]));
+  const allSeen = seen.size === members.length;
+  const current = members[index];
+
+  const show = (i: number) => {
+    setIndex(i);
+    setSeen((prev) => new Set(prev).add(i));
   };
 
-  const selected = selectedIndex !== null ? CREW_DEFINITIONS[selectedIndex] : null;
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const n = ['1', '2', '3', '4'].indexOf(e.key);
+      if (n >= 0) show(n);
+      else if (e.key === 'ArrowRight') show((index + 1) % members.length);
+      else if (e.key === 'ArrowLeft') show((index - 1 + members.length) % members.length);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
 
   return (
     <div className="crew-screen">
-      <div className="crew-container">
-        <h2 className="crew-title">Your Crew</h2>
-        <p className="crew-subtitle">
-          Tap each crew member to learn about them, Commander {playerName}.
-        </p>
+      <ScreenNav
+        backLabel="Back"
+        onBack={onBack}
+        skipLabel={allSeen ? undefined : 'Skip to the game'}
+        onSkip={allSeen ? undefined : onContinue}
+      />
 
-        <div className="crew-cards">
-          {CREW_DEFINITIONS.map((member, i) => (
-            <button
-              key={member.id}
-              className={`crew-card-btn ${selectedIndex === i ? 'selected' : ''} ${viewed.has(i) ? 'viewed' : ''}`}
-              style={{ '--crew-color': member.color } as React.CSSProperties}
-              onClick={() => handleSelect(i)}
-            >
-              <div className="crew-avatar" style={{ borderColor: member.color }}>
-                {ROLE_ICONS[member.role] || '⭐'}
-              </div>
-              <span className="crew-card-name">{member.name.split(' ')[0]}</span>
-              <span className="crew-card-role">{member.roleLabel}</span>
-              {viewed.has(i) && <span className="crew-check">✓</span>}
-            </button>
-          ))}
+      <main className="crew-container">
+        <header className="crew-header">
+          <h1 className="crew-title">Meet your crew</h1>
+          <p className="crew-subtitle">Tap each astronaut to learn about them, {commanderLabel(playerName)}.</p>
+          <p className="crew-progress" aria-live="polite">
+            Seen {seen.size} of {members.length}
+          </p>
+        </header>
+
+        <div className="crew-roster" role="tablist" aria-label="Crew members">
+          {members.map((m, i) => {
+            const active = i === index;
+            return (
+              <button
+                key={m.role}
+                type="button"
+                role="tab"
+                id={`crew-tab-${i}`}
+                aria-selected={active}
+                aria-controls="crew-panel"
+                className={`crew-tab${active ? ' crew-tab--active' : ''}`}
+                style={{ ['--role-color' as string]: m.color }}
+                onClick={() => show(i)}
+              >
+                <span className="crew-photo crew-photo--tab">
+                  {m.photo ? <img src={m.photo} alt="" /> : <span className="crew-photo__letter">{m.name.charAt(0)}</span>}
+                  <span className="crew-photo__badge" aria-hidden="true">
+                    <RoleIcon role={m.role} size={14} />
+                  </span>
+                </span>
+                <span className="crew-tab__name">{m.role === 'commander' ? 'You' : firstName(m)}</span>
+                <span className="crew-tab__role">{m.roleLabel}</span>
+                <span className={`crew-tab__seen${seen.has(i) ? ' is-seen' : ''}`}>
+                  {seen.has(i) ? (
+                    <>
+                      <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 12.5l5 5L20 6.5" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      Seen
+                    </>
+                  ) : (
+                    'New'
+                  )}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
-        {selected && (
-          <div className="crew-detail animate-slideUp" key={selected.id}>
-            <div className="crew-detail-header">
-              <div className="crew-detail-avatar" style={{ borderColor: selected.color }}>
-                {ROLE_ICONS[selected.role] || '⭐'}
-              </div>
-              <div>
-                <h3 className="crew-detail-name">{selected.name}</h3>
-                <span className="crew-detail-role" style={{ color: selected.color }}>
-                  {selected.roleLabel}
-                </span>
-              </div>
+        <section
+          id="crew-panel"
+          role="tabpanel"
+          aria-labelledby={`crew-tab-${index}`}
+          className="crew-profile"
+          key={current.role}
+          style={{ ['--role-color' as string]: current.color }}
+        >
+          <div className="crew-profile__media">
+            <span className="crew-photo crew-photo--hero">
+              {current.photo ? <img src={current.photo} alt={`Portrait of ${current.name}`} /> : <span className="crew-photo__letter">{current.name.charAt(0)}</span>}
+            </span>
+            <span className="crew-profile__role-chip">
+              <RoleIcon role={current.role} size={18} />
+              {current.roleLabel}
+            </span>
+          </div>
+
+          <div className="crew-profile__body">
+            <div>
+              {current.role === 'commander' && <p className="crew-profile__you">This is you</p>}
+              <h2 className="crew-profile__name">{current.name}</h2>
+              {current.specialty && <p className="crew-profile__specialty">{current.specialty}</p>}
             </div>
 
-            <p className="crew-detail-desc">{selected.description}</p>
-            <p className="crew-detail-phrase">{selected.phrase}</p>
+            <p className="crew-profile__desc">{current.description}</p>
+
+            {current.strengths && (
+              <p className="crew-profile__strengths">
+                <strong>Strengths:</strong> {current.strengths}
+              </p>
+            )}
+
+            {current.phrase && <blockquote className="crew-profile__quote">{current.phrase}</blockquote>}
 
             <div className="crew-skills">
-              {selected.skills.map((skill) => (
-                <ProgressBar
-                  key={skill.label}
-                  label={skill.label}
-                  value={skill.value}
-                  color={selected.color}
-                  size="sm"
-                />
-              ))}
+              <h3 className="crew-skills__title">Skills</h3>
+              <ul className="crew-skills__list">
+                {current.skills.map((skill) => (
+                  <li key={skill.label} className="crew-skill">
+                    <span className="crew-skill__label">{skill.label}</span>
+                    <span
+                      className="crew-skill__track"
+                      role="meter"
+                      aria-label={skill.label}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={skill.value}
+                    >
+                      <span className="crew-skill__fill" style={{ width: `${skill.value}%` }} />
+                    </span>
+                    <span className="crew-skill__value">{skill.value}%</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
-        )}
+        </section>
 
-        {!selected && (
-          <div className="crew-placeholder">
-            <p>👆 Tap a crew member above</p>
-          </div>
-        )}
+        <p className="crew-keys">Keyboard: ← → or 1–4 to switch.</p>
 
-        {viewedAll && (
-          <div className="crew-footer animate-fadeIn">
-            <p className="crew-footer-text">
-              That's your team. Each one is great at their job.
-              But if someone is busy or sick, the others can help — just not as well.
-              Choosing who does what is YOUR job.
+        {allSeen && (
+          <footer className="crew-footer">
+            <p className="crew-footer__text">
+              That's your team. Each one is great at their job, and the others can help if someone is busy or sick. Choosing who does what is
+              YOUR job.
             </p>
-            <Button variant="primary" size="lg" icon="🎮" onClick={onContinue}>
-              Learn How the Station Works
-            </Button>
-          </div>
+            <button type="button" className="crew-footer__btn" onClick={onContinue}>
+              Learn how the station works
+              <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </button>
+          </footer>
         )}
-      </div>
+      </main>
     </div>
   );
 }

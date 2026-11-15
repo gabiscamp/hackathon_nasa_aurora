@@ -1,61 +1,198 @@
-import { useState } from 'react';
-import { Button } from '../ui/Button';
+import { useEffect, useState } from 'react';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { RoleIcon } from '../ui/RoleIcon';
+import { drawTeams, type CrewTeam } from '../../data/crews';
+import type { SeatProfile } from '../../data/astronauts';
 import './TitleScreen.css';
 
 interface TitleScreenProps {
-  onStart: (name: string) => void;
+  onStart: (team: CrewTeam) => void;
+  onOpenCredits: () => void;
+  /** Mission left with "Main menu"; null when there is none. */
+  savedMission: { commanderName: string; day: number } | null;
+  onContinueMission: () => void;
+  /** true while the credits overlay owns the keyboard. */
+  creditsOpen: boolean;
 }
 
-export function TitleScreen({ onStart }: TitleScreenProps) {
-  const [name, setName] = useState('');
+/** Round portrait with the role icon as a small badge (icon + photo, never color alone). */
+function Portrait({ seat, size }: { seat: SeatProfile; size: 'lg' | 'sm' }) {
+  return (
+    <span className={`portrait portrait--${size}`} style={{ ['--role-color' as string]: seat.color }}>
+      {seat.photo ? (
+        <img src={seat.photo} alt="" loading="lazy" decoding="async" />
+      ) : (
+        <span className="portrait__fallback">{seat.name.charAt(0)}</span>
+      )}
+      <span className="portrait__badge" aria-hidden="true">
+        <RoleIcon role={seat.role} size={size === 'lg' ? 16 : 13} />
+      </span>
+    </span>
+  );
+}
 
-  const handleStart = () => {
-    if (name.trim().length >= 2) {
-      onStart(name.trim());
-    }
+/**
+ * Home: pick one of the two commanders from the team briefing (Anne McClain or
+ * Neil Armstrong). Each commander's crew is drawn at random from real astronauts,
+ * different between the two cards. Shortcuts: 1/2 choose, R new crews, Enter start.
+ */
+export function TitleScreen({ onStart, onOpenCredits, savedMission, onContinueMission, creditsOpen }: TitleScreenProps) {
+  const [teams, setTeams] = useState<CrewTeam[]>(() => drawTeams());
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [confirmNew, setConfirmNew] = useState(false);
+  const selected = selectedIndex === null ? null : teams[selectedIndex];
+
+  const reshuffle = () => setTeams(drawTeams());
+
+  // Starting over would replace a saved mission, so ask first (error prevention).
+  const start = () => {
+    if (!selected) return;
+    if (savedMission) setConfirmNew(true);
+    else onStart(selected);
   };
+
+  useEffect(() => {
+    if (creditsOpen || confirmNew) return;
+    const onKey = (e: KeyboardEvent) => {
+      const index = ['1', '2'].indexOf(e.key);
+      if (index >= 0) setSelectedIndex(index);
+      else if (e.key.toLowerCase() === 'r') reshuffle();
+      else if (e.key === 'Enter' && !(e.target instanceof HTMLButtonElement)) {
+        // Stop the same Enter from also clicking the dialog button that gets focus.
+        e.preventDefault();
+        start();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
 
   return (
     <div className="title-screen">
-      <div className="title-stars" />
-      <div className="title-content">
-        <div className="title-badge">NASA SPACE APPS 2026</div>
-        <h1 className="title-name">
-          <span className="title-orbit">AURORA</span>
-          <span className="title-sub">STATION</span>
-        </h1>
-        <p className="title-tagline">A Mars Orbit Mission</p>
+      <div className="title-stars" aria-hidden="true" />
 
-        <div className="title-form">
-          <label className="title-label" htmlFor="commander-name">
-            What is your name, Commander?
-          </label>
-          <input
-            id="commander-name"
-            className="title-input"
-            type="text"
-            placeholder="Type your name..."
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleStart()}
-            maxLength={20}
-            autoFocus
-          />
-          <Button
-            variant="primary"
-            size="lg"
-            icon="🚀"
-            onClick={handleStart}
-            disabled={name.trim().length < 2}
-          >
-            Start Mission
-          </Button>
-        </div>
+      <main className="title-content">
+        <header className="title-header">
+          <p className="title-badge">NASA Space Apps Challenge 2026</p>
+          <h1 className="title-name">
+            <span className="title-orbit">AURORA</span>
+            <span className="title-sub">STATION</span>
+          </h1>
+          <p className="title-tagline">90 days in orbit around Mars. Keep your crew safe.</p>
+        </header>
 
-        <p className="title-footer">
-          Based on real NASA data and missions
-        </p>
-      </div>
+        {savedMission && (
+          <div className="title-continue">
+            <button type="button" className="title-continue__btn" onClick={onContinueMission}>
+              <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+                <path d="M7 4.5v15l12-7.5z" />
+              </svg>
+              Continue mission
+            </button>
+            <span className="title-continue__info">
+              Commander {savedMission.commanderName} · Day {savedMission.day}
+            </span>
+          </div>
+        )}
+
+        <section className="title-pick" aria-labelledby="choose-crew">
+          <div className="title-pick__intro">
+            <h2 className="title-choose" id="choose-crew">
+              {savedMission ? 'Or start a new mission' : 'Choose your commander'}
+            </h2>
+            <p className="title-hint">You play as the commander. The crew is picked at random from real astronauts.</p>
+          </div>
+
+          <div className="title-crews" role="radiogroup" aria-labelledby="choose-crew">
+            {teams.map((team, index) => {
+              const isSelected = index === selectedIndex;
+              return (
+                <button
+                  key={team.commander.astronautId}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  className={`crew-pick${isSelected ? ' crew-pick--selected' : ''}`}
+                  onClick={() => setSelectedIndex(index)}
+                >
+                  <span className="crew-pick__top">
+                    <kbd className="title-kbd crew-pick__key">{index + 1}</kbd>
+                    <span className={`crew-pick__check${isSelected ? ' is-on' : ''}`}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 12.5l5 5L20 6.5" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      {isSelected ? 'Chosen' : 'Choose'}
+                    </span>
+                  </span>
+
+                  <span className="crew-pick__commander">
+                    <Portrait seat={team.commander} size="lg" />
+                    <span className="crew-pick__commander-text">
+                      <span className="crew-pick__you">You are</span>
+                      <span className="crew-pick__commander-name">{team.commander.name}</span>
+                      <span className="crew-pick__role">{team.commander.roleLabel}</span>
+                    </span>
+                  </span>
+
+                  <span className="crew-pick__crew-label">Your crew</span>
+                  <span className="crew-pick__list">
+                    {team.seats.map((member) => (
+                      <span key={member.role} className="crew-pick__member">
+                        <Portrait seat={member} size="sm" />
+                        <span className="crew-pick__who">
+                          <span className="crew-pick__member-name">{member.name}</span>
+                          <span className="crew-pick__role">{member.roleLabel}</span>
+                        </span>
+                      </span>
+                    ))}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="title-actions">
+            <button type="button" className="title-shuffle" onClick={reshuffle}>
+              <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />
+              </svg>
+              New crew members
+              <kbd className="title-kbd">R</kbd>
+            </button>
+            <button type="button" className="title-start" onClick={start} disabled={!selected}>
+              {selected ? (
+                <>
+                  Start Mission <kbd className="title-kbd">Enter</kbd>
+                </>
+              ) : (
+                'Choose a commander first'
+              )}
+            </button>
+          </div>
+          <p className="title-keys">Keyboard: press 1 or 2 to choose a commander.</p>
+        </section>
+
+        <footer className="title-footer">
+          <button type="button" className="title-credits" onClick={onOpenCredits}>
+            Credits, photos &amp; NASA sources
+          </button>
+          <p>Based on real NASA data. Not made or endorsed by NASA.</p>
+        </footer>
+      </main>
+
+      {confirmNew && selected && savedMission && (
+        <ConfirmDialog
+          title="Start a new mission?"
+          message={`Your saved mission (Day ${savedMission.day}) will be replaced.`}
+          confirmLabel="Start new mission"
+          cancelLabel="Keep my mission"
+          onCancel={() => setConfirmNew(false)}
+          onConfirm={() => {
+            setConfirmNew(false);
+            onStart(selected);
+          }}
+        />
+      )}
     </div>
   );
 }
