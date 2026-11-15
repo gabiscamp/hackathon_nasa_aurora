@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useGameStore } from '../../stores/useGameStore';
 import { useMissionStore } from '../../stores/useMissionStore';
 import { getMission, MISSIONS } from '../../data/missions';
-import { advanceTo, missionLastDay, nextEventDay, openDay } from '../../engine/missionEngine';
+import { advanceTo, fixedDay, missionLastDay, nextEventDay, openDay } from '../../engine/missionEngine';
 import { checkCollapse } from '../../engine/survival';
 import { saveCheckpoint } from '../../engine/checkpoint';
 import { MissionOverlay } from '../panels/MissionOverlay';
@@ -28,7 +28,7 @@ function incomingTitles(day: number): string[] {
   const { openEvents, scheduled, completedMissions } = useMissionStore.getState();
   const ids = new Set<string>(openEvents);
   for (const s of scheduled) if (s.day <= day) ids.add(s.missionId);
-  for (const m of MISSIONS) if (m.day === day && !m.followUpOnly && !completedMissions.includes(m.id)) ids.add(m.id);
+  for (const m of MISSIONS) if (fixedDay(m) === day && !m.followUpOnly && !completedMissions.includes(m.id)) ids.add(m.id);
   return [...ids].flatMap((id) => {
     const m = getMission(id);
     return m && !completedMissions.includes(id) ? [`${m.icon} ${m.title}`] : [];

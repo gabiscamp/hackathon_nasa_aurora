@@ -172,6 +172,8 @@ export interface Mission {
   description: string;
   act: 1 | 2 | 3;
   day?: number;
+  /** Missions that close the trip: this many days before the last day (45, or 37 after the early return of problem 42). Wins over `day`. */
+  fromEnd?: number;
   system: string;
   room: string;
   icon: string;
@@ -621,9 +623,10 @@ export const MISSIONS_BASE: Mission[] = [
 
   {
     id: 'countdown-begins',
+    fromEnd: 1,
     title: 'Countdown Begins',
     description:
-      'Day 88. The return window opens in 2 days. The ship needs to be ready. What do you prioritize for the final preparations?',
+      'The return window opens tomorrow. The ship needs to be ready. What do you prioritize for the final preparations?',
     act: 3,
     day: 44,
     system: 'engineering',
@@ -672,9 +675,10 @@ export const MISSIONS_BASE: Mission[] = [
 
   {
     id: 'final-day',
+    fromEnd: 0,
     title: 'The Final Day',
     description:
-      'Day 45. It\'s time to leave Mars orbit and begin the long journey home. One last decision before you go.',
+      'It\'s the last day! Time to leave Mars orbit and begin the long journey home. One last decision before you go.',
     act: 3,
     day: 45,
     system: 'mission',
