@@ -96,6 +96,21 @@ export const NPC_SPAWNS = {
   scientist: { x: 797, y: 235, room: 'lab' },
 } as const satisfies Record<string, { x: number; y: number; room: RoomId }>;
 
+/**
+ * Mission marker spot per room: the middle of the room's biggest floor area, so it always
+ * sits on walkable floor of the current station map (rooms: see RoomId).
+ */
+export const ROOM_CENTERS = (() => {
+  const best = {} as Record<RoomId, { x: number; y: number; area: number }>;
+  for (const a of WALKABLE_AREAS) {
+    const area = a.w * a.h;
+    if (!best[a.room] || area > best[a.room].area) best[a.room] = { x: a.x + a.w / 2, y: a.y + a.h / 2, area };
+  }
+  const centers = {} as Record<RoomId, { x: number; y: number }>;
+  for (const room of Object.keys(best) as RoomId[]) centers[room] = { x: best[room].x, y: best[room].y };
+  return centers;
+})();
+
 export function isPointWalkable(x: number, y: number): boolean {
   return WALKABLE_AREAS.some((a) => x >= a.x && x <= a.x + a.w && y >= a.y && y <= a.y + a.h);
 }

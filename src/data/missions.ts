@@ -1,28 +1,19 @@
+import type { ResourceKey } from '../stores/useResourceStore';
+
+export interface ChoiceEffect {
+  resource: ResourceKey;
+  delta: number;
+}
+
 export interface Choice {
   id: string;
   label: string;
   icon: string;
-  crewRequired?: string;
-  consequences: {
-    food?: number;
-    water?: number;
-    energy?: number;
-    oxygen?: number;
-    /** Radiation level change: + means MORE radiation (worse). */
-    radiation?: number;
-    crewEffects?: { id: string; health?: number; morale?: number }[];
-    narrative: string;
-    successRate?: number;
-    failNarrative?: string;
-    failEffects?: {
-      food?: number;
-      water?: number;
-      energy?: number;
-      oxygen?: number;
-      radiation?: number;
-      crewEffects?: { id: string; health?: number; morale?: number }[];
-    };
-  };
+  effects: ChoiceEffect[];
+  narrative: string;
+  successRate?: number;
+  failNarrative?: string;
+  failEffects?: ChoiceEffect[];
 }
 
 export interface Mission {
@@ -32,62 +23,100 @@ export interface Mission {
   act: 1 | 2 | 3;
   day?: number;
   system: string;
+  room: string;
   icon: string;
   nasaSource: string;
-  nasaYear: number;
+  nasaYear?: number;
   popup: string;
   choices: Choice[];
 }
 
 export const MISSIONS: Mission[] = [
   {
-    id: 'broken-filter',
-    title: 'The Broken Filter',
-    description: 'The CO2 filter just broke! CO2 is a gas that builds up when you breathe. Too much makes you dizzy and sleepy. You have spare filters, but they are the wrong shape — they don\'t fit the machine.',
+    id: 'despensa-missao',
+    title: 'The Mission Pantry',
+    description:
+      'The ship is being loaded before launch. You can bring more freeze-dried food (light and lasts longer) or more ready-to-eat meals (tastier but heavier). This choice will affect the whole mission.',
     act: 1,
-    day: 68,
+    day: 1,
+    system: 'food',
+    room: 'storage',
+    icon: '🍽',
+    nasaSource: 'ISS ECLSS / NASA food research',
+    popup:
+      'On the ISS, the kitchen heats and rehydrates food. Freeze-dried meals last about 2 years, but need water to prepare. Ready meals are tastier but take more cargo space. For a Mars mission, NASA needs food that lasts 5 years!',
+    choices: [
+      {
+        id: 'freeze-dried',
+        label: 'More freeze-dried food',
+        icon: '📦',
+        effects: [
+          { resource: 'food', delta: 0 },
+          { resource: 'water', delta: -5 },
+        ],
+        narrative:
+          'Good choice, Commander! You loaded 100 units of freeze-dried food. It lasts longer, but every meal needs water to prepare. Water consumption will be a bit higher throughout the mission.',
+      },
+      {
+        id: 'ready-meals',
+        label: 'More ready-to-eat meals',
+        icon: '🍱',
+        effects: [
+          { resource: 'food', delta: -20 },
+          { resource: 'satisfaction', delta: 10 },
+        ],
+        narrative:
+          'The crew cheered when they saw the ready meals! Tastier food boosts morale. But there\'s less of it — only 80 units fit in the cargo. You\'ll need to be careful with rationing later.',
+      },
+    ],
+  },
+  {
+    id: 'co2-filter-failure',
+    title: 'CO2 Filter Failure',
+    description: 'The CO2 scrubber broke! It removes carbon dioxide from the air. Without it, the crew will slowly suffocate. You have limited tools and materials.',
+    act: 2,
+    day: 40,
     system: 'oxygen',
-    icon: '🫁',
+    room: 'engineering',
+    icon: '💨',
     nasaSource: 'Apollo 13',
     nasaYear: 1970,
-    popup: 'YOU JUST LIVED THROUGH APOLLO 13! In 1970, an oxygen tank exploded 320,000 km from Earth. The CO2 filters didn\'t fit, so engineers on Earth invented an adapter using duct tape and plastic bags. The astronauts built it in space and saved their lives.',
+    popup: 'THIS REALLY HAPPENED! On Apollo 13, the CO2 filters broke. NASA engineers on Earth had to figure out how to build an adapter from duct tape, cardboard, and plastic bags — using only what the astronauts had on board. They did it, and saved the crew.',
     choices: [
       {
         id: 'build-adapter',
         label: 'Build an adapter',
         icon: '🔧',
-        crewRequired: 'engineer',
-        consequences: {
-          oxygen: -5,
-          narrative: '{engineer} worked for 3 hours and built an adapter from tape and plastic. The filter works again! But CO2 rose during the repair.',
-          successRate: 80,
-          failNarrative: '{engineer} tried but the adapter didn\'t hold. CO2 is still rising. You need another plan.',
-          failEffects: { oxygen: -15 },
-        },
+        effects: [
+          { resource: 'oxygen', delta: -5 },
+        ],
+        narrative:
+          'The engineer worked for 3 hours and built an adapter from tape and plastic. The filter works again! But CO2 rose during the repair.',
+        successRate: 80,
+        failNarrative: 'The engineer tried but the adapter didn\'t hold. CO2 is still rising. You need another plan.',
+        failEffects: [{ resource: 'oxygen', delta: -15 }],
       },
       {
         id: 'everybody-rest',
         label: 'Everybody rest',
         icon: '😴',
-        consequences: {
-          oxygen: -3,
-          crewEffects: [
-            { id: 'engineer', morale: -5 },
-            { id: 'medic', morale: -5 },
-            { id: 'scientist', morale: -5 },
-          ],
-          narrative: 'The crew lay still for hours, breathing slowly. CO2 rose slowly but stayed below danger. No work done today — the filter still needs fixing tomorrow.',
-        },
+        effects: [
+          { resource: 'oxygen', delta: -3 },
+          { resource: 'satisfaction', delta: -5 },
+        ],
+        narrative:
+          'The crew lay still for hours, breathing slowly. CO2 rose slowly but stayed below danger. No work done today — the filter still needs fixing tomorrow.',
       },
       {
         id: 'use-candles',
         label: 'Use oxygen candles',
         icon: '🕯️',
-        consequences: {
-          oxygen: 5,
-          energy: -3,
-          narrative: 'You burned one precious oxygen candle. Fresh air! But candles are limited and there\'s a small fire risk. The filter still needs fixing.',
-        },
+        effects: [
+          { resource: 'oxygen', delta: 5 },
+          { resource: 'energy', delta: -3 },
+        ],
+        narrative:
+          'You burned one precious oxygen candle. Fresh air! But candles are limited and there\'s a small fire risk. The filter still needs fixing.',
       },
     ],
   },
@@ -98,6 +127,7 @@ export const MISSIONS: Mission[] = [
     act: 3,
     day: 72,
     system: 'oxygen',
+    room: 'engineering',
     icon: '🔥',
     nasaSource: 'MIR Space Station',
     nasaYear: 1997,
@@ -107,96 +137,146 @@ export const MISSIONS: Mission[] = [
         id: 'fight-fire',
         label: 'Fight the fire',
         icon: '🧯',
-        consequences: {
-          oxygen: -8,
-          crewEffects: [
-            { id: 'engineer', health: -15 },
-            { id: 'medic', health: -15 },
-          ],
-          narrative: 'Two crew members fought the fire with extinguishers for 15 minutes. Fire is out! But toxic smoke fills the air for the next 3 days. Everyone gets headaches.',
-        },
+        effects: [
+          { resource: 'oxygen', delta: -8 },
+          { resource: 'health', delta: -15 },
+        ],
+        narrative:
+          'Two crew members fought the fire with extinguishers for 15 minutes. Fire is out! But toxic smoke fills the air for the next 3 days. Everyone gets headaches.',
       },
       {
         id: 'seal-room',
         label: 'Seal the room',
         icon: '🚪',
-        consequences: {
-          energy: -10,
-          narrative: 'You sealed the door. No air means no fire. It died out. But everything in that room is lost — tools, spare parts, and one escape pod access.',
-        },
+        effects: [
+          { resource: 'energy', delta: -10 },
+        ],
+        narrative:
+          'You sealed the door. No air means no fire. It died out. But everything in that room is lost — tools, spare parts, and one escape pod access.',
       },
       {
         id: 'evacuate-safe',
         label: 'Move to safe area',
         icon: '🏃',
-        consequences: {
-          energy: -5,
-          oxygen: -5,
-          crewEffects: [
-            { id: 'engineer', morale: -10 },
-            { id: 'medic', morale: -10 },
-            { id: 'scientist', morale: -10 },
-          ],
-          narrative: 'Everyone moved to the safe section near escape pod 2. The fire burned itself out but may have damaged equipment.',
-        },
+        effects: [
+          { resource: 'energy', delta: -5 },
+          { resource: 'oxygen', delta: -5 },
+          { resource: 'satisfaction', delta: -10 },
+        ],
+        narrative:
+          'Everyone moved to the safe section near escape pod 2. The fire burned itself out but may have damaged equipment.',
       },
     ],
   },
   {
     id: 'bathroom-broke',
     title: 'The Bathroom Broke',
-    description: 'The toilet and water recycler broke down. In space, the toilet isn\'t just a toilet — it\'s a machine that also recycles water. Without it, you lose water every time someone uses the bathroom.',
+    description:
+      'The toilet and water recycler broke down. In space, the toilet isn\'t just a toilet — it\'s a machine that also recycles water from pee and sweat. The ISS recycles 98% of all water. Without it, you lose water every time someone uses the bathroom.',
     act: 1,
     day: 5,
     system: 'water',
+    room: 'engineering',
     icon: '🚽',
     nasaSource: 'ISS',
     nasaYear: 2008,
-    popup: 'THIS REALLY HAPPENED! The ISS toilet has broken multiple times. In 2008, NASA had to send repair parts on the next cargo ship. Without the toilet\'s water recycler, the station can\'t turn waste back into clean water — and that water is also used to make oxygen!',
+    popup:
+      'THIS REALLY HAPPENED! The ISS toilet has broken multiple times. In 2008, NASA had to send repair parts on the next cargo ship. Without the toilet\'s water recycler, the station can\'t turn waste back into clean water — and that water is also used to make oxygen!',
     choices: [
       {
         id: 'full-repair',
         label: 'Engineer fixes it today',
         icon: '🔧',
-        crewRequired: 'engineer',
-        consequences: {
-          narrative: '{engineer} spent the whole day repairing the toilet. It works again! But nothing else got fixed today.',
-          crewEffects: [{ id: 'engineer', morale: -5 }],
-        },
+        effects: [
+          { resource: 'energy', delta: -5 },
+        ],
+        narrative:
+          'Kira spent the whole day repairing the toilet system. The water recycler is back online — 98% of water is being recovered again! But nothing else got fixed today.',
       },
       {
         id: 'use-bags',
         label: 'Use emergency bags',
         icon: '🛍️',
-        consequences: {
-          oxygen: -3,
-          crewEffects: [
-            { id: 'engineer', morale: -10 },
-            { id: 'medic', morale: -10 },
-            { id: 'scientist', morale: -10 },
-          ],
-          narrative: 'The crew used emergency bags. It works, but it\'s unpleasant. Mood dropped. The water in those bags can\'t be recycled — that water is lost forever.',
-        },
+        effects: [
+          { resource: 'water', delta: -5 },
+          { resource: 'satisfaction', delta: -10 },
+        ],
+        narrative:
+          'The crew used emergency waste bags, like astronauts in the old Apollo missions. It works, but nobody is happy about it. The water in those bags can\'t be recycled — lost forever.',
       },
       {
         id: 'partial-fix',
         label: 'Quick partial fix',
         icon: '⚡',
-        crewRequired: 'engineer',
-        consequences: {
-          oxygen: -2,
-          narrative: '{engineer} did a quick fix — toilet works but the water recycler is still broken. Water from waste isn\'t being recycled yet.',
-        },
+        effects: [
+          { resource: 'water', delta: -3 },
+          { resource: 'energy', delta: -3 },
+        ],
+        narrative:
+          'Kira did a quick fix — toilet works for comfort but the water recycler is still broken. Water from waste isn\'t being recycled. You\'re losing a little water every day until the full repair.',
       },
     ],
   },
   {
-    id: 'invisible-leak',
-    title: 'The Invisible Leak',
-    description: 'Air pressure is dropping very slowly. There is a small leak somewhere on the station, but nobody knows where. It\'s so small you can\'t hear it or see it.',
+    id: 'shadow-coming',
+    title: 'Mars Shadow Coming',
+    description:
+      'The station is about to pass behind Mars. The solar panels will stop making energy. The battery can\'t power everything. What do you turn off?',
+    act: 1,
+    day: 12,
+    system: 'energy',
+    room: 'bridge',
+    icon: '⚡',
+    nasaSource: 'ESA Mars Express',
+    nasaYear: 2006,
+    popup:
+      'THIS REALLY HAPPENED! The Mars Express probe passed up to 75 minutes in Mars\'s shadow every orbit. With weak batteries and 20% less sunlight, it entered survival mode: turned off all science instruments and cut power from 400W to 300W.',
+    choices: [
+      {
+        id: 'turn-off-lab',
+        label: 'Turn off the laboratory',
+        icon: '🔬',
+        effects: [
+          { resource: 'energy', delta: 10 },
+        ],
+        narrative:
+          'You turned off the lab. Science stops for today, but the important systems keep running. The shadow will pass in a few hours.',
+      },
+      {
+        id: 'turn-off-greenhouse',
+        label: 'Turn off the greenhouse',
+        icon: '🌱',
+        effects: [
+          { resource: 'energy', delta: 5 },
+          { resource: 'food', delta: -5 },
+          { resource: 'satisfaction', delta: -3 },
+        ],
+        narrative:
+          'The greenhouse lights went dark. The plants will survive a few hours, but the next harvest will be smaller. The crew is worried about their lettuce.',
+      },
+      {
+        id: 'lower-heating',
+        label: 'Lower the heating',
+        icon: '❄️',
+        effects: [
+          { resource: 'energy', delta: 10 },
+          { resource: 'satisfaction', delta: -5 },
+          { resource: 'health', delta: -3 },
+        ],
+        narrative:
+          'It\'s getting cold in here! Mars averages -59°C, and without full heating the station cools down fast. The crew puts on extra layers but nobody sleeps well.',
+      },
+    ],
+  },
+  {
+    id: 'air-leak',
+    title: 'Air Leak!',
+    description:
+      'A slow air leak has been detected on the station. Pressure is dropping. You need to find and seal the leak before the air runs out.',
     act: 1,
     day: 10,
-    system: 'pressure',
+    system: 'oxygen',
+    room: 'bridge',
     icon: '💨',
     nasaSource: 'ISS',
     nasaYear: 2004,
@@ -206,37 +286,35 @@ export const MISSIONS: Mission[] = [
         id: 'lockdown-search',
         label: 'Lock down and search',
         icon: '🔒',
-        consequences: {
-          oxygen: -3,
-          narrative: 'You sealed all rooms and checked each one. Found it! A cracked hose seal. Easy fix once found. But it took a full day with everyone in tight spaces.',
-          crewEffects: [
-            { id: 'engineer', morale: -5 },
-            { id: 'medic', morale: -5 },
-            { id: 'scientist', morale: -5 },
-          ],
-        },
+        effects: [
+          { resource: 'oxygen', delta: -3 },
+          { resource: 'satisfaction', delta: -5 },
+        ],
+        narrative:
+          'You sealed all rooms and checked each one. Found it! A cracked hose seal. Easy fix once found. But it took a full day with everyone in tight spaces.',
       },
       {
         id: 'listen-for-it',
         label: 'Listen for the leak',
         icon: '👂',
-        consequences: {
-          narrative: 'The crew spread out with leak detectors. Found it in 4 hours! Much faster. A cracked hose seal — fixed quickly.',
-          successRate: 85,
-          failNarrative: 'Couldn\'t find it today. Pressure dropped more. Tomorrow you\'ll have to do the full lockdown with less air.',
-          failEffects: { oxygen: -8 },
-        },
+        effects: [],
+        narrative:
+          'The crew spread out with leak detectors. Found it in 4 hours! Much faster. A cracked hose seal — fixed quickly.',
+        successRate: 85,
+        failNarrative: 'Couldn\'t find it today. Pressure dropped more. Tomorrow you\'ll have to do the full lockdown with less air.',
+        failEffects: [{ resource: 'oxygen', delta: -8 }],
       },
       {
         id: 'eva-inspect',
         label: 'Inspect from outside',
         icon: '🧑‍🚀',
-        consequences: {
-          oxygen: -5,
-          energy: -5,
-          crewEffects: [{ id: 'engineer', health: -5 }],
-          narrative: '{engineer} went outside and found the leak AND two other weak spots. You can fix them before they become leaks too. But {engineer} is exhausted.',
-        },
+        effects: [
+          { resource: 'oxygen', delta: -5 },
+          { resource: 'energy', delta: -5 },
+          { resource: 'health', delta: -5 },
+        ],
+        narrative:
+          'The engineer went outside and found the leak AND two other weak spots. You can fix them before they become leaks too. But the engineer is exhausted.',
       },
     ],
   },
@@ -247,92 +325,134 @@ export const MISSIONS: Mission[] = [
     act: 2,
     day: 35,
     system: 'oxygen',
+    room: 'engineering',
     icon: '☠️',
     nasaSource: 'ISS',
     nasaYear: 2006,
-    popup: 'THIS REALLY HAPPENED! In 2006, the oxygen generator on the ISS overheated and released toxic smoke. The 3 astronauts had to put on masks and gloves. It was the first real emergency in 8 years of the space station.',
+    popup:
+      'THIS REALLY HAPPENED! The Mars Express probe passed up to 75 minutes in Mars\'s shadow every orbit. With weak batteries and 20% less sunlight, it entered survival mode: turned off all science instruments and cut power from 400W to 300W.',
     choices: [
       {
         id: 'masks-restart',
         label: 'Masks on, restart it',
         icon: '😷',
-        crewRequired: 'engineer',
-        consequences: {
-          oxygen: -5,
-          narrative: 'Everyone put on masks. {engineer} restarted the machine — it works at 70% power! Needs full repair tomorrow.',
-          successRate: 60,
-          failNarrative: 'The machine won\'t start. You need to use emergency oxygen candles now.',
-          failEffects: { oxygen: -15 },
-        },
+        effects: [
+          { resource: 'oxygen', delta: -5 },
+        ],
+        narrative:
+          'Everyone put on masks. The engineer restarted the machine — it works at 70% power! Needs full repair tomorrow.',
+        successRate: 60,
+        failNarrative: 'The machine won\'t start. You need to use emergency oxygen candles now.',
+        failEffects: [{ resource: 'oxygen', delta: -15 }],
       },
       {
-        id: 'shutdown-candles',
-        label: 'Shut down, use candles',
-        icon: '🕯️',
-        consequences: {
-          oxygen: -10,
-          narrative: 'Machine off. No more smoke. You lit emergency oxygen candles — each one gives air for 1 person for 1 day. You have 12. That\'s 3 days for a crew of 4. Clock is ticking.',
-        },
+        id: 'turn-off-greenhouse',
+        label: 'Turn off the greenhouse',
+        icon: '🌱',
+        effects: [
+          { resource: 'energy', delta: 5 },
+          { resource: 'food', delta: -5 },
+          { resource: 'satisfaction', delta: -3 },
+        ],
+        narrative:
+          'The greenhouse lights went dark. The plants will survive a few hours, but the next harvest will be smaller. The crew is worried about their lettuce.',
       },
       {
-        id: 'ventilate-wait',
-        label: 'Ventilate and wait',
-        icon: '🌬️',
-        consequences: {
-          oxygen: -12,
-          narrative: 'Fans pushed the smoke through filters. After 8 hours the air cleared. You found the problem: a burned wire. Easy fix — but a whole day without making oxygen.',
-        },
+        id: 'lower-heating',
+        label: 'Lower the heating',
+        icon: '❄️',
+        effects: [
+          { resource: 'energy', delta: 10 },
+          { resource: 'satisfaction', delta: -5 },
+          { resource: 'health', delta: -3 },
+        ],
+        narrative:
+          'It\'s getting cold in here! Mars averages -59°C, and without full heating the station cools down fast. The crew puts on extra layers but nobody sleeps well.',
       },
     ],
   },
   {
-    id: 'debris-storm',
-    title: 'Debris Storm!',
-    description: 'A cloud of space debris is heading toward the station! Thousands of pieces, some as small as a marble, flying at 28,000 km/h. At that speed, even a tiny piece can punch through the wall.',
+    id: 'solar-storm-small',
+    title: 'Solar Storm Warning',
+    description:
+      'DONKI detected a solar storm heading toward Mars. It\'s small, but the crew should take shelter. Radiation is invisible energy from the Sun — too much can make astronauts sick.',
+    act: 1,
+    day: 15,
+    system: 'radiation',
+    room: 'bridge',
+    icon: '☢️',
+    nasaSource: 'NASA DONKI',
+    nasaYear: 2026,
+    popup:
+      'The DONKI system (Database Of Notifications, Knowledge, Information) tracks real solar storms. CMEs (Coronal Mass Ejections) take 4-7 days to reach Mars from the Sun. On Mars\'s surface, radiation is about 0.64 mSv per day — that\'s like getting a chest X-ray every 2 days!',
+    choices: [
+      {
+        id: 'full-shelter',
+        label: 'Everyone to the shelter',
+        icon: '🛡️',
+        effects: [
+          { resource: 'radiation', delta: 2 },
+        ],
+        narrative:
+          'Everyone moved to the radiation shelter. The water tanks and food bags around the walls block most of the radiation. Safe! But 2 hours of work lost while waiting for the storm to pass.',
+      },
+      {
+        id: 'keep-working',
+        label: 'Keep working',
+        icon: '💪',
+        effects: [
+          { resource: 'radiation', delta: 8 },
+        ],
+        narrative:
+          'The crew kept working through the storm. More got done today, but everyone absorbed extra radiation. Maya warns that radiation adds up over time — it never goes away.',
+      },
+    ],
+  },
+  {
+    id: 'debris-field',
+    title: 'Debris Field!',
+    description: 'An old satellite broke apart and the debris is heading toward the station. Pieces of metal moving at 7 km/s — faster than a bullet. Even a small piece can punch through the hull.',
     act: 2,
-    day: 28,
-    system: 'debris',
-    icon: '☄️',
+    day: 50,
+    system: 'shielding',
+    room: 'bridge',
+    icon: '🛰️',
     nasaSource: 'ISS',
     nasaYear: 2021,
-    popup: 'THIS REALLY HAPPENED! In November 2021, Russia destroyed a satellite with a missile. It created over 1,500 pieces of debris that passed near the ISS. All 7 astronauts had to get into their escape capsules and wait for 2 hours. NASA called it "irresponsible."',
+    popup: 'THIS REALLY HAPPENED! In 2021, the ISS had to dodge debris 3 times. Once, the crew had to shelter in the Soyuz capsules. In 2022, debris from a destroyed satellite came within 25 km of the station. At orbital speeds, even a paint fleck can crack a window.',
     choices: [
       {
         id: 'escape-pods',
         label: 'Everyone to escape pods',
         icon: '🚀',
-        consequences: {
-          crewEffects: [
-            { id: 'engineer', morale: -10 },
-            { id: 'medic', morale: -10 },
-            { id: 'scientist', morale: -10 },
-          ],
-          narrative: 'Everyone squeezed into the escape capsules for 2 hours. The debris passed without hitting the station. Safe, but 2 hours of work lost.',
-        },
+        effects: [
+          { resource: 'satisfaction', delta: -10 },
+        ],
+        narrative:
+          'Everyone squeezed into the escape capsules for 2 hours. The debris passed without hitting the station. Safe, but 2 hours of work lost.',
       },
       {
         id: 'shelter-core',
         label: 'Shelter in the core',
         icon: '🛡️',
-        consequences: {
-          narrative: 'You sealed the outer modules and everyone stayed in the center. The debris passed. Work continued at half speed.',
-          successRate: 95,
-          failNarrative: 'A piece hit an outer module! Small pressure drop. The hatch was closed so the crew is fine, but you lost some equipment.',
-          failEffects: { energy: -10, radiation: 5 }, // was shielding -5 (less protection = more radiation)
-        },
+        effects: [
+          { resource: 'satisfaction', delta: -5 },
+        ],
+        narrative:
+          'The crew moved to the most shielded part of the station. The debris passed safely. Less disruptive than the pods.',
       },
       {
         id: 'dodge-station',
         label: 'Move the station',
         icon: '🎯',
-        crewRequired: 'scientist',
-        consequences: {
-          energy: -8,
-          narrative: '{scientist} calculated the perfect dodge. Thrusters fired and the station moved to a safe orbit. But fuel is limited — can\'t do this often.',
-          successRate: 90,
-          failNarrative: 'The dodge wasn\'t enough. A small piece clipped a solar panel.',
-          failEffects: { energy: -15 },
-        },
+        effects: [
+          { resource: 'energy', delta: -8 },
+        ],
+        narrative:
+          'The scientist calculated the perfect dodge. Thrusters fired and the station moved to a safe orbit. But fuel is limited — can\'t do this often.',
+        successRate: 90,
+        failNarrative: 'The dodge wasn\'t enough. A small piece clipped a solar panel.',
+        failEffects: [{ resource: 'energy', delta: -15 }],
       },
     ],
   },
@@ -343,6 +463,7 @@ export const MISSIONS: Mission[] = [
     act: 2,
     day: 45,
     system: 'communication',
+    room: 'bridge',
     icon: '📡',
     nasaSource: 'CHAPEA Mars Simulation',
     nasaYear: 2025,
@@ -352,41 +473,39 @@ export const MISSIONS: Mission[] = [
         id: 'stay-calm',
         label: 'Stay calm, keep routine',
         icon: '😌',
-        consequences: {
-          crewEffects: [
-            { id: 'engineer', morale: -5 },
-            { id: 'medic', morale: -5 },
-            { id: 'scientist', morale: -5 },
-          ],
-          narrative: 'You told the crew to follow the normal schedule. Communication came back in 2 days. It was just a technical glitch on Earth\'s side.',
-        },
+        effects: [
+          { resource: 'satisfaction', delta: -5 },
+        ],
+        narrative:
+          'You told the crew to follow the normal schedule. Communication came back in 2 days. It was just a technical glitch on Earth\'s side.',
       },
       {
         id: 'boost-antenna',
         label: 'Boost the antenna',
         icon: '📡',
-        consequences: {
-          energy: -8,
-          oxygen: -3,
-          narrative: 'You redirected power to the antenna. You reached Earth! They said it was a minor equipment problem on their end.',
-          successRate: 70,
-          failNarrative: 'Still no contact. You used extra energy for nothing. The crew is colder and oxygen production was slower.',
-          failEffects: { energy: -5, oxygen: -5 },
-        },
+        effects: [
+          { resource: 'energy', delta: -8 },
+          { resource: 'oxygen', delta: -3 },
+        ],
+        narrative:
+          'You redirected power to the antenna. You reached Earth! They said it was a minor equipment problem on their end.',
+        successRate: 70,
+        failNarrative: 'Still no contact. You used extra energy for nothing. The crew is colder and oxygen production was slower.',
+        failEffects: [
+          { resource: 'energy', delta: -5 },
+          { resource: 'oxygen', delta: -5 },
+        ],
       },
       {
         id: 'emergency-protocol',
         label: 'Emergency protocol',
         icon: '🚨',
-        consequences: {
-          energy: -5,
-          crewEffects: [
-            { id: 'engineer', morale: -15 },
-            { id: 'medic', morale: -15 },
-            { id: 'scientist', morale: -15 },
-          ],
-          narrative: 'You assumed the worst and prepared for an emergency. Turns out it was just a glitch. But the crew is now scared and will work slower tomorrow.',
-        },
+        effects: [
+          { resource: 'energy', delta: -5 },
+          { resource: 'satisfaction', delta: -15 },
+        ],
+        narrative:
+          'You assumed the worst and prepared for an emergency. Turns out it was just a glitch. But the crew is now scared and will work slower tomorrow.',
       },
     ],
   },

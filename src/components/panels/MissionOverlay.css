@@ -1,0 +1,268 @@
+.mission-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.mission-overlay__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 8, 20, 0.75);
+  backdrop-filter: blur(4px);
+}
+
+.mission-overlay__panel {
+  position: relative;
+  width: min(680px, 92vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: linear-gradient(180deg, rgba(15, 22, 45, 0.97), rgba(10, 14, 30, 0.99));
+  border: 1px solid rgba(77, 201, 246, 0.25);
+  border-radius: 12px;
+  box-shadow:
+    0 0 40px rgba(77, 201, 246, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  padding: 0;
+}
+
+.mission-overlay__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px 12px;
+  border-bottom: 1px solid rgba(77, 201, 246, 0.15);
+}
+
+.mission-overlay__icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.mission-overlay__title {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  letter-spacing: 0.02em;
+}
+
+.mission-overlay__source {
+  padding: 6px 24px 0;
+  font-size: 0.7rem;
+  color: rgba(77, 201, 246, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.mission-overlay__body {
+  padding: 16px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mission-overlay__terminal {
+  background: rgba(0, 10, 25, 0.6);
+  border: 1px solid rgba(77, 201, 246, 0.12);
+  border-radius: 8px;
+  padding: 16px 18px;
+  font-family: var(--font-family);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #a8d8ea;
+  min-height: 80px;
+}
+
+.mission-overlay__terminal--nasa {
+  border-color: rgba(46, 204, 113, 0.25);
+  color: #7dcea0;
+}
+
+.mission-overlay__prompt {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.mission-overlay__choices {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mission-choice {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: rgba(20, 30, 60, 0.7);
+  border: 1px solid rgba(77, 201, 246, 0.18);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  color: #e2e8f0;
+}
+
+.mission-choice:hover {
+  background: rgba(30, 45, 90, 0.8);
+  border-color: rgba(77, 201, 246, 0.45);
+  box-shadow: 0 0 15px rgba(77, 201, 246, 0.15);
+  transform: translateY(-1px);
+}
+
+.mission-choice:active {
+  transform: translateY(0);
+}
+
+.mission-choice__icon {
+  font-size: 1.6rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.mission-choice__content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mission-choice__label {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.mission-choice__effects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.effect-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.effect-badge--positive {
+  background: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+  border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.effect-badge--negative {
+  background: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+  border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.mission-btn {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  align-self: center;
+}
+
+.mission-btn--primary {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(37, 99, 235, 0.3);
+}
+
+.mission-btn--primary:hover {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+  transform: translateY(-1px);
+}
+
+.mission-btn--primary:active {
+  transform: translateY(0);
+}
+
+.resource-hints {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 14px;
+  background: rgba(0, 10, 25, 0.5);
+  border: 1px solid rgba(77, 201, 246, 0.12);
+  border-radius: 8px;
+}
+
+.resource-hints__label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.resource-hints__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.resource-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.resource-chip--warning {
+  background: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+  border-color: rgba(231, 76, 60, 0.3);
+  animation: hint-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes hint-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.mission-overlay__nasa-badge {
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #2ecc71;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 8px;
+  background: rgba(46, 204, 113, 0.08);
+  border-radius: 6px;
+  border: 1px solid rgba(46, 204, 113, 0.2);
+}
+
+.typewriter-cursor {
+  animation: blink 0.7s infinite;
+  color: rgba(77, 201, 246, 0.8);
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}

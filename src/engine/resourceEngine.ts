@@ -1,35 +1,19 @@
-import type { Choice } from '../data/missions';
-import { RESOURCE_KEYS, type Resources } from '../stores/useResourceStore';
+import type { ResourceKey } from '../stores/useResourceStore';
+import type { ChoiceEffect } from '../data/missions';
 
 interface ResourceStore {
-  applyDelta: (delta: Partial<Resources>) => void;
+  applyDelta: (delta: Partial<Record<ResourceKey, number>>) => void;
 }
 
-interface CrewStore {
-  updateCrew: (id: string, partial: { health?: number; morale?: number }) => void;
-}
-
-export function applyConsequences(
+export function applyEffects(
   resourceStore: ResourceStore,
-  crewStore: CrewStore,
-  consequences: Choice['consequences'],
+  effects: ChoiceEffect[],
 ): void {
-  const delta: Partial<Resources> = {};
-  for (const key of RESOURCE_KEYS) {
-    const value = consequences[key];
-    if (value !== undefined) delta[key] = value;
+  const delta: Partial<Record<ResourceKey, number>> = {};
+  for (const eff of effects) {
+    delta[eff.resource] = (delta[eff.resource] ?? 0) + eff.delta;
   }
-
   if (Object.keys(delta).length > 0) {
     resourceStore.applyDelta(delta);
-  }
-
-  if (consequences.crewEffects) {
-    for (const effect of consequences.crewEffects) {
-      crewStore.updateCrew(effect.id, {
-        ...(effect.health !== undefined && { health: effect.health }),
-        ...(effect.morale !== undefined && { morale: effect.morale }),
-      });
-    }
   }
 }

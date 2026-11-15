@@ -26,11 +26,13 @@ export function DaySummary() {
   const oxygen = useResourceStore((s) => s.oxygen);
   const radiation = useResourceStore((s) => s.radiation);
   const energy = useResourceStore((s) => s.energy);
+  const health = useResourceStore((s) => s.health);
+  const satisfaction = useResourceStore((s) => s.satisfaction);
   const crew = useCrewStore((s) => s.crew);
   const nextDay = useGameStore((s) => s.nextDay);
   const day = useGameStore((s) => s.day);
 
-  const [snapshot] = useState<Resources>({ food, water, oxygen, radiation, energy });
+  const [snapshot] = useState<Resources>({ food, water, oxygen, radiation, energy, health, satisfaction });
 
   return (
     <div
@@ -56,6 +58,8 @@ export function DaySummary() {
         <Delta label="🫁 Oxygen" before={snapshot.oxygen} after={oxygen} />
         <Delta label="☢️ Radiation" before={snapshot.radiation} after={radiation} higherIsWorse />
         <Delta label="⚡ Energy" before={snapshot.energy} after={energy} />
+        <Delta label="❤️ Health" before={snapshot.health} after={health} />
+        <Delta label="😊 Satisfaction" before={snapshot.satisfaction} after={satisfaction} />
       </div>
 
       <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-3)' }}>

@@ -1,52 +1,56 @@
 import { Button } from '../ui/Button';
-import { ENDINGS } from '../../data/endings';
-import { calculateEnding } from '../../engine/endingCalculator';
-import { stationScore, type Resources } from '../../stores/useResourceStore';
 import './EndingScreen.css';
 
 interface EndingScreenProps {
   playerName: string;
-  resources: Resources;
+  resources: { food: number; health: number; satisfaction: number };
   onReplay: () => void;
   onOpenCredits: () => void;
 }
 
-const ENDING_ICONS = { good: '🎉', medium: '😮‍💨', bad: '💪' };
-// TODO: replace with real asset — emoji icons on the ending screen.
-const ENDING_STATS = [
-  { key: 'food', icon: '🍎', label: 'Food' },
-  { key: 'water', icon: '💧', label: 'Water' },
-  { key: 'oxygen', icon: '🫁', label: 'Oxygen' },
-  { key: 'radiation', icon: '☢️', label: 'Radiation' },
-  { key: 'energy', icon: '⚡', label: 'Energy' },
-] as const;
-
 export function EndingScreen({ playerName, resources, onReplay, onOpenCredits }: EndingScreenProps) {
-  const endingType = calculateEnding(resources);
-  const ending = ENDINGS.find((e) => e.id === endingType)!;
-  const avg = Math.round(stationScore(resources));
+  const avg = Math.round((resources.food + resources.health + resources.satisfaction) / 3);
+  const endingType = avg > 30 ? 'good' : avg > 10 ? 'medium' : 'bad';
+
+  const endings = {
+    good: {
+      icon: '🎉',
+      title: 'Mission Complete!',
+      desc: `Congratulations, Commander ${playerName}! The return ship has docked. Your crew is healthy and the station is in good shape. The data you collected will help future Mars missions.`,
+    },
+    medium: {
+      icon: '😮‍💨',
+      title: 'You Survived!',
+      desc: `Commander ${playerName}, the return ship arrived just in time. Your crew made it, but barely. Resources were running dangerously low. Next time, manage them more carefully.`,
+    },
+    bad: {
+      icon: '💪',
+      title: 'A Tough Mission',
+      desc: `Commander ${playerName}, the mission was hard and some things went wrong. But you learned something important: in space, every decision matters. The real astronauts know this. Try again?`,
+    },
+  };
+
+  const ending = endings[endingType];
 
   return (
     <div className="ending-screen">
       <div className="ending-container animate-fadeIn">
-        <div className="ending-icon">{ENDING_ICONS[endingType]}</div>
+        <div className="ending-icon">{ending.icon}</div>
         <h1 className="ending-title">{ending.title}</h1>
-        <p className="ending-desc">
-          {ending.description.replace('{name}', playerName)}
-        </p>
+        <p className="ending-desc">{ending.desc}</p>
 
         <div className="ending-stats">
-          {ENDING_STATS.map((stat) => (
-            <div key={stat.key} className="ending-stat">
-              <span className="ending-stat-icon">{stat.icon}</span>
-              <span className="ending-stat-label">{stat.label}</span>
-              <span className="ending-stat-value">{Math.round(resources[stat.key])}%</span>
-            </div>
-          ))}
-          <div className="ending-stat overall">
-            <span className="ending-stat-icon">📊</span>
-            <span className="ending-stat-label">Overall</span>
-            <span className="ending-stat-value">{avg}%</span>
+          <div className="ending-stat">
+            <span className="ending-stat-icon">🍽</span>
+            <span>Food: {Math.round(resources.food)}</span>
+          </div>
+          <div className="ending-stat">
+            <span className="ending-stat-icon">❤️</span>
+            <span>Health: {Math.round(resources.health)}</span>
+          </div>
+          <div className="ending-stat">
+            <span className="ending-stat-icon">😊</span>
+            <span>Morale: {Math.round(resources.satisfaction)}</span>
           </div>
         </div>
 
@@ -64,8 +68,8 @@ export function EndingScreen({ playerName, resources, onReplay, onOpenCredits }:
           </button>
         </div>
 
-        <Button variant="primary" size="lg" icon="🔄" onClick={onReplay}>
-          {endingType === 'good' ? 'Play Again' : 'Try a Different Strategy'}
+        <Button variant="primary" onClick={onReplay}>
+          Play Again
         </Button>
       </div>
     </div>
