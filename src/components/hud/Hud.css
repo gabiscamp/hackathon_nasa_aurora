@@ -20,6 +20,8 @@
   --hud-rim: rgba(77, 201, 246, 0.3);
   --hud-metal: linear-gradient(180deg, #4a5878 0%, #232c47 55%, #161d33 100%);
   --hud-edge: 16px;
+  /* One knob for the size of the corner panels (Station, Mission, Map, Location). */
+  --hud-scale: 1.2;
 
   position: absolute;
   inset: 0;
@@ -33,6 +35,14 @@
 .hud > * {
   position: absolute;
   pointer-events: auto;
+}
+
+/* Corner panels grow together; offsets stay readable because zoom also scales them. */
+.hud-status,
+.hud-objective,
+.hud-minimap,
+.hud-location {
+  zoom: var(--hud-scale);
 }
 
 /* ---------- Shared HUD panel ---------- */
