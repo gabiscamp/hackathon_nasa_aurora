@@ -3,14 +3,16 @@ import { EXPLORATION_REPORTS, RISK_LABELS, type ExplorationOption } from '../../
 import { EVENTS, gameEvents } from '../../game/events';
 import { useExplorationStore } from '../../stores/useExplorationStore';
 import { useResourceStore } from '../../stores/useResourceStore';
+import { useGameStore } from '../../stores/useGameStore';
 import { RobotPortrait } from './RobotPortrait';
 import './ExplorationSystem.css';
 
-function formatRemaining(milliseconds: number): string {
-  const gameHours = Math.max(0, Math.ceil(milliseconds / 1000));
-  const days = Math.floor(gameHours / 24);
-  const hours = gameHours % 24;
-  return days > 0 ? `${days}d ${String(hours).padStart(2, '0')}h` : `${String(hours).padStart(2, '0')}h`;
+function missionDays(mission: ExplorationOption): number {
+  return Math.ceil(mission.durationHours / 24);
+}
+
+function formatDays(days: number): string {
+  return `${days} ${days === 1 ? 'dia' : 'dias'}`;
 }
 
 function MissionDetails({ mission }: { mission: ExplorationOption }) {
@@ -20,7 +22,7 @@ function MissionDetails({ mission }: { mission: ExplorationOption }) {
       <h3>{mission.title}</h3>
       <p>{mission.description}</p>
       <dl className="exploration-stats">
-        <div><dt>Duração</dt><dd>{mission.durationHours}h</dd></div>
+        <div><dt>Duração</dt><dd>{formatDays(missionDays(mission))}</dd></div>
         <div><dt>Sucesso</dt><dd>{Math.round(mission.successChance * 100)}%</dd></div>
         <div><dt>Custo</dt><dd>{mission.cost.energy} energia · {mission.cost.water} água</dd></div>
         <div><dt>Retorno</dt><dd>até {mission.reward.minerals} minérios</dd></div>
@@ -46,7 +48,7 @@ export function ExplorationSystem() {
   const water = useResourceStore((state) => state.water);
   const energy = useResourceStore((state) => state.energy);
   const applyDelta = useResourceStore((state) => state.applyDelta);
-  const [now, setNow] = useState(active?.startedAt ?? 0);
+  const day = useGameStore((state) => state.day);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const worldPausedByExploration = useRef(false);
 
@@ -78,20 +80,13 @@ export function ExplorationSystem() {
 
   useEffect(() => {
     if (!active) return;
-    const update = () => {
-      const currentTime = Date.now();
-      setNow(currentTime);
-      const outcome = resolveExploration(currentTime);
-      if (!outcome?.succeeded) return;
-      applyDelta({
-        water: outcome.mission.reward.water,
-        energy: outcome.mission.reward.energy,
-      });
-    };
-    update();
-    const timer = window.setInterval(update, 250);
-    return () => window.clearInterval(timer);
-  }, [active, applyDelta, resolveExploration]);
+    const outcome = resolveExploration(day);
+    if (!outcome?.succeeded) return;
+    applyDelta({
+      water: outcome.mission.reward.water,
+      energy: outcome.mission.reward.energy,
+    });
+  }, [active, day, applyDelta, resolveExploration]);
 
   useEffect(() => {
     if (lastOutcome && !worldPausedByExploration.current) {
@@ -117,7 +112,7 @@ export function ExplorationSystem() {
     if (water < mission.cost.water || energy < mission.cost.energy) return;
     setDetailsOpen(false);
     applyDelta({ water: -mission.cost.water, energy: -mission.cost.energy });
-    startExploration(mission);
+    startExploration(mission, day);
     if (worldPausedByExploration.current) {
       worldPausedByExploration.current = false;
       gameEvents.emit(EVENTS.MENU_CLOSED);
@@ -179,7 +174,7 @@ export function ExplorationSystem() {
           <RobotPortrait size={64} />
           <span>
             <strong>Explorando Marte</strong>
-            <small>{formatRemaining(active.endsAt - now)} para retornar</small>
+            <small>Retorna no Dia {active.returnDay} · faltam {formatDays(Math.max(0, active.returnDay - day))}</small>
           </span>
           <b>{unlockedIds.length}/10</b>
         </button>
@@ -196,12 +191,13 @@ export function ExplorationSystem() {
             <div className="exploration-options">
               {options.map((mission) => {
                 const affordable = water >= mission.cost.water && energy >= mission.cost.energy;
+                const returnsInTime = day + missionDays(mission) <= 90;
                 return (
                   <article className={`exploration-option exploration-option--${mission.risk}`} key={mission.id}>
                     <span className="exploration-number">OPÇÃO {mission.optionNumber}</span>
                     <MissionDetails mission={mission} />
-                    <button type="button" disabled={!affordable} onClick={() => launch(mission)}>
-                      {affordable ? 'Enviar robô' : 'Recursos insuficientes'}
+                    <button type="button" disabled={!affordable || !returnsInTime} onClick={() => launch(mission)}>
+                      {!returnsInTime ? 'Não retorna antes do fim' : affordable ? 'Enviar robô' : 'Recursos insuficientes'}
                     </button>
                   </article>
                 );
@@ -217,7 +213,7 @@ export function ExplorationSystem() {
             <RobotPortrait size={96} />
             <div><span className="exploration-eyebrow">MISSÃO EM ANDAMENTO</span><h2 id="active-title">{active.mission.title}</h2></div>
             <MissionDetails mission={active.mission} />
-            <p className="exploration-countdown">Retorno em {formatRemaining(active.endsAt - now)}</p>
+            <p className="exploration-countdown">Retorno no Dia {active.returnDay} — faltam {formatDays(Math.max(0, active.returnDay - day))}</p>
             <button type="button" onClick={closeDetails}>Voltar ao jogo</button>
           </section>
         </div>

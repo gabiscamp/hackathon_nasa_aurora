@@ -74,7 +74,7 @@ const OVERHEAD_DEPTH = 11;
 /** Extra zoom when the camera flies to a mission spot. */
 const MISSION_ZOOM = 1.4;
 const ROBOT_SCALE = 0.24;
-const ROBOT_INTERACT_DISTANCE = 72;
+const ROBOT_INTERACT_DISTANCE = 110;
 
 export class GameScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Container;
@@ -463,7 +463,8 @@ export class GameScene extends Phaser.Scene {
       targets: this.robot,
       x: target.x,
       y: target.y,
-      duration: Math.max(1800, distance * 12),
+      // About 35 world-pixels/second: deliberately slower than the player (160 px/s).
+      duration: Math.max(3000, distance * 28),
       ease: 'Sine.easeInOut',
       onUpdate: () => {
         if (this.robot) gameEvents.emit(EVENTS.ROBOT_MOVED, { x: this.robot.x, y: this.robot.y });
@@ -472,7 +473,8 @@ export class GameScene extends Phaser.Scene {
         if (!this.robot) return;
         gameEvents.emit(EVENTS.ROBOT_MOVED, { x: this.robot.x, y: this.robot.y });
         this.robotPatrol = null;
-        this.time.delayedCall(Phaser.Math.Between(900, 2400), () => this.startRandomRobotPatrol());
+        // Long inspection stop so the player can walk up and interact with AUR-1.
+        this.time.delayedCall(Phaser.Math.Between(4000, 8000), () => this.startRandomRobotPatrol());
       },
     });
   }

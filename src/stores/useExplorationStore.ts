@@ -7,13 +7,12 @@ import {
   type ExplorationReport,
 } from '../data/exploration';
 
-export const REAL_MS_PER_GAME_HOUR = 1000;
 const FAILURE_PITY_LIMIT = 2;
 
 export interface ActiveExploration {
   mission: ExplorationOption;
-  startedAt: number;
-  endsAt: number;
+  startedDay: number;
+  returnDay: number;
 }
 
 export interface ExplorationOutcome {
@@ -36,8 +35,8 @@ interface ExplorationState {
   celebrationPending: boolean;
   openMissionMenu: () => void;
   clearOptions: () => void;
-  startExploration: (mission: ExplorationOption, now?: number) => void;
-  resolveExploration: (now?: number, roll?: number) => ExplorationOutcome | null;
+  startExploration: (mission: ExplorationOption, currentDay: number) => void;
+  resolveExploration: (currentDay: number, roll?: number) => ExplorationOutcome | null;
   clearOutcome: () => void;
   dismissCelebration: () => void;
   reset: () => void;
@@ -72,22 +71,22 @@ export const useExplorationStore = create<ExplorationState>()(
       openMissionMenu: () => set({ options: generateExplorationOptions(), lastOutcome: null }),
       clearOptions: () => set({ options: [] }),
 
-      startExploration: (mission, now = Date.now()) =>
+      startExploration: (mission, currentDay) =>
         set((state) => ({
           status: 'exploring',
           options: [],
           active: {
             mission,
-            startedAt: now,
-            endsAt: now + mission.durationHours * REAL_MS_PER_GAME_HOUR,
+            startedDay: currentDay,
+            returnDay: currentDay + Math.ceil(mission.durationHours / 24),
           },
           totalExplorationHours: state.totalExplorationHours + mission.durationHours,
           lastOutcome: null,
         })),
 
-      resolveExploration: (now = Date.now(), roll = Math.random()) => {
+      resolveExploration: (currentDay, roll = Math.random()) => {
         const state = get();
-        if (!state.active || now < state.active.endsAt) return null;
+        if (!state.active || currentDay < state.active.returnDay) return null;
 
         const mission = state.active.mission;
         const wasGuaranteed = state.consecutiveFailures >= FAILURE_PITY_LIMIT;
@@ -118,7 +117,21 @@ export const useExplorationStore = create<ExplorationState>()(
     }),
     {
       name: 'aurora-exploration-store',
-      version: 1,
+      version: 2,
+      migrate: (persisted, version) => {
+        const saved = (persisted ?? {}) as Partial<ExplorationState>;
+        return {
+          status: version < 2 ? 'aboard' : saved.status ?? INITIAL.status,
+          active: version < 2 ? null : saved.active ?? INITIAL.active,
+          unlockedReportIds: saved.unlockedReportIds ?? INITIAL.unlockedReportIds,
+          consecutiveFailures: saved.consecutiveFailures ?? INITIAL.consecutiveFailures,
+          totalExplorationHours: saved.totalExplorationHours ?? INITIAL.totalExplorationHours,
+          minerals: saved.minerals ?? INITIAL.minerals,
+          lastOutcome: version < 2 ? null : saved.lastOutcome ?? INITIAL.lastOutcome,
+          medalAwarded: saved.medalAwarded ?? INITIAL.medalAwarded,
+          celebrationPending: saved.celebrationPending ?? INITIAL.celebrationPending,
+        };
+      },
       partialize: (state) => ({
         status: state.status,
         active: state.active,
