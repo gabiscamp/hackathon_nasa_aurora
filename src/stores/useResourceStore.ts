@@ -1,40 +1,49 @@
 import { create } from 'zustand';
 import { clamp } from '../utils/clamp';
 
-interface ResourceState {
-  energy: number;
-  oxygen: number;
-  shielding: number;
+export type ResourceKey = 'food' | 'water' | 'energy' | 'oxygen' | 'health' | 'satisfaction' | 'radiation';
 
-  applyDelta: (delta: Partial<Pick<ResourceState, 'energy' | 'oxygen' | 'shielding'>>) => void;
-  tick: (act: 1 | 2 | 3) => void;
+type ResourceValues = Record<ResourceKey, number>;
+
+interface ResourceState extends ResourceValues {
+  applyDelta: (delta: Partial<ResourceValues>) => void;
+  tick: () => void;
   reset: () => void;
 }
 
-const INITIAL: Pick<ResourceState, 'energy' | 'oxygen' | 'shielding'> = {
-  energy: 85,
-  oxygen: 90,
-  shielding: 80,
+const INITIAL: ResourceValues = {
+  food: 100,
+  water: 100,
+  energy: 100,
+  oxygen: 100,
+  health: 100,
+  satisfaction: 80,
+  radiation: 0,
 };
 
 export const useResourceStore = create<ResourceState>()((set) => ({
   ...INITIAL,
 
   applyDelta: (delta) =>
-    set((state) => ({
-      energy: clamp(state.energy + (delta.energy ?? 0), 0, 100),
-      oxygen: clamp(state.oxygen + (delta.oxygen ?? 0), 0, 100),
-      shielding: clamp(state.shielding + (delta.shielding ?? 0), 0, 100),
-    })),
-
-  tick: (act) =>
     set((state) => {
-      const decay = act === 1 ? 1 : act === 2 ? 2 : 3;
-      const oxygenMultiplier = state.energy < 20 ? 2 : 1;
+      const next: Partial<ResourceValues> = {};
+      for (const key of Object.keys(delta) as ResourceKey[]) {
+        const v = state[key] + (delta[key] ?? 0);
+        next[key] = key === 'radiation' ? clamp(v, 0, 100) : clamp(v, 0, 100);
+      }
+      return next;
+    }),
+
+  tick: () =>
+    set((state) => {
+      const oxygenPenalty = state.energy <= 0 ? -10 : 0;
+      const healthPenalty = state.oxygen < 20 ? -5 : 0;
       return {
-        energy: clamp(state.energy - decay, 0, 100),
-        oxygen: clamp(state.oxygen - decay * oxygenMultiplier, 0, 100),
-        shielding: clamp(state.shielding - decay, 0, 100),
+        food: clamp(state.food - 1, 0, 100),
+        water: clamp(state.water - 1, 0, 100),
+        oxygen: clamp(state.oxygen + oxygenPenalty, 0, 100),
+        health: clamp(state.health + healthPenalty, 0, 100),
+        radiation: clamp(state.radiation + 0.5, 0, 100),
       };
     }),
 

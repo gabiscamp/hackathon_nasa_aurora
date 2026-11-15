@@ -31,9 +31,9 @@ export default function App() {
   const setPlayerName = useGameStore((s) => s.setPlayerName);
   const setScene = useGameStore((s) => s.setScene);
   const resetGame = useGameStore((s) => s.resetGame);
-  const energy = useResourceStore((s) => s.energy);
-  const oxygen = useResourceStore((s) => s.oxygen);
-  const shielding = useResourceStore((s) => s.shielding);
+  const food = useResourceStore((s) => s.food);
+  const health = useResourceStore((s) => s.health);
+  const satisfaction = useResourceStore((s) => s.satisfaction);
   const resetResources = useResourceStore((s) => s.reset);
   const resetCrew = useCrewStore((s) => s.reset);
 
@@ -59,7 +59,7 @@ export default function App() {
       )}
       {scene === 'game' && <GameScreen />}
       {scene === 'ending' && (
-        <EndingScreen playerName={playerName} resources={{ energy, oxygen, shielding }} onReplay={handleReplay} />
+        <EndingScreen playerName={playerName} resources={{ food, health, satisfaction }} onReplay={handleReplay} />
       )}
     </Suspense>
   );

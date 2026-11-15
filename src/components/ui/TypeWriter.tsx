@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
+import { playKeyTick } from '../../utils/sounds';
 
 interface TypeWriterProps {
   text: string;
   speed?: number;
   onComplete?: () => void;
   className?: string;
+  sound?: boolean;
 }
 
-export function TypeWriter({ text, speed = 30, onComplete, className = '' }: TypeWriterProps) {
+export function TypeWriter({ text, speed = 30, onComplete, className = '', sound = true }: TypeWriterProps) {
   const [displayed, setDisplayed] = useState('');
   const [done, setDone] = useState(false);
 
@@ -18,6 +20,7 @@ export function TypeWriter({ text, speed = 30, onComplete, className = '' }: Typ
     const interval = setInterval(() => {
       if (i < text.length) {
         setDisplayed(text.slice(0, i + 1));
+        if (sound && i % 2 === 0) playKeyTick();
         i++;
       } else {
         clearInterval(interval);
@@ -26,7 +29,7 @@ export function TypeWriter({ text, speed = 30, onComplete, className = '' }: Typ
       }
     }, speed);
     return () => clearInterval(interval);
-  }, [text, speed, onComplete]);
+  }, [text, speed, onComplete, sound]);
 
   return (
     <span
