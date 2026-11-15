@@ -91,7 +91,7 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
         <PauseMenu onMainMenu={onMainMenu} onOpenCredits={onOpenCredits} suspended={creditsOpen} />
 
         {phase === 'decision' && !missionOpen && currentMission && (
-          <div className="game-hint-banner">
+          <div className="game-hint-banner" data-read>
             <span>{currentMission.icon} Go to {ROOM_NAMES[currentMission.room as RoomId] ?? currentMission.room} and press <kbd>E</kbd> to investigate!</span>
           </div>
         )}

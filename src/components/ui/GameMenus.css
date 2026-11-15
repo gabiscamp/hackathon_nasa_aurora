@@ -462,3 +462,47 @@
     display: none;
   }
 }
+
+/* ---------- Read + Options (accessibility) ---------- */
+.a11y-dock {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  display: flex;
+  gap: 10px;
+}
+
+.a11y-dock .gm-menu-btn,
+.a11y-dock .gm-menu-btn:hover {
+  position: static;
+  transform: none;
+}
+
+.a11y-btn svg {
+  flex: none;
+  color: #4dc9f6;
+}
+
+/* Small screens: icon-only round buttons (they keep their aria-label), dock moves to the bottom-right corner. */
+@media (max-width: 760px) {
+  .a11y-dock {
+    top: auto;
+    bottom: 12px;
+    left: auto;
+    right: 12px;
+    transform: none;
+  }
+
+  .a11y-btn .a11y-btn__text,
+  .a11y-btn .gm-kbd {
+    display: none;
+  }
+
+  .a11y-btn {
+    min-width: 48px;
+    justify-content: center;
+    padding: 4px 10px !important;
+  }
+}

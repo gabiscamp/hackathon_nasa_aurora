@@ -73,7 +73,7 @@ export function OptionsPanel() {
       {speechSupported && (
         <Segmented
           title="Read text aloud"
-          hint="A voice reads the messages for you."
+          hint="A voice reads the messages as they appear. Press L (or Read) to hear any screen."
           choices={ON_OFF}
           value={readAloud}
           onChange={(v) => {

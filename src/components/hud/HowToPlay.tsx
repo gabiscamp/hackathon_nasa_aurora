@@ -6,6 +6,7 @@ const CONTROLS: { keys: string[]; action: string }[] = [
   { keys: ['E'], action: 'Talk or use things' },
   { keys: ['M'], action: 'Open the ship map' },
   { keys: ['H'], action: 'Open this help' },
+  { keys: ['L'], action: 'Read the screen aloud' },
   { keys: ['Esc'], action: 'Pause the game' },
 ];
 

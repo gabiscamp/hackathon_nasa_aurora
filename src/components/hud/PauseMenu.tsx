@@ -3,6 +3,7 @@ import { gameEvents, EVENTS } from '../../game/events';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { HowToPlay } from './HowToPlay';
 import { OptionsPanel } from '../ui/OptionsPanel';
+import { GearIcon, ReadButton } from '../ui/A11yDock';
 import '../ui/GameMenus.css';
 
 interface PauseMenuProps {
@@ -21,8 +22,8 @@ type View = 'menu' | 'help' | 'options';
 export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuProps) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<View>('menu');
-  // Help opened straight from the Help button: "Back" returns to the game, not to the menu.
-  const [helpDirect, setHelpDirect] = useState(false);
+  // Help/Options opened straight from their own button: "Back" returns to the game, not to the menu.
+  const [direct, setDirect] = useState(false);
   const [confirmHome, setConfirmHome] = useState(false);
   const resumeRef = useRef<HTMLButtonElement>(null);
 
@@ -31,7 +32,7 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
 
   const openMenu = useCallback((start: View = 'menu') => {
     setView(start);
-    setHelpDirect(start === 'help');
+    setDirect(start !== 'menu');
     setOpen(true);
     if (!pausingRef.current) {
       pausingRef.current = true;
@@ -59,12 +60,12 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
       }
       if (key !== 'escape' && key !== 'p') return;
       if (!open) openMenu();
-      else if ((view === 'help' && !helpDirect) || view === 'options') setView('menu');
+      else if (view !== 'menu' && !direct) setView('menu');
       else closeMenu();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [open, view, helpDirect, suspended, confirmHome, openMenu, closeMenu]);
+  }, [open, view, direct, suspended, confirmHome, openMenu, closeMenu]);
 
   useEffect(() => {
     if (open) resumeRef.current?.focus({ preventScroll: true });
@@ -107,6 +108,11 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
           Help
           <kbd className="gm-kbd">H</kbd>
         </button>
+        <ReadButton />
+        <button type="button" className="gm-menu-btn a11y-btn" onClick={() => openMenu('options')} aria-haspopup="dialog" aria-label="Options">
+          <GearIcon />
+          <span className="a11y-btn__text">Options</span>
+        </button>
       </div>
 
       {open && (
@@ -142,8 +148,13 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
                   Options
                 </h2>
                 <OptionsPanel />
-                <button ref={resumeRef} type="button" className="gm-btn gm-btn--primary gm-btn--wide" onClick={() => setView('menu')}>
-                  Back <kbd className="gm-kbd">Esc</kbd>
+                <button
+                  ref={resumeRef}
+                  type="button"
+                  className="gm-btn gm-btn--primary gm-btn--wide"
+                  onClick={direct ? closeMenu : () => setView('menu')}
+                >
+                  {direct ? 'Back to the game' : 'Back'} <kbd className="gm-kbd">Esc</kbd>
                 </button>
               </>
             ) : (
@@ -156,9 +167,9 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
                   ref={resumeRef}
                   type="button"
                   className="gm-btn gm-btn--primary gm-btn--wide"
-                  onClick={helpDirect ? closeMenu : () => setView('menu')}
+                  onClick={direct ? closeMenu : () => setView('menu')}
                 >
-                  {helpDirect ? 'Back to the game' : 'Back'} <kbd className="gm-kbd">Esc</kbd>
+                  {direct ? 'Back to the game' : 'Back'} <kbd className="gm-kbd">Esc</kbd>
                 </button>
               </>
             )}

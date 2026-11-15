@@ -657,8 +657,10 @@
     display: none;
   }
 
+  /* Top row belongs to Menu / Help / Read / Options: the AI mark sits above the bottom hint. */
   .hud-ai-mark {
-    top: 8px;
+    top: auto;
+    bottom: 96px;
     left: 8px;
     transform: none;
     font-size: 13px;

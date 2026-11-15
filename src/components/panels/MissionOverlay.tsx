@@ -41,7 +41,7 @@ function ResourceHints() {
   ];
 
   return (
-    <div className="resource-hints">
+    <div className="resource-hints" data-read-skip>
       <span className="resource-hints__label">Current resources:</span>
       <div className="resource-hints__list">
         {resources.map((r) => {
@@ -122,7 +122,7 @@ export function MissionOverlay({ onComplete }: MissionOverlayProps) {
     <div className="mission-overlay">
       <div className="mission-overlay__backdrop" />
 
-      <div className="mission-overlay__panel">
+      <div className="mission-overlay__panel" role="dialog" aria-modal="true" aria-label={mission.title}>
         <div className="mission-overlay__header">
           <span className="mission-overlay__icon">{mission.icon}</span>
           <h2 className="mission-overlay__title">{mission.title}</h2>

@@ -41,7 +41,7 @@ export function ObjectiveTracker() {
   const pct = Math.min(100, (day / MISSION_DAYS) * 100);
 
   return (
-    <section className="hud-panel hud-objective" aria-label="Mission">
+    <section className="hud-panel hud-objective" aria-label="Mission" data-read>
       <div className="hud-objective__top">
         <p className="hud-objective__title">{title}</p>
         <span className="hud-objective__day">

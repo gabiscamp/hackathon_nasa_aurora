@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { OptionsDialog } from '../ui/OptionsPanel';
+import { ReadButton } from '../ui/A11yDock';
 import { RoleIcon } from '../ui/RoleIcon';
 import { drawTeams, type CrewTeam } from '../../data/crews';
 import type { SeatProfile } from '../../data/astronauts';
@@ -75,6 +76,7 @@ export function TitleScreen({ onStart, onOpenCredits, savedMission, onContinueMi
 
       {/* Settings and credits as game-style corner buttons (not web links), always in view. */}
       <nav className="title-topbar" aria-label="Game options">
+        <ReadButton className="title-top-btn" />
         <button type="button" className="title-top-btn" onClick={() => setOptionsOpen(true)}>
           <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="3.2" />

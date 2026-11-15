@@ -23,7 +23,7 @@ export function PlayerStatus() {
   ].filter((a): a is string => Boolean(a));
 
   return (
-    <section className="hud-panel hud-status" aria-label="Station">
+    <section className="hud-panel hud-status" aria-label="Station" data-read>
       <h2 className="hud-group__label">Station</h2>
       <HudBar icon={<FoodIcon />} label="Food" value={food} color="var(--hud-orange)" />
       <HudBar icon={<WaterIcon />} label="Water" value={water} color="var(--hud-blue)" />
