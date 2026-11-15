@@ -20,6 +20,7 @@ import { CREW_ROLES } from "../../data/crew";
 import { ROOM_NAMES } from "./LocationHint";
 import { MapIcon } from "./HudIcons";
 import { usePlayerPosition } from "./usePlayerPosition";
+import { useMissionTarget } from "./useMissionTarget";
 
 /** Where each room's name goes: the middle of its biggest floor area. */
 const ROOM_LABELS = (() => {
@@ -94,6 +95,7 @@ const top = (y: number) => `${((y - VIEW.y) / VIEW.h) * 100}%`;
 export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
   const pos = usePlayerPosition();
   const crew = useCrewStore((s) => s.crew);
+  const target = useMissionTarget();
   const crewId = useGameStore((s) => s.crewId);
   const commander = crewId ? getTeam(crewId).commander : null;
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -150,7 +152,7 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
             <StationDrawing />
             <span className="ship-map__watermark">AI-generated map</span>
 
-            {ROOM_LABELS.map((r) => (
+            {ROOM_LABELS.filter((r) => r.room !== target?.room).map((r) => (
               <span
                 key={r.room}
                 className="ship-map__room"
@@ -182,6 +184,20 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
                 </span>
               );
             })}
+
+            {target && (
+              <span
+                className="ship-map__pin ship-map__pin--mission"
+                style={{
+                  left: left(target.x),
+                  top: top(target.y),
+                  ["--pin-color" as string]: "var(--hud-red)",
+                }}
+              >
+                <span className="ship-map__face" aria-hidden="true">!</span>
+                <span className="ship-map__name">Mission: {ROOM_NAMES[target.room]}</span>
+              </span>
+            )}
 
             <span
               className="ship-map__pin ship-map__pin--you"

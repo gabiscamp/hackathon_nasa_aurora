@@ -21,7 +21,7 @@ export const ROOM_NAMES: Record<RoomId, string> = {
 /** Bottom-left HUD: current room + control hints. */
 export function LocationHint() {
   const [room, setRoom] = useState<RoomId>('corridor');
-  // Key hints help at the start; once the player is moving they fade out (they stay in Menu → How to play).
+  // Key hints help at the start; once the player is moving they fade out (they stay in Help / H).
   const [showKeys, setShowKeys] = useState(true);
 
   useEffect(() => {

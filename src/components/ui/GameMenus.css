@@ -213,3 +213,132 @@
 .gm-menu-btn:hover {
   transform: translateX(-50%);
 }
+
+/* Menu + Help side by side at the top centre (Help always visible: IHC guide). */
+.gm-top-actions {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.gm-top-actions .gm-menu-btn,
+.gm-top-actions .gm-menu-btn:hover {
+  position: static;
+  transform: none;
+}
+
+.gm-help-badge {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0a0e27;
+  background: #4dc9f6;
+}
+
+/* ---------- How to play ---------- */
+.gm-card--help {
+  width: min(1040px, 100%);
+  padding: 22px 28px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  text-align: left;
+}
+
+.gm-card--help .gm-title {
+  text-align: center;
+}
+
+.gm-help {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  gap: 18px 32px;
+  margin: 8px 0 20px;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.gm-help__col {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+@media (max-width: 760px) {
+  .gm-help {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gm-help section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gm-help h3 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 700;
+  color: #f5a623;
+}
+
+.gm-help p,
+.gm-help ol {
+  margin: 0;
+}
+
+.gm-help ol {
+  padding-left: 24px;
+  list-style: decimal;
+}
+
+.gm-help .gm-controls {
+  margin: 0;
+}
+
+.gm-help__bang {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-weight: 800;
+  color: #f0ece4;
+  background: #e74c3c;
+}
+
+.gm-help__bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gm-help__bars li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.gm-help__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(10, 14, 32, 0.9);
+  border: 1px solid rgba(77, 201, 246, 0.25);
+}
