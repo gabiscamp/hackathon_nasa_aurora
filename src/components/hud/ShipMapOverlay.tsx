@@ -20,15 +20,12 @@ import { CREW_ROLES } from "../../data/crew";
 import { ROOM_NAMES } from "./LocationHint";
 import { MapIcon } from "./HudIcons";
 import { usePlayerPosition } from "./usePlayerPosition";
-<<<<<<< HEAD
 import { useRobotPosition } from "./useRobotPosition";
 import { useExplorationStore } from "../../stores/useExplorationStore";
 import { RobotPortrait } from "../exploration/RobotPortrait";
+import { useMissionTarget } from "./useMissionTarget";
 
 const ROBOT_COLOR = "#9a5b32";
-=======
-import { useMissionTarget } from "./useMissionTarget";
->>>>>>> origin/main
 
 /** Size of a placed piece in world px (after rotation). */
 function placedSize(p: Placement): { w: number; h: number } {
@@ -177,11 +174,8 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
   const pos = usePlayerPosition();
   const robotPos = useRobotPosition();
   const crew = useCrewStore((s) => s.crew);
-<<<<<<< HEAD
   const robotAboard = useExplorationStore((s) => s.status === "aboard");
-=======
   const target = useMissionTarget();
->>>>>>> origin/main
   const crewId = useGameStore((s) => s.crewId);
   const commander = crewId ? getTeam(crewId).commander : null;
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -376,7 +370,6 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
               );
             })}
 
-<<<<<<< HEAD
             {robotAboard && (
               <span
                 className="ship-map__pin ship-map__pin--robot"
@@ -388,7 +381,9 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
               >
                 <span className="ship-map__face"><RobotPortrait size={44} /></span>
                 <span className="ship-map__name">AUR-1</span>
-=======
+              </span>
+            )}
+
             {target && (
               <span
                 className="ship-map__pin ship-map__pin--mission"
@@ -400,7 +395,6 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
               >
                 <span className="ship-map__face" aria-hidden="true">!</span>
                 <span className="ship-map__name">Mission: {ROOM_NAMES[target.room]}</span>
->>>>>>> origin/main
               </span>
             )}
 

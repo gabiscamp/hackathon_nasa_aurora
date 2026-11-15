@@ -17,13 +17,8 @@ import { useCrewStore } from '../../stores/useCrewStore';
 import { CREW_ROLES } from '../../data/crew';
 import { useGameStore } from '../../stores/useGameStore';
 import { useMissionStore } from '../../stores/useMissionStore';
-<<<<<<< HEAD
 import { useExplorationStore } from '../../stores/useExplorationStore';
-import { getTeam } from '../../data/crews';
-import { ASTRONAUTS, getAstronaut, type HeadId } from '../../data/astronauts';
-=======
 import { getTeam, type HeadId } from '../../data/crews';
->>>>>>> origin/main
 import { ASTRO_ORIGIN_Y, astronautAnim, astronautTextureKey } from '../world/modularAstronaut';
 import {
   CHARACTER_SPRITES,
@@ -103,13 +98,10 @@ export class GameScene extends Phaser.Scene {
   private missionMarker: Phaser.GameObjects.Container | null = null;
   private missionGlow: Phaser.GameObjects.Graphics | null = null;
   private frozen = false;
-<<<<<<< HEAD
   private robot: Phaser.GameObjects.Sprite | null = null;
   private robotPatrol: Phaser.Tweens.Tween | null = null;
-=======
   private speechBubble: Phaser.GameObjects.Container | null = null;
   private speechTimer: Phaser.Time.TimerEvent | null = null;
->>>>>>> origin/main
 
   constructor() {
     super({ key: 'GameScene' });
