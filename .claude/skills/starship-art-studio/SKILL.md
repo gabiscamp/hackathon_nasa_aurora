@@ -136,7 +136,7 @@ with visible gentle brushwork, soft blue-violet ambient light with warm amber li
 cyan screen glow, key light from upper-left, soft dark colored outlines (never pure black),
 rounded friendly shapes, premium indie game finish, palette: cream-beige hull #8b7b6b,
 floor #9a8f82, dark metal #2e3850, cyan #4dc9f6, amber #f5a623, violet #8b5cf6.
-AVOID: pixel art, flat vector, 3D render, photorealism, isometric diamond grid, text,
+AVOID: flat vector, 3D render, photorealism, isometric diamond grid, text,
 letters, logos, watermark, cast shadows on background, cropped edges.
 ```
 
@@ -191,7 +191,7 @@ Depois: reduzir para 96×96 (2x), testar em mosaico 4×4, criar 3–4 variaçõe
 
 | # | Verificação | Como |
 |---|---|---|
-| 1 | Direção de arte | Comparar lado a lado com refs e com assets aprovados do conjunto: perspectiva 3/4, luz noroeste, paleta (§4 de ART_DIRECTION), contorno colorido. Nada de pixel art, vetor chapado ou 3D. |
+| 1 | Direção de arte | Comparar lado a lado com refs e com assets aprovados do conjunto: perspectiva 3/4, luz noroeste, paleta (§4 de ART_DIRECTION), contorno colorido. Pixel art no padrão de ART_DIRECTION §0; nada de vetor chapado ou 3D. |
 | 2 | Resolução | Dimensões **exatamente** iguais à ficha, nos dois arquivos (1x e 2x). Sem upscale de imagem pequena (bordas borradas = reprovado). |
 | 3 | Formato real | Os bytes iniciais são `89 50 4E 47` (PNG). Extensão `.png` com JPEG dentro é reprovação. As referências do projeto têm exatamente esse defeito. |
 | 4 | Transparência | Canal alpha presente. Fundo 100% transparente sem resíduo de cor (halo branco ou xadrez "fake" pintado). Bordas antialiasadas sem franja clara. |
