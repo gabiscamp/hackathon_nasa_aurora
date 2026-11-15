@@ -16,15 +16,20 @@ export function createGameConfig(parent: string): Phaser.Types.Core.GameConfig {
       default: 'arcade',
       arcade: {
         gravity: { x: 0, y: 0 },
-        debug: import.meta.env.DEV,
+        // Debug boxes are drawn with Graphics every frame; keep them off (F2 shows the floor map in dev).
+        debug: false,
       },
     },
     scene: [BootScene, GameScene],
+    // Cap at 60 fps: on 120/144 Hz monitors the loop would otherwise run 2× more often for nothing.
+    fps: { target: 60, limit: 60 },
+    // The canvas is drawn at the real size of its box on screen (no extra browser
+    // stretching), and pixel art is scaled with nearest-neighbour so it stays sharp.
     scale: {
-      mode: Phaser.Scale.FIT,
-      autoCenter: Phaser.Scale.CENTER_BOTH,
+      mode: Phaser.Scale.RESIZE,
+      autoCenter: Phaser.Scale.NO_CENTER,
     },
-    pixelArt: false,
-    antialias: true,
+    pixelArt: true,
+    roundPixels: true,
   };
 }

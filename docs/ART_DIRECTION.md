@@ -12,7 +12,8 @@ Decisão do time: o estilo oficial passa a ser **pixel art top-down**, feito no 
 
 - Contorno escuro de 1 pixel de arte, sombreamento por blocos de cor, sem pincelada nem gradiente suave.
 - Vista top-down em 3/4 e luz vinda do noroeste continuam valendo, assim como a paleta e os tokens de cor da UI.
-- Personagens: chibi, folha 4×4 (linhas baixo, esquerda, direita e cima; 4 quadros cada), pés na mesma linha em todos os quadros. O jogo usa quadros de 96×128 (2x) em escala 0.4.
+- Personagens: chibi, folha 4×4 (linhas baixo, esquerda, direita e cima; 4 quadros cada), pés na mesma linha em todos os quadros. O jogo usa quadros de 40×48 no tamanho nativo (1 pixel de arte = 1 pixel do mapa), personagem com ~40 px de altura.
+- Renderização: `pixelArt: true` (filtro nearest) e canvas no tamanho real da tela (`Scale.RESIZE`); a câmera mostra ~380 px de altura do mapa. Não exportar arte já ampliada.
 - Fundo do mapa: chroma-key magenta (#FF00FF) ou PNG com transparência. Personagens: fundo transparente ou branco liso, sem tocar a borda da célula.
 - Os assets 2D continuam desenhados pelo time; IA não gera arte final (se gerar, exige marca d'água visível, regra do briefing).
 

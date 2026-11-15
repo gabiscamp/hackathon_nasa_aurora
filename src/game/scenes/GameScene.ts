@@ -33,13 +33,17 @@ const FEET_HALF_H = 3;
 const CORNER_ASSIST = 8;
 /**
  * Close follow camera, player locked in the centre (Among Us style).
- * Zoom 2 on the 1280×720 canvas shows ~640×360 world px: about one room at a time.
+ * The zoom is chosen so the screen always shows about this many world pixels
+ * of height (~one room), whatever the window size.
  */
-const FOLLOW_ZOOM = 2;
+const VIEW_HEIGHT = 380;
+/** Never zoom out below 1:1 (that would show the edge of the map). */
+const MIN_ZOOM = 1;
 /** 1 = rigid lock on the player; a little below keeps it from feeling jerky. */
 const FOLLOW_LERP = 0.25;
 /** Minimum time between PLAYER_MOVED events sent to the React HUD (ms). */
 const POSITION_EMIT_INTERVAL = 80;
+const STARFIELD_KEY = 'starfield';
 
 export class GameScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Container;
@@ -109,10 +113,14 @@ export class GameScene extends Phaser.Scene {
     // Camera: zoomed in and centred on the player, stopping at the edges of the station map.
     const camera = this.cameras.main;
     camera.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-    camera.setZoom(FOLLOW_ZOOM);
+    this.applyZoom();
     camera.startFollow(this.player, true, FOLLOW_LERP, FOLLOW_LERP);
-    // Centre on the feet-to-head middle of the sprite, not on the feet.
-    camera.setFollowOffset(0, 20);
+    // Centre on the middle of the sprite, not on the feet.
+    camera.setFollowOffset(0, 16);
+    // The canvas follows its box on screen; keep the same view when it resizes.
+    this.scale.on(Phaser.Scale.Events.RESIZE, this.applyZoom, this);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scale.off(Phaser.Scale.Events.RESIZE, this.applyZoom, this));
+    this.events.once(Phaser.Scenes.Events.DESTROY, () => this.scale.off(Phaser.Scale.Events.RESIZE, this.applyZoom, this));
 
     this.updateRoom();
     this.emitPosition(true);
@@ -121,12 +129,19 @@ export class GameScene extends Phaser.Scene {
   /** Station illustration over a simple starfield (the map PNG has a transparent background). */
   private createShipBackground() {
     // TODO: replace with real asset — ENV-001 star layer. Seeded so stars don't move between visits.
-    const rnd = new Phaser.Math.RandomDataGenerator(['aurora-stars']);
-    const stars = this.add.graphics().setDepth(0);
-    for (let i = 0; i < 260; i++) {
-      stars.fillStyle(0xf0ece4, rnd.realInRange(0.25, 0.9));
-      stars.fillCircle(rnd.between(-200, WORLD_WIDTH + 200), rnd.between(-150, WORLD_HEIGHT + 150), rnd.realInRange(0.6, 1.8));
+    // Drawn ONCE into a texture: a live Graphics object is re-triangulated every frame,
+    // which cost ~6 ms per frame (and made the game lag while screen sharing).
+    if (!this.textures.exists(STARFIELD_KEY)) {
+      const rnd = new Phaser.Math.RandomDataGenerator(['aurora-stars']);
+      const g = this.make.graphics({}, false);
+      for (let i = 0; i < 260; i++) {
+        g.fillStyle(0xf0ece4, rnd.realInRange(0.25, 0.9));
+        g.fillRect(rnd.between(0, WORLD_WIDTH), rnd.between(0, WORLD_HEIGHT), rnd.pick([1, 1, 2]), rnd.pick([1, 1, 2]));
+      }
+      g.generateTexture(STARFIELD_KEY, WORLD_WIDTH, WORLD_HEIGHT);
+      g.destroy();
     }
+    this.add.image(0, 0, STARFIELD_KEY).setOrigin(0, 0).setDepth(0);
     this.add.image(0, 0, SHIP_BG_KEY).setOrigin(0, 0).setDepth(1);
   }
 
@@ -189,15 +204,21 @@ export class GameScene extends Phaser.Scene {
 
     const circle = this.add.graphics();
     circle.fillStyle(color, 1);
-    circle.fillCircle(0, -14, 14);
-    circle.lineStyle(2, 0xe2e8f0, 1);
-    circle.strokeCircle(0, -14, 14);
+    // Same footprint as the ~40 px astronaut sprite.
+    circle.fillCircle(0, -10, 10);
+    circle.lineStyle(1.5, 0xe2e8f0, 1);
+    circle.strokeCircle(0, -10, 10);
 
+    // Rendered at 4x so the name stays sharp under the zoomed pixel-art camera.
     const label = this.add
-      .text(0, -40, name, {
-        fontSize: '14px',
+      .text(0, -28, name, {
+        fontSize: '9px',
+        fontStyle: 'bold',
         color: '#f0ece4',
         fontFamily: 'Nunito, sans-serif',
+        stroke: '#0a0e27',
+        strokeThickness: 2,
+        resolution: 4,
       })
       .setOrigin(0.5);
 
@@ -230,6 +251,10 @@ export class GameScene extends Phaser.Scene {
     if (!force && now - this.lastPositionEmit < POSITION_EMIT_INTERVAL) return;
     this.lastPositionEmit = now;
     gameEvents.emit(EVENTS.PLAYER_MOVED, { x: this.player.x, y: this.player.y });
+  }
+
+  private applyZoom() {
+    this.cameras.main.setZoom(Math.max(MIN_ZOOM, this.scale.height / VIEW_HEIGHT));
   }
 
   private canStand(x: number, y: number): boolean {

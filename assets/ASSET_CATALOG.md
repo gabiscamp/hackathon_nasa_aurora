@@ -124,6 +124,6 @@ Quando um asset passa para **Em produção**, crie aqui a ficha completa no form
 | ID | Arquivo no jogo | Original | Dimensões | Uso | Fonte | Estado |
 |---|---|---|---|---|---|---|
 | MAP-002 | `public/assets/environments/station-map.png` | `assets/environments/_source/station-map-original.png` | 1600×800, PNG RGBA (fundo magenta removido) | Mapa da estação; piso navegável em `src/game/world/shipLayout.ts` | Pixel art do time, feita no Aseprite | Integrado |
-| CHR-020 | `public/assets/characters/cmdr-mcclain-walk.png` | `assets/characters/_source/cmdr-mcclain-sheet-original.png` | 384×512, 4×4 quadros de 96×128 (2x), linhas: baixo, esquerda, direita, cima; pés em y=124 | Comandante Anne McClain (jogador), escala 0.55 | Pixel art do time, feita no Aseprite | Integrado |
+| CHR-020 | `public/assets/characters/cmdr-mcclain-walk.png` | `assets/characters/_source/cmdr-mcclain-sheet-original.png` | 160×192, 4×4 quadros de 40×48 no tamanho nativo do pixel art, linhas: baixo, esquerda, direita, cima; pés em y=46 | Comandante Anne McClain (jogador), escala 1, filtro nearest | Pixel art do time, feita no Aseprite | Integrado |
 
 Observação: feitos à mão no Aseprite (não são IA), então não precisam de marca d'água. Creditados na tela de créditos. Estilo oficial atualizado para pixel art (ART_DIRECTION §0).
