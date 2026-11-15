@@ -383,7 +383,7 @@ export const MISSIONS_BATCH_6: Mission[] = [
     honoree: true,
     honoreeBy: 'highest-dose',
     title: 'Close to the Limit',
-    description: "{honoree} has received a lot of radiation and is getting close to the personal limit. At 100, {honoree} would have to go back to Earth.",
+    description: "{honoree} has received a lot of radiation and is getting close to the personal limit of 600 mSv. At the limit, {honoree} would have to go back to Earth.",
     act: 2,
     system: 'radiation',
     room: 'gym',
@@ -392,7 +392,7 @@ export const MISSIONS_BATCH_6: Mission[] = [
     nasaSource: 'NASA astronaut radiation limits',
     factKind: 'tip',
     popup:
-      'SPACE TIP: Every astronaut wears a small dosimeter that counts their radiation. NASA has a career limit, and astronauts close to it stop flying.',
+      "SPACE TIP: Every astronaut wears a small dosimeter that counts their radiation. Since 2022, NASA's career limit is 600 mSv, the same for every astronaut. It keeps the risk of getting very sick later in life under 3 in 100. Before, the limit changed with age and sex.",
     defer: false,
     choices: [
       {

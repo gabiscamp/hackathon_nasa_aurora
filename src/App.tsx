@@ -7,6 +7,7 @@ import { useCrewStore } from './stores/useCrewStore';
 import { useSpaceWeatherStore } from './stores/useSpaceWeatherStore';
 import { getTeam, type CrewTeam } from './data/crews';
 import { useMissionStore } from './stores/useMissionStore';
+import { checkpointDay, clearCheckpoint, restoreCheckpoint } from './engine/checkpoint';
 import { useDutyStore } from './stores/useDutyStore';
 
 const TitleScreen = lazy(() => import('./components/scenes/TitleScreen').then(m => ({ default: m.TitleScreen })));
@@ -73,6 +74,7 @@ export default function App() {
     resetResources();
     resetMissions();
     resetDuty();
+    clearCheckpoint();
     selectTeam(team.id);
     startMission(team.id, team.commander.name);
   };
@@ -82,6 +84,7 @@ export default function App() {
     crewId && resumeScene ? { commanderName: getTeam(crewId).commander.name, day } : null;
 
   const handleReplay = () => {
+    clearCheckpoint();
     resetGame();
     resetResources();
     resetCrew();
@@ -110,7 +113,14 @@ export default function App() {
         <GameScreen onMainMenu={goHome} onOpenCredits={() => setShowCredits(true)} creditsOpen={showCredits} />
       )}
       {scene === 'ending' && (
-        <EndingScreen playerName={playerName} resources={resources} onReplay={handleReplay} onOpenCredits={() => setShowCredits(true)} />
+        <EndingScreen
+          playerName={playerName}
+          resources={resources}
+          onReplay={handleReplay}
+          onOpenCredits={() => setShowCredits(true)}
+          retryDay={checkpointDay()}
+          onRetry={restoreCheckpoint}
+        />
       )}
       {showCredits && <CreditsScreen onClose={() => setShowCredits(false)} />}
     </Suspense>
