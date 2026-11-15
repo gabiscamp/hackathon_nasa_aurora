@@ -42,6 +42,7 @@ const TOOLS: Source[] = [
   { name: 'Zustand', url: 'https://zustand.docs.pmnd.rs/', use: 'Game state.' },
   { name: 'Vite + TypeScript', url: 'https://vite.dev/', use: 'Building the game.' },
   { name: 'Tailwind CSS', url: 'https://tailwindcss.com/', use: 'Styles.' },
+  { name: 'Aseprite', url: 'https://www.aseprite.org/', use: 'Our team drew the station map and the astronaut sprite in it.' },
   { name: 'Nunito font (SIL Open Font License)', url: 'https://fonts.google.com/specimen/Nunito', use: 'All game text.' },
 ];
 

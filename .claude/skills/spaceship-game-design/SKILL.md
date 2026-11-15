@@ -47,7 +47,7 @@ Shows the crew management perspective:
 
 **Painterly / cel-shaded hybrid.** The game uses hand-painted 2D environments with cartoon clarity. Think "animated storybook in space" — rich textures but clean, readable shapes.
 
-This is **NOT pixel art**. Assets should have smooth lines, painted lighting, and visible brushwork texture in backgrounds. Outlines are soft or absent, relying on color contrast for separation.
+**Updated 2026-11-15 (team decision): the game is top-down pixel art made in Aseprite** (see `docs/ART_DIRECTION.md` §0 and the integrated `station-map.png` / McClain sprite). Keep the 3/4 view, the palette and the room identity rules below; ignore the older painterly/brushwork wording.
 
 ### Lighting Philosophy
 

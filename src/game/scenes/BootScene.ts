@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { SHIP_BG_KEY, SHIP_BG_URL } from '../world/shipLayout';
+import { CHARACTER_SPRITES, SPRITE_FRAME_H, SPRITE_FRAME_W } from '../world/characterSprites';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -30,13 +31,12 @@ export class BootScene extends Phaser.Scene {
       bar.destroy();
     });
 
-    // TODO: replace with real asset — reference illustration used as the map base
+    // Station illustration provided by the team (magenta key removed)
     this.load.image(SHIP_BG_KEY, SHIP_BG_URL);
 
-    // TODO: Load actual game assets here
-    // this.load.image('station', 'assets/tilemaps/station.png');
-    // this.load.tilemapTiledJSON('station-map', 'assets/tilemaps/station.json');
-    // this.load.spritesheet('player', 'assets/characters/player.png', { frameWidth: 32, frameHeight: 48 });
+    for (const sprite of Object.values(CHARACTER_SPRITES)) {
+      this.load.spritesheet(sprite.key, sprite.url, { frameWidth: SPRITE_FRAME_W, frameHeight: SPRITE_FRAME_H });
+    }
   }
 
   create() {
