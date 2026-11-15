@@ -440,3 +440,78 @@
     transform: none;
   }
 }
+
+/* ---------- Wide screens: team on the left, the chosen astronaut on the right (fits without scrolling) ---------- */
+@media (min-width: 1200px) {
+  .crew-screen {
+    padding-top: 88px;
+    padding-bottom: 24px;
+  }
+
+  .crew-container {
+    width: min(1440px, 100%);
+    display: grid;
+    grid-template-columns: minmax(420px, 500px) 1fr;
+    grid-template-areas:
+      'header  profile'
+      'roster  profile'
+      'keys    profile'
+      'footer  profile';
+    grid-template-rows: auto auto auto 1fr;
+    column-gap: clamp(28px, 3vw, 48px);
+    row-gap: 18px;
+    align-items: start;
+  }
+
+  .crew-header {
+    grid-area: header;
+  }
+
+  .crew-roster {
+    grid-area: roster;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Compact cards: photo beside the name, so the team, keys and "next" button all fit on the left. */
+  .crew-tab {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto auto;
+    column-gap: 12px;
+    row-gap: 2px;
+    align-items: center;
+    justify-items: start;
+    padding: 12px 12px;
+    text-align: left;
+  }
+
+  .crew-tab .crew-photo--tab {
+    grid-row: 1 / 4;
+    width: 64px;
+    height: 64px;
+  }
+
+  .crew-tab__name {
+    margin-top: 0;
+  }
+
+  .crew-tab__role {
+    text-align: left;
+  }
+
+  .crew-tab__seen {
+    margin-top: 2px;
+  }
+
+  .crew-keys {
+    grid-area: keys;
+  }
+
+  .crew-footer {
+    grid-area: footer;
+  }
+
+  .crew-profile {
+    grid-area: profile;
+  }
+}

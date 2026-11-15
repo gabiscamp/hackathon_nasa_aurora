@@ -73,6 +73,24 @@ export function TitleScreen({ onStart, onOpenCredits, savedMission, onContinueMi
     <div className="title-screen">
       <div className="title-stars" aria-hidden="true" />
 
+      {/* Settings and credits as game-style corner buttons (not web links), always in view. */}
+      <nav className="title-topbar" aria-label="Game options">
+        <button type="button" className="title-top-btn" onClick={() => setOptionsOpen(true)}>
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3.2" />
+            <path d="M12 2.5v3M12 18.5v3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M2.5 12h3M18.5 12h3M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1" />
+          </svg>
+          Options
+        </button>
+        <button type="button" className="title-top-btn" onClick={onOpenCredits}>
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z" />
+            <path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5" />
+          </svg>
+          Credits
+        </button>
+      </nav>
+
       <main className="title-content">
         <header className="title-header">
           <p className="title-badge">NASA Space Apps Challenge 2026</p>
@@ -175,14 +193,6 @@ export function TitleScreen({ onStart, onOpenCredits, savedMission, onContinueMi
         </section>
 
         <footer className="title-footer">
-          <div className="title-footer__links">
-            <button type="button" className="title-credits" onClick={() => setOptionsOpen(true)}>
-              Options: text, voice &amp; sound
-            </button>
-            <button type="button" className="title-credits" onClick={onOpenCredits}>
-              Credits, photos &amp; NASA sources
-            </button>
-          </div>
           <p>Based on real NASA data. Not made or endorsed by NASA.</p>
         </footer>
       </main>
