@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { A11yDock, useReadShortcut } from './components/ui/A11yDock';
+import { OrientationGuard } from './components/ui/OrientationGuard';
 import { useShallow } from 'zustand/react/shallow';
 import { useGameStore } from './stores/useGameStore';
 import { useResourceStore } from './stores/useResourceStore';
@@ -91,7 +92,8 @@ export default function App() {
 
   return (
     <Suspense fallback={<LoadingScreen />}>
-      {/* Read + Options on the story screens (title and game have their own buttons). */}
+      <OrientationGuard />
+      {/* Settings on story screens (title and game have their own entry points). */}
       {(scene === 'briefing' || scene === 'crew-intro' || scene === 'ending') && <A11yDock />}
       {scene === 'title' && <TitleScreen
           onStart={handleStart}

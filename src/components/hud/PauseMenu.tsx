@@ -3,7 +3,7 @@ import { gameEvents, EVENTS } from '../../game/events';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { HowToPlay } from './HowToPlay';
 import { OptionsPanel } from '../ui/OptionsPanel';
-import { GearIcon, ReadButton } from '../ui/A11yDock';
+import { GearIcon } from '../ui/A11yDock';
 import '../ui/GameMenus.css';
 
 interface PauseMenuProps {
@@ -98,20 +98,19 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
           >
             <path d="M4 7h16M4 12h16M4 17h16" />
           </svg>
-          Menu
+          <span className="gm-action-label">Menu</span>
           <kbd className="gm-kbd">Esc</kbd>
         </button>
         <button type="button" className="gm-menu-btn" onClick={() => openMenu('help')} aria-haspopup="dialog">
           <span className="gm-help-badge" aria-hidden="true">
             ?
           </span>
-          Help
+          <span className="gm-action-label">Help</span>
           <kbd className="gm-kbd">H</kbd>
         </button>
-        <ReadButton />
-        <button type="button" className="gm-menu-btn a11y-btn" onClick={() => openMenu('options')} aria-haspopup="dialog" aria-label="Options">
+        <button type="button" className="gm-menu-btn a11y-btn" onClick={() => openMenu('options')} aria-haspopup="dialog" aria-label="Settings">
           <GearIcon />
-          <span className="a11y-btn__text">Options</span>
+          <span className="gm-action-label">Settings</span>
         </button>
       </div>
 
@@ -132,7 +131,7 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
                     How to play
                   </button>
                   <button type="button" className="gm-btn gm-btn--wide" onClick={() => setView('options')}>
-                    Options: text, voice &amp; sound
+                    Settings &amp; accessibility
                   </button>
                   <button type="button" className="gm-btn gm-btn--wide" onClick={onOpenCredits}>
                     Credits &amp; NASA sources
@@ -145,7 +144,7 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
             ) : view === 'options' ? (
               <>
                 <h2 id="gm-pause-title" className="gm-title">
-                  Options
+                  Settings
                 </h2>
                 <OptionsPanel />
                 <button

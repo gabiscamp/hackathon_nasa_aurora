@@ -354,7 +354,7 @@
 
 /* ---------- Options ---------- */
 .gm-card--options {
-  width: min(560px, 100%);
+  width: min(760px, 100%);
   max-height: calc(100vh - 48px);
   overflow-y: auto;
   text-align: left;
@@ -370,6 +370,36 @@
   gap: 18px;
   margin: 8px 0 20px;
 }
+
+.opt-section {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid rgba(77, 201, 246, 0.22);
+  border-radius: 14px;
+  background: rgba(10, 14, 32, 0.55);
+}
+
+.opt-section__title {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #4dc9f6;
+}
+
+.opt-read-btn {
+  align-self: end;
+  min-height: 48px;
+  padding: 6px 14px;
+  font-size: 18px;
+  background: rgba(77, 201, 246, 0.12);
+  border: 2px solid #4dc9f6;
+}
+
+.opt-read-btn svg { flex: none; }
 
 .opt-row {
   margin: 0;
@@ -448,8 +478,12 @@
 
 @media (max-width: 960px) {
   .gm-top-actions {
-    top: 8px;
-    right: 8px;
+    top: auto;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    left: max(8px, env(safe-area-inset-left));
+    right: auto;
+    transform: none;
+    gap: 6px;
   }
 
   .gm-top-actions .gm-menu-btn {
@@ -460,6 +494,33 @@
 
   .gm-top-actions .gm-kbd {
     display: none;
+  }
+}
+
+@media (max-width: 760px), (max-height: 520px) {
+  .gm-top-actions .gm-menu-btn {
+    min-width: 46px;
+    min-height: 46px;
+    padding: 4px 10px;
+  }
+
+  .gm-top-actions .gm-action-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .opt-section {
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
+
+  .gm-card--options {
+    padding: 18px;
+    max-height: calc(100dvh - 24px);
   }
 }
 

@@ -130,13 +130,21 @@
 /* Phones: the hint spans the bottom edge. */
 @media (max-width: 960px) {
   .game-hint-banner {
-    left: 8px;
+    left: 176px;
     right: 8px;
-    bottom: 8px;
+    bottom: max(8px, env(safe-area-inset-bottom));
     transform: none;
     max-width: none;
     min-width: 0;
     padding: 10px 14px;
     font-size: 18px;
+  }
+}
+
+@media (max-width: 620px) and (orientation: landscape) {
+  .game-hint-banner {
+    left: 158px;
+    padding: 8px 10px;
+    font-size: 16px;
   }
 }
