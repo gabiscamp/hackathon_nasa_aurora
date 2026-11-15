@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { SHIP_BG_KEY, SHIP_BG_URL } from '../world/shipLayout';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -28,6 +29,9 @@ export class BootScene extends Phaser.Scene {
       bg.destroy();
       bar.destroy();
     });
+
+    // TODO: replace with real asset — reference illustration used as the map base
+    this.load.image(SHIP_BG_KEY, SHIP_BG_URL);
 
     // TODO: Load actual game assets here
     // this.load.image('station', 'assets/tilemaps/station.png');
