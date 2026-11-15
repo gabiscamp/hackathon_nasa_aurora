@@ -96,7 +96,7 @@ export function TitleScreen({ onStart, onOpenCredits, savedMission, onContinueMi
             <span className="title-orbit">AURORA</span>
             <span className="title-sub">STATION</span>
           </h1>
-          <p className="title-tagline">90 days in orbit around Mars. Keep your crew safe.</p>
+          <p className="title-tagline">45 days in orbit around Mars. Keep your crew safe.</p>
         </header>
 
         {savedMission && (

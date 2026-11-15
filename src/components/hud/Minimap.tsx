@@ -2,9 +2,9 @@ import { WALKABLE_AREAS, NPC_SPAWNS } from '../../game/world/shipLayout';
 import { useCrewStore } from '../../stores/useCrewStore';
 import { CREW_ROLES } from '../../data/crew';
 import { usePlayerPosition } from './usePlayerPosition';
+import { useMissionTargets } from './useMissionTarget';
 import { useRobotPosition } from './useRobotPosition';
 import { useExplorationStore } from '../../stores/useExplorationStore';
-import { useMissionTarget } from './useMissionTarget';
 
 const ROBOT_COLOR = '#9a5b32';
 
@@ -23,8 +23,8 @@ export function Minimap({ onOpen }: { onOpen: () => void }) {
   const pos = usePlayerPosition();
   const robotPos = useRobotPosition();
   const crew = useCrewStore((s) => s.crew);
+  const targets = useMissionTargets();
   const robotAboard = useExplorationStore((s) => s.status === 'aboard');
-  const target = useMissionTarget();
 
   return (
     <button type="button" className="hud-panel hud-minimap" onClick={onOpen} aria-label="Open the full ship map (M)" title="Open the full ship map (M)">
@@ -44,13 +44,13 @@ export function Minimap({ onOpen }: { onOpen: () => void }) {
           <circle cx={robotPos.x} cy={robotPos.y - 14} r="24" fill={ROBOT_COLOR} stroke="#0a0e27" strokeWidth="7" />
         )}
         {/* mission spot: same "!" as in the ship */}
-        {target && (
-          <g className="hud-minimap__mission">
+        {targets.map((target) => (
+          <g key={target.id} className="hud-minimap__mission">
             <circle cx={target.x} cy={target.y} r="60" fill="rgba(231, 76, 60, 0.35)" className="hud-minimap__ping" />
             <circle cx={target.x} cy={target.y} r="38" fill="#e74c3c" stroke="#0a0e27" strokeWidth="8" />
             <text x={target.x} y={target.y + 18} textAnchor="middle" fontSize="54" fontWeight="800" fill="#f0ece4">!</text>
           </g>
-        )}
+        ))}
         {/* player */}
         <circle cx={pos.x} cy={pos.y - 14} r="48" fill="rgba(245, 166, 35, 0.35)" className="hud-minimap__ping" />
         <circle cx={pos.x} cy={pos.y - 14} r="28" fill="#f5a623" stroke="#0a0e27" strokeWidth="8" />

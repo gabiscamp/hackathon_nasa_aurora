@@ -18,7 +18,16 @@ export const EVENTS = {
   ROBOT_INTERACT: 'robot-interact',
   SHOW_SPEECH_BUBBLE: 'show-speech-bubble',
   HIDE_SPEECH_BUBBLE: 'hide-speech-bubble',
+  /** React → Phaser: the "!" of every open problem (MissionMarkerSpec[]). */
+  SET_MISSION_MARKERS: 'set-mission-markers',
 } as const;
+
+/** One "!" on the map. MISSION_START is emitted with this id when the player presses E next to it. */
+export interface MissionMarkerSpec {
+  id: string;
+  room: string;
+  critical: boolean;
+}
 
 export interface PlayerMovedPayload {
   x: number;

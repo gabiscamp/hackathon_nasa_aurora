@@ -14,7 +14,7 @@ interface MissionBriefingProps {
 const MESSAGES = [
   '{commander}, this is Mission Control.',
   'You are in command of Aurora Station, orbiting Mars.',
-  'Your mission lasts 90 days. During this time, you must:',
+  'Your mission lasts 45 days. During this time, you must:',
   'Keep your crew breathing, fed, and healthy.',
   'Manage the station\'s energy, water, and oxygen.',
   'Collect scientific data about Mars.',

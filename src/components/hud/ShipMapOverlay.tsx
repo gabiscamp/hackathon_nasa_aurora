@@ -20,10 +20,10 @@ import { CREW_ROLES } from "../../data/crew";
 import { ROOM_NAMES } from "./LocationHint";
 import { MapIcon } from "./HudIcons";
 import { usePlayerPosition } from "./usePlayerPosition";
+import { useMissionTargets } from "./useMissionTarget";
 import { useRobotPosition } from "./useRobotPosition";
 import { useExplorationStore } from "../../stores/useExplorationStore";
 import { RobotPortrait } from "../exploration/RobotPortrait";
-import { useMissionTarget } from "./useMissionTarget";
 
 const ROBOT_COLOR = "#9a5b32";
 
@@ -174,8 +174,8 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
   const pos = usePlayerPosition();
   const robotPos = useRobotPosition();
   const crew = useCrewStore((s) => s.crew);
+  const targets = useMissionTargets();
   const robotAboard = useExplorationStore((s) => s.status === "aboard");
-  const target = useMissionTarget();
   const crewId = useGameStore((s) => s.crewId);
   const commander = crewId ? getTeam(crewId).commander : null;
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -337,7 +337,7 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
             </span>
 
             {showNames &&
-              ROOM_LABELS.filter((r) => r.room !== target?.room).map((r, i) => (
+              ROOM_LABELS.filter((r) => !targets.some((t) => t.room === r.room)).map((r, i) => (
                 <span
                   key={i}
                   className="ship-map__room"
@@ -384,19 +384,22 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
               </span>
             )}
 
-            {target && (
+            {targets.map((target) => (
               <span
+                key={target.id}
                 className="ship-map__pin ship-map__pin--mission"
                 style={{
                   left: left(target.x),
                   top: top(target.y),
-                  ["--pin-color" as string]: "var(--hud-red)",
+                  ["--pin-color" as string]: target.critical ? "var(--hud-red)" : "var(--hud-amber)",
                 }}
               >
                 <span className="ship-map__face" aria-hidden="true">!</span>
-                <span className="ship-map__name">Mission: {ROOM_NAMES[target.room]}</span>
+                <span className="ship-map__name">
+                  {target.title}: {ROOM_NAMES[target.room]}
+                </span>
               </span>
-            )}
+            ))}
 
             <span
               className="ship-map__pin ship-map__pin--you"

@@ -7,7 +7,7 @@ Aurora Station is an educational space management game that teaches kids (ages 7
 ## Setting
 
 - **Location**: Aurora Station, a research habitat in orbit around Mars
-- **Timeline**: 90-day mission (Day 1 through Day 90)
+- **Timeline**: 45-day mission (Day 1 through Day 45; team decision 2026-11-15, was 90)
 - **Constraint**: No resupply possible. Everything the crew needs is already on board. Every resource spent is gone forever.
 - **Tone**: Hopeful and educational. Challenges are serious but never frightening. The crew supports each other.
 
@@ -293,7 +293,7 @@ Each in-game day follows this structure:
 
 ## Endings
 
-Determined by average resource levels and crew status on Day 90.
+Determined by average resource levels and crew status on Day 45 (or Day 37 with the early return). A game over before that ends the mission early (see below).
 
 ### Good Ending: "Mission Complete" (Average resources > 30%)
 - The crew celebrates. Earth congratulates the Commander.
@@ -313,6 +313,43 @@ Determined by average resource levels and crew status on Day 90.
 - Player sees what went wrong.
 - Message: "Every mission teaches us something. The best commanders learn from failure and try again."
 - Note: Even the "bad" ending is NOT scary or punishing. The crew survives. The tone is encouraging.
+
+## Game Over and Survival Rules (team rules, 2026-11-15)
+
+All numbers live in `src/data/difficulty.ts`; the rules run every morning in `src/engine/survival.ts`.
+
+### Game over: the station is lost
+- **Oxygen at 0**: game over that same day.
+- **Health at 0**: game over.
+- **Radiation at 100**: game over (everyone must leave).
+- Water, food and energy at 0 are not instant game over, but their chain failures (below) end the game in a few days.
+- Tone stays gentle: the crew always escapes safely in the capsule; the station is what is lost.
+- The game-over screen shows the cause, what was hurting the station, the 3 decisions that cost the most, a real NASA story and a tip.
+- "Try again from Day X" goes back to the start of the current act (Day 1, 16 or 31). "Start a new mission" starts over.
+
+### Chain failures (every day while the bar is in danger)
+| Situation | Effect per day |
+|---|---|
+| Energy at 0 | Oxygen −25, water −25 (life support stops) |
+| Oxygen below 20 | Health −25 |
+| Water below 30 | Health −3 and **water saving** turns on |
+| Water at 0 | Health −20 |
+| Food below 20 | Health −3 and **food rationing** turns on |
+| Food at 0 | Health −20, tiredness +40% (chance per person per day) |
+| Radiation above 70 | Health −3, +30% chance that someone gets sick |
+| Health below 30 | 30% chance that someone gets sick |
+
+### Protocols (turn on and off by themselves)
+- **Water saving** (water < 30, off at 40): half the daily water use, no showers (satisfaction −1 per day).
+- **Food rationing** (food < 20, off at 30): half the daily food use, satisfaction −1 per day, 20% chance per person per day of getting more tired.
+
+### Weight of decisions
+- Losses from mission choices are ×1.5 the numbers written in `missoes.txt` (gains stay as written).
+- A failed job costs ×1.25 more on top of that, and tires everyone on it one extra step.
+- Daily use of a crew of four: food −1, water −1, oxygen −0.5, satisfaction −0.3, radiation +0.5.
+
+### Personal radiation dose
+- The personal dose bar maps to NASA's career limit of **600 mSv** (since 2022, the same for every astronaut; it keeps the risk of radiation-induced cancer death under 3%). 1 point = 6 mSv. At 600 mSv the crew member goes back to Earth.
 
 ## NASA Data Integration
 

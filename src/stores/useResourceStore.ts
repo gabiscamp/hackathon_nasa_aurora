@@ -16,8 +16,6 @@ export function stationScore(r: Resources): number {
 
 interface ResourceState extends ResourceValues {
   applyDelta: (delta: Partial<ResourceValues>) => void;
-  tick: () => void;
-  tickDays: (days: number) => void;
   reset: () => void;
 }
 
@@ -32,6 +30,7 @@ const INITIAL: ResourceValues = {
 };
 
 // Saved in the browser so "Continue mission" keeps the resources.
+// Daily use and chain failures live in src/engine/survival.ts (run every morning by the mission engine).
 export const useResourceStore = create<ResourceState>()(
   persist(
     (set) => ({
@@ -46,28 +45,6 @@ export const useResourceStore = create<ResourceState>()(
           }
           return next;
         }),
-
-      tick: () =>
-        set((state) => {
-          const oxygenPenalty = state.energy <= 0 ? -10 : 0;
-          const healthPenalty = state.oxygen < 20 ? -5 : 0;
-          return {
-            food: clamp(state.food - 1, 0, 100),
-            water: clamp(state.water - 1, 0, 100),
-            oxygen: clamp(state.oxygen + oxygenPenalty, 0, 100),
-            health: clamp(state.health + healthPenalty, 0, 100),
-            radiation: clamp(state.radiation + 0.5, 0, 100),
-          };
-        }),
-
-      tickDays: (days: number) =>
-        set((state) => ({
-          food: clamp(state.food - days * 1, 0, 100),
-          water: clamp(state.water - days * 1, 0, 100),
-          oxygen: clamp(state.oxygen - days * 0.5, 0, 100),
-          satisfaction: clamp(state.satisfaction - days * 0.3, 0, 100),
-          radiation: clamp(state.radiation + days * 0.5, 0, 100),
-        })),
 
       reset: () => set(INITIAL),
     }),
