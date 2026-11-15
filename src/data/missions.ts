@@ -4,17 +4,22 @@ export interface Choice {
   icon: string;
   crewRequired?: string;
   consequences: {
+    food?: number;
+    water?: number;
     energy?: number;
     oxygen?: number;
-    shielding?: number;
+    /** Radiation level change: + means MORE radiation (worse). */
+    radiation?: number;
     crewEffects?: { id: string; health?: number; morale?: number }[];
     narrative: string;
     successRate?: number;
     failNarrative?: string;
     failEffects?: {
+      food?: number;
+      water?: number;
       energy?: number;
       oxygen?: number;
-      shielding?: number;
+      radiation?: number;
       crewEffects?: { id: string; health?: number; morale?: number }[];
     };
   };
@@ -313,7 +318,7 @@ export const MISSIONS: Mission[] = [
           narrative: 'You sealed the outer modules and everyone stayed in the center. The debris passed. Work continued at half speed.',
           successRate: 95,
           failNarrative: 'A piece hit an outer module! Small pressure drop. The hatch was closed so the crew is fine, but you lost some equipment.',
-          failEffects: { energy: -10, shielding: -5 },
+          failEffects: { energy: -10, radiation: 5 }, // was shielding -5 (less protection = more radiation)
         },
       },
       {

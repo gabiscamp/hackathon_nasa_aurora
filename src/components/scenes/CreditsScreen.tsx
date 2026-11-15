@@ -42,8 +42,8 @@ const TOOLS: Source[] = [
   { name: 'Zustand', url: 'https://zustand.docs.pmnd.rs/', use: 'Game state.' },
   { name: 'Vite + TypeScript', url: 'https://vite.dev/', use: 'Building the game.' },
   { name: 'Tailwind CSS', url: 'https://tailwindcss.com/', use: 'Styles.' },
-  { name: 'Aseprite', url: 'https://www.aseprite.org/', use: 'Our team drew the station map and the astronaut sprite in it.' },
-  { name: 'Nunito font (SIL Open Font License)', url: 'https://fonts.google.com/specimen/Nunito', use: 'All game text.' },
+  { name: 'Aseprite', url: 'https://www.aseprite.org/', use: 'Our team drew the astronaut sprites in it.' },
+  { name: 'Lexend font (SIL Open Font License)', url: 'https://fonts.google.com/specimen/Lexend', use: 'All game text.' },
 ];
 
 const MAX_CMES_SHOWN = 5;
@@ -188,8 +188,16 @@ export function CreditsScreen({ onClose }: CreditsScreenProps) {
           <section>
             <h2>Use of AI</h2>
             <p>
-              Our team created the concept, the game rules and the story. An AI assistant (Claude, by Anthropic) helped us write code and
-              organize our research.
+              All the creative work is ours: our team came up with the idea, the game rules, the story, the missions and the
+              design documents. No AI wrote them. An AI assistant (Claude, by Anthropic) only helped us write the code.
+            </p>
+            <p>
+              The station map was made with an AI image tool. We started from a floor plan of the International Space
+              Station and guided the tool step by step. In the game, the map shows an "AI-generated map" mark.
+            </p>
+            <p>
+              Our team drew the astronaut characters by hand in Aseprite. We also tried an AI tool to clean up the
+              character art.
             </p>
           </section>
 

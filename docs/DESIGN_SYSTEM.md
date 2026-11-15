@@ -57,9 +57,9 @@
 
 ### Font Family
 
-**Primary**: Nunito (Google Fonts)
+**Primary**: Lexend (Google Fonts) — escolhida pelo time em 2026-11-15, substituiu a Nunito
 - Weights: 400 (Regular), 600 (SemiBold), 700 (Bold), 800 (ExtraBold)
-- Fallback: `'Nunito', 'Segoe UI', system-ui, sans-serif`
+- Fallback: `'Lexend', 'Segoe UI', system-ui, sans-serif`
 - Reason: Rounded, friendly letterforms. Highly readable. Great for kids.
 
 ### Size Scale
@@ -138,7 +138,7 @@ Semi-transparent overlays that float on top of the Phaser canvas.
   min-height: 60px;
   padding: 12px 24px;
   border-radius: 8px;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 18px;
   font-weight: 700;
   cursor: pointer;
@@ -346,7 +346,7 @@ These tokens map to Tailwind classes for the React overlay layer:
     'panel': 'rgba(20, 27, 45, 0.9)',
   },
   fontFamily: {
-    sans: ['Nunito', 'Segoe UI', 'system-ui', 'sans-serif'],
+    sans: ['Lexend', 'Segoe UI', 'system-ui', 'sans-serif'],
   },
   fontSize: {
     sm: '14px',

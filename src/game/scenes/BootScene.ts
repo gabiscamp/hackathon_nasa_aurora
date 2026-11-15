@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
-import { SHIP_BG_KEY, SHIP_BG_URL } from '../world/shipLayout';
+import { SHIP_BG_KEY, SHIP_BG_URL, SPACE_BG_KEY, SPACE_BG_URL } from '../world/shipLayout';
 import { CHARACTER_SPRITES, SPRITE_FRAME_H, SPRITE_FRAME_W } from '../world/characterSprites';
+import { buildModularAstronauts, preloadModularAstronaut } from '../world/modularAstronaut';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -33,13 +34,16 @@ export class BootScene extends Phaser.Scene {
 
     // Station illustration provided by the team (magenta key removed)
     this.load.image(SHIP_BG_KEY, SHIP_BG_URL);
+    this.load.image(SPACE_BG_KEY, SPACE_BG_URL);
 
     for (const sprite of Object.values(CHARACTER_SPRITES)) {
       this.load.spritesheet(sprite.key, sprite.url, { frameWidth: SPRITE_FRAME_W, frameHeight: SPRITE_FRAME_H });
     }
+    preloadModularAstronaut(this);
   }
 
   create() {
+    buildModularAstronauts(this);
     this.scene.start('GameScene');
   }
 }

@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Tailwind `font-sans` (the default) = the game font. */
+@theme {
+  --font-sans: 'Lexend', system-ui, -apple-system, sans-serif;
+}
+
 /* ============================================
    Space Station Game - Global Styles
    Target: Kids 7-12
@@ -45,8 +50,9 @@
   --text-xl: 28px;
   --text-xxl: 40px;
 
-  /* Typography */
-  --font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+  /* Typography — Lexend is the game's default font (team decision 2026-11-15).
+     Change it only here; every stylesheet uses var(--font-family). */
+  --font-family: 'Lexend', system-ui, -apple-system, sans-serif;
   --font-size-sm: 14px;
   --font-size-base: 18px;
   --font-size-lg: 24px;

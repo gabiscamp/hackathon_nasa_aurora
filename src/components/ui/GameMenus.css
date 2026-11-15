@@ -9,7 +9,7 @@
   justify-content: center;
   padding: 16px;
   background: rgba(10, 14, 39, 0.78);
-  font-family: 'Nunito', system-ui, sans-serif;
+  font-family: var(--font-family);
 }
 
 .gm-backdrop--top {
@@ -34,7 +34,7 @@
 .gm-title {
   margin: 0 0 8px;
   font-size: 28px;
-  font-weight: 800;
+  font-weight: 700;
   color: #4dc9f6;
 }
 
@@ -71,7 +71,7 @@
   padding: 10px 22px;
   font: inherit;
   font-size: 20px;
-  font-weight: 800;
+  font-weight: 700;
   color: #f0ece4;
   background: rgba(77, 201, 246, 0.12);
   border: 2px solid #4dc9f6;
@@ -118,7 +118,7 @@
   padding: 1px 7px;
   font-family: inherit;
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.4;
   color: inherit;
   border: 2px solid currentColor;
@@ -178,9 +178,9 @@
   gap: 8px;
   min-height: 48px;
   padding: 6px 16px;
-  font-family: 'Nunito', system-ui, sans-serif;
+  font-family: var(--font-family);
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 700;
   color: #f0ece4;
   background: rgba(20, 27, 45, 0.9);
   border: 2px solid rgba(77, 201, 246, 0.55);

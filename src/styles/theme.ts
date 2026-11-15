@@ -15,9 +15,11 @@ export const colors = {
 } as const;
 
 export const resourceColors = {
+  food: '#f97316',
+  water: '#38bdf8',
+  oxygen: '#10b981',
+  radiation: '#eab308',
   energy: '#f59e0b',
-  oxygen: '#3b82f6',
-  shielding: '#8b5cf6',
 } as const;
 
 export const spacing = {
@@ -33,7 +35,7 @@ export const spacing = {
 export const spacingScale = [4, 8, 12, 16, 24, 32, 48] as const;
 
 export const typography = {
-  fontFamily: "'Nunito', system-ui, -apple-system, sans-serif",
+  fontFamily: "'Lexend', system-ui, -apple-system, sans-serif",
   sizes: {
     sm: 14,
     base: 18,

@@ -1,21 +1,30 @@
 import { Button } from '../ui/Button';
 import { ENDINGS } from '../../data/endings';
 import { calculateEnding } from '../../engine/endingCalculator';
+import { stationScore, type Resources } from '../../stores/useResourceStore';
 import './EndingScreen.css';
 
 interface EndingScreenProps {
   playerName: string;
-  resources: { energy: number; oxygen: number; shielding: number };
+  resources: Resources;
   onReplay: () => void;
   onOpenCredits: () => void;
 }
 
 const ENDING_ICONS = { good: '🎉', medium: '😮‍💨', bad: '💪' };
+// TODO: replace with real asset — emoji icons on the ending screen.
+const ENDING_STATS = [
+  { key: 'food', icon: '🍎', label: 'Food' },
+  { key: 'water', icon: '💧', label: 'Water' },
+  { key: 'oxygen', icon: '🫁', label: 'Oxygen' },
+  { key: 'radiation', icon: '☢️', label: 'Radiation' },
+  { key: 'energy', icon: '⚡', label: 'Energy' },
+] as const;
 
 export function EndingScreen({ playerName, resources, onReplay, onOpenCredits }: EndingScreenProps) {
   const endingType = calculateEnding(resources);
   const ending = ENDINGS.find((e) => e.id === endingType)!;
-  const avg = Math.round((resources.energy + resources.oxygen + resources.shielding) / 3);
+  const avg = Math.round(stationScore(resources));
 
   return (
     <div className="ending-screen">
@@ -27,21 +36,13 @@ export function EndingScreen({ playerName, resources, onReplay, onOpenCredits }:
         </p>
 
         <div className="ending-stats">
-          <div className="ending-stat">
-            <span className="ending-stat-icon">⚡</span>
-            <span className="ending-stat-label">Energy</span>
-            <span className="ending-stat-value">{Math.round(resources.energy)}%</span>
-          </div>
-          <div className="ending-stat">
-            <span className="ending-stat-icon">🫁</span>
-            <span className="ending-stat-label">Oxygen</span>
-            <span className="ending-stat-value">{Math.round(resources.oxygen)}%</span>
-          </div>
-          <div className="ending-stat">
-            <span className="ending-stat-icon">🛡️</span>
-            <span className="ending-stat-label">Shielding</span>
-            <span className="ending-stat-value">{Math.round(resources.shielding)}%</span>
-          </div>
+          {ENDING_STATS.map((stat) => (
+            <div key={stat.key} className="ending-stat">
+              <span className="ending-stat-icon">{stat.icon}</span>
+              <span className="ending-stat-label">{stat.label}</span>
+              <span className="ending-stat-value">{Math.round(resources[stat.key])}%</span>
+            </div>
+          ))}
           <div className="ending-stat overall">
             <span className="ending-stat-icon">📊</span>
             <span className="ending-stat-label">Overall</span>

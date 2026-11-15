@@ -1,11 +1,10 @@
 import { useGameStore } from '../../stores/useGameStore';
 import { useMissionStore } from '../../stores/useMissionStore';
 import { getAct } from '../panels/DayTracker';
-import { AlertIcon } from './HudIcons';
 
 const MISSION_DAYS = 90;
 
-/** Top-right HUD: current objective + mission day progress. */
+/** Top-right HUD: what to do now, plus how far the 90-day mission has gone. */
 export function ObjectiveTracker() {
   const day = useGameStore((s) => s.day);
   const phase = useGameStore((s) => s.phase);
@@ -21,27 +20,27 @@ export function ObjectiveTracker() {
         : phase === 'summary'
           ? 'Review the day'
           : 'Explore the ship';
+  const pct = Math.min(100, (day / MISSION_DAYS) * 100);
 
   return (
-    <div className="hud-objective">
-      <span className="hud-objective__icon">
-        <AlertIcon size={18} />
-      </span>
-      <div className="hud-objective__body">
-        <div className="hud-objective__title">{title}</div>
-        <div className="hud-objective__task">
-          <span className="hud-diamond" aria-hidden="true" />
-          {objective}
-        </div>
-        <div className="hud-objective__days">
-          <span className="hud-objective__days-track">
-            <span style={{ width: `${(day / MISSION_DAYS) * 100}%` }} />
-          </span>
-          <span className="hud-objective__days-label">
-            Day {day}/{MISSION_DAYS}
-          </span>
-        </div>
+    <section className="hud-panel hud-objective" aria-label="Mission">
+      <div className="hud-objective__top">
+        <p className="hud-objective__title">{title}</p>
+        <span className="hud-objective__day">
+          Day {day}/{MISSION_DAYS}
+        </span>
       </div>
-    </div>
+      <p className="hud-objective__task">{objective}</p>
+      <span
+        className="hud-objective__track"
+        role="meter"
+        aria-label="Mission day"
+        aria-valuenow={day}
+        aria-valuemin={1}
+        aria-valuemax={MISSION_DAYS}
+      >
+        <span style={{ width: `${pct}%` }} />
+      </span>
+    </section>
   );
 }

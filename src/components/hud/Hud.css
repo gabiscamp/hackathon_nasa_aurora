@@ -13,6 +13,8 @@
   --hud-blue: #4dc9f6;
   --hud-amber: #f5a623;
   --hud-red: #e74c3c;
+  --hud-orange: #fb923c;
+  --hud-yellow: #facc15;
   --hud-green: #2ecc71;
   --hud-purple: #9b6cf2;
   --hud-rim: rgba(77, 201, 246, 0.3);
@@ -22,7 +24,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  font-family: 'Nunito', 'Nunito Sans', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-family);
   color: var(--hud-text);
   user-select: none;
   z-index: 5;
@@ -33,154 +35,84 @@
   pointer-events: auto;
 }
 
-/* ---------- Top-left: status ---------- */
+/* ---------- Shared HUD panel ---------- */
+.hud-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: rgba(10, 14, 32, 0.88);
+  border: 1px solid rgba(77, 201, 246, 0.18);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* ---------- Top-left: Station + Crew (one panel) ---------- */
 .hud-status {
   top: var(--hud-edge);
   left: var(--hud-edge);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.hud-status__main {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.hud-portrait {
-  position: relative;
-  padding-bottom: 12px;
-}
-
-.hud-portrait__frame {
-  width: 88px;
-  height: 88px;
-  padding: 4px;
-  border-radius: 14px;
-  background: var(--hud-metal);
-  box-shadow:
-    0 0 0 2px var(--hud-amber),
-    0 0 0 4px rgba(10, 14, 39, 0.9),
-    0 0 14px rgba(245, 166, 35, 0.35),
-    0 6px 14px rgba(0, 0, 0, 0.55);
-}
-
-.hud-portrait__frame img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 18%;
-  border-radius: 10px;
-}
-
-.hud-portrait__frame svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: 10px;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6);
-}
-
-.hud-portrait__badge {
-  position: absolute;
-  left: 50%;
-  bottom: -2px;
-  transform: translateX(-50%);
-  padding: 1px 10px;
-  border-radius: 8px;
-  background: var(--hud-bg-deep);
-  border: 2px solid var(--hud-amber);
-  font-size: 16px;
-  font-weight: 800;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6);
-}
-
-.hud-status__bars {
-  display: flex;
-  flex-direction: column;
   gap: 5px;
-  padding-top: 2px;
 }
 
-.hud-status__name {
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.9);
-  margin-left: 4px;
+.hud-group__label {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
   line-height: 1.2;
+  color: var(--hud-text-dim);
 }
 
-/* Resource bar */
+/* Resource bar: [icon] Name [gauge] 85 — text on the dark panel, not on the fill. */
 .hud-bar {
-  display: flex;
+  display: grid;
+  grid-template-columns: 22px 84px 96px 32px;
   align-items: center;
+  column-gap: 8px;
 }
 
 .hud-bar__badge {
-  position: relative;
-  z-index: 1;
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
+  width: 22px;
+  height: 22px;
   color: var(--bar-color);
-  background: radial-gradient(circle at 35% 30%, #34405f, var(--hud-bg-deep));
-  border: 2px solid var(--bar-color);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--bar-color) 55%, transparent), 0 2px 4px rgba(0, 0, 0, 0.7);
-  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.8));
+}
+
+.hud-bar__badge svg {
+  width: 18px;
+  height: 18px;
+}
+
+.hud-bar__label {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--hud-text);
 }
 
 .hud-bar__track {
   position: relative;
-  width: 176px;
-  height: 22px;
-  margin-left: -6px;
-  border-radius: 0 9px 9px 0;
-  background: rgba(6, 9, 24, 0.92);
-  border: 2px solid #0b0f22;
-  box-shadow:
-    0 0 0 1px var(--hud-rim),
-    inset 0 2px 4px rgba(0, 0, 0, 0.8);
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(240, 236, 228, 0.12);
   overflow: hidden;
 }
 
 .hud-bar__fill {
   position: absolute;
   inset: 0 auto 0 0;
-  border-radius: 0 7px 7px 0;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.08) 45%, rgba(0, 0, 0, 0.2) 100%),
-    var(--bar-color);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--bar-color) 60%, transparent);
+  border-radius: 4px;
+  background: var(--bar-color);
   transition: width 400ms ease, background-color 300ms ease;
 }
 
-/* segment ticks over the fill */
-.hud-bar__track::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(90deg, transparent 0 13px, rgba(6, 9, 24, 0.45) 13px 14px);
-  pointer-events: none;
-}
-
 .hud-bar__value {
-  position: absolute;
-  z-index: 1;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 15px;
-  font-weight: 800;
+  font-size: 16px;
+  font-weight: 600;
   line-height: 1;
+  text-align: right;
+  color: var(--hud-text);
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 1px 2px #000, 0 0 3px #000;
 }
 
 .hud-bar--low .hud-bar__badge,
@@ -188,172 +120,79 @@
   animation: hud-pulse 0.9s ease-in-out infinite;
 }
 
+.hud-bar--low .hud-bar__value {
+  color: var(--hud-red);
+}
+
 @keyframes hud-pulse {
   50% { opacity: 0.45; }
 }
 
-/* Crew chips */
-.hud-crew {
-  list-style: none;
-  display: flex;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-}
-
-.hud-crew__chip {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px 4px 4px;
-  border-radius: 8px;
-  background: var(--hud-bg);
-  border: 1px solid var(--hud-rim);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
-}
-
-.hud-crew__avatar {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--hud-bg-deep);
-  background: var(--crew-color);
-  box-shadow: 0 0 0 2px var(--hud-bg-deep), 0 0 0 3px var(--crew-color);
-  overflow: hidden;
-}
-
-.hud-crew__avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 18%;
-}
-
-.hud-crew__info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.hud-crew__name {
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.1;
-}
-
-.hud-crew__mini {
-  display: block;
-  width: 56px;
-  height: 6px;
-  border-radius: 2px;
-  background: rgba(6, 9, 24, 0.9);
-  overflow: hidden;
-}
-
-.hud-crew__mini > span {
-  display: block;
-  height: 100%;
-  transition: width 400ms ease;
-}
-
-/* ---------- Top-right: objective ---------- */
+/* ---------- Top-right: Mission ---------- */
 .hud-objective {
   top: var(--hud-edge);
   right: var(--hud-edge);
+  width: 320px;
+  gap: 4px;
+}
+
+.hud-objective__top {
   display: flex;
-  align-items: flex-start;
-  max-width: 360px;
-}
-
-.hud-objective__icon {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 40px;
-  height: 40px;
-  margin-top: 6px;
-  margin-right: -14px;
-  color: var(--hud-amber);
-  background: var(--hud-bg-deep);
-  border: 2px solid var(--hud-amber);
-  border-radius: 6px;
-  transform: rotate(45deg);
-  box-shadow: 0 0 12px rgba(245, 166, 35, 0.45);
-}
-
-.hud-objective__icon svg {
-  transform: rotate(-45deg);
-}
-
-.hud-objective__body {
-  min-width: 260px;
-  padding: 8px 14px 9px 24px;
-  background: var(--hud-bg);
-  border: 1px solid var(--hud-rim);
-  border-radius: 8px;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .hud-objective__title {
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  line-height: 1.2;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.25;
   color: var(--hud-amber);
-  padding-bottom: 4px;
-  margin-bottom: 4px;
-  border-bottom: 1px solid rgba(240, 236, 228, 0.12);
+}
+
+.hud-objective__day {
+  flex: none;
+  font-size: 14px;
+  color: var(--hud-text-dim);
+  font-variant-numeric: tabular-nums;
 }
 
 .hud-objective__task {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  margin: 0;
   font-size: 18px;
-  line-height: 1.3;
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--hud-text);
 }
 
-.hud-diamond {
-  flex: none;
-  width: 7px;
-  height: 7px;
-  background: var(--hud-amber);
-  transform: rotate(45deg);
-}
-
-.hud-objective__days {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 6px;
-}
-
-.hud-objective__days-track {
-  flex: 1;
-  height: 6px;
+.hud-objective__track {
+  display: block;
+  height: 4px;
+  margin-top: 4px;
   border-radius: 2px;
-  background: rgba(6, 9, 24, 0.9);
+  background: rgba(240, 236, 228, 0.12);
   overflow: hidden;
 }
 
-.hud-objective__days-track > span {
+.hud-objective__track > span {
   display: block;
+  min-width: 4px;
   height: 100%;
   background: var(--hud-blue);
-  box-shadow: 0 0 6px var(--hud-blue);
 }
 
-.hud-objective__days-label {
-  font-size: 16px;
+/* AI watermark for the station image (team briefing rule): one quiet label, always on screen. */
+.hud-ai-mark {
+  top: calc(var(--hud-edge) + 52px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1px 8px;
+  border-radius: 6px;
+  font-size: 14px;
   color: var(--hud-text-dim);
-  font-variant-numeric: tabular-nums;
+  background: rgba(10, 14, 32, 0.6);
+  pointer-events: none;
 }
 
 /* ---------- Bottom-center: inventory ---------- */
@@ -407,7 +246,7 @@
   padding: 0 5px;
   border-radius: 6px;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 20px;
   color: var(--hud-text);
   background: var(--hud-bg-deep);
@@ -420,25 +259,233 @@
   border-color: var(--hud-amber);
 }
 
-/* ---------- Bottom-right: minimap ---------- */
+/* ---------- Bottom-right: map (click or M opens the big map) ---------- */
 .hud-minimap {
   right: var(--hud-edge);
   bottom: var(--hud-edge);
-  width: 150px;
-  height: 150px;
+  width: 210px;
+  min-height: 0;
+  padding: 6px;
+  position: absolute;
+  align-items: stretch;
+  justify-content: flex-start;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.hud-minimap:hover {
+  transform: none;
+  border-color: var(--hud-amber);
+  box-shadow: 0 0 12px rgba(245, 166, 35, 0.3);
+}
+
+.hud-minimap__key {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.hud-minimap__key,
+.ship-map__close kbd {
+  padding: 0 6px;
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--hud-text);
+  background: var(--hud-bg-deep);
+  border: 1px solid #3a4666;
+  border-bottom-width: 2px;
+}
+
+/* ---------- Full ship map (M) ---------- */
+/* Portal layer: reuses the .hud tokens, sits above every game layer (incl. the Menu button). */
+.hud.ship-map-layer {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: auto;
+}
+
+.hud > .ship-map {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(5, 8, 20, 0.82);
+  animation: hud-fade-in 200ms ease;
+}
+
+.ship-map__card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(100%, calc((100vh - 120px) * 2), 1400px);
+  padding: 14px 16px 16px;
+  background: rgba(10, 14, 32, 0.97);
+  border: 1px solid var(--hud-rim);
+  border-radius: 14px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+}
+
+.ship-map__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ship-map__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--hud-text);
+}
+
+.ship-map__title svg {
+  color: var(--hud-blue);
+}
+
+.ship-map__close {
+  min-height: 48px;
+  padding: 6px 16px;
+  font-size: 18px;
+  background: #2b3654;
+  border: 1px solid var(--hud-rim);
+}
+
+.ship-map__frame {
+  position: relative;
+  aspect-ratio: 2 / 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #070b1c url('/assets/environments/mars-backdrop.jpg') center / cover no-repeat;
+}
+
+.ship-map__frame > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  user-select: none;
+}
+
+.ship-map__watermark {
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  padding: 2px 10px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--hud-text);
+  background: rgba(10, 14, 32, 0.8);
+}
+
+.ship-map__room {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 2px 10px;
+  border-radius: 8px;
+  font-size: clamp(14px, 1.3vw, 19px);
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--hud-text);
+  background: rgba(10, 14, 32, 0.85);
+  border: 1px solid var(--hud-rim);
+  pointer-events: none;
+}
+
+.ship-map__pin {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.ship-map__face {
+  display: grid;
+  place-items: center;
+  width: clamp(30px, 3vw, 44px);
+  aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(20, 34, 66, 0.92), rgba(10, 14, 39, 0.95));
-  box-shadow:
-    0 0 0 3px #2b3654,
-    0 0 0 5px var(--hud-rim),
-    0 0 18px rgba(77, 201, 246, 0.2),
-    0 6px 14px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--hud-bg-deep);
+  background: var(--pin-color);
+  box-shadow: 0 0 0 2px var(--hud-bg-deep), 0 0 0 4px var(--pin-color), 0 4px 10px rgba(0, 0, 0, 0.6);
+}
+
+.ship-map__face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+}
+
+.ship-map__name {
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--hud-bg-deep);
+  background: var(--pin-color);
+}
+
+.ship-map__pin--you {
+  z-index: 1;
+}
+
+.ship-map__pin--you .ship-map__face {
+  animation: ship-map-bob 1.2s ease-in-out infinite;
+}
+
+@keyframes ship-map-bob {
+  50% { transform: translateY(-4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ship-map__pin--you .ship-map__face,
+  .hud-minimap__ping {
+    animation: none;
+  }
+}
+
+.hud-minimap__legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  text-transform: none;
+  color: var(--hud-text);
+}
+
+.hud-minimap__you {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--hud-amber);
+  box-shadow: 0 0 0 2px var(--hud-bg-deep), 0 0 0 3px var(--hud-amber);
 }
 
 .hud-minimap__map {
+  display: block;
   width: 100%;
-  height: 100%;
-  border-radius: 50%;
+  height: auto;
+  border-radius: 6px;
+  background: #0d1430;
 }
 
 .hud-minimap__ping {
@@ -452,21 +499,7 @@
   100% { transform: scale(1.6); opacity: 0; }
 }
 
-.hud-minimap__north {
-  position: absolute;
-  top: -11px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  font-size: 14px;
-  font-weight: 800;
-  background: var(--hud-bg-deep);
-  border: 2px solid var(--hud-blue);
-}
+
 
 /* ---------- Bottom-left: location + keys ---------- */
 .hud-location {
@@ -484,11 +517,10 @@
   gap: 6px;
   padding: 4px 12px 4px 8px;
   border-radius: 8px;
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  background: var(--hud-bg);
-  border: 1px solid var(--hud-rim);
+  font-size: 16px;
+  font-weight: 600;
+  background: rgba(10, 14, 32, 0.88);
+  border: 1px solid rgba(77, 201, 246, 0.18);
   animation: hud-fade-in 250ms ease;
 }
 
@@ -500,9 +532,12 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 16px;
-  color: var(--hud-text-dim);
-  text-shadow: 0 1px 2px #000;
+  padding: 4px 10px 4px 6px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--hud-text);
+  background: rgba(10, 14, 32, 0.88);
+  animation: hud-fade-in 250ms ease;
 }
 
 .hud-location__keys kbd {
@@ -510,16 +545,16 @@
   border-radius: 5px;
   font-family: inherit;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 600;
   line-height: 20px;
   color: var(--hud-text);
   background: var(--hud-bg-deep);
   border: 1px solid #3a4666;
-  border-bottom-width: 3px;
+  border-bottom-width: 2px;
 }
 
 .hud-location__keys kbd:not(:first-child) {
-  margin-left: 6px;
+  margin-left: 8px;
 }
 
 @keyframes hud-fade-in {

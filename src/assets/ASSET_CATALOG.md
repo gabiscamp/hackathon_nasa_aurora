@@ -7,7 +7,7 @@ Regras: `docs/ART_DIRECTION.md`. Processo: skill `starship-art-studio`.
 Dimensões em **1x** (o jogo carrega 1x). O master fica em `_source/` com o dobro do tamanho.
 Dimensões marcadas com **(prov.)** são provisórias e só valem depois que o blockout `MAP-001` for aprovado.
 
-Nenhum asset foi produzido ainda. Não há gerador de imagens conectado (ver skill, §1).
+Assets integrados: ver a seção no fim do arquivo (MAP-002, CHR-020, CHR-030/031). A direção criativa é do time. Única imagem gerada com IA: o mapa `MAP-002`, com marca d'água no jogo.
 
 ---
 
@@ -123,7 +123,15 @@ Quando um asset passa para **Em produção**, crie aqui a ficha completa no form
 
 | ID | Arquivo no jogo | Original | Dimensões | Uso | Fonte | Estado |
 |---|---|---|---|---|---|---|
-| MAP-002 | `public/assets/environments/station-map.png` | `assets/environments/_source/station-map-original.png` | 1600×800, PNG RGBA (fundo magenta removido) | Mapa da estação; piso navegável em `src/game/world/shipLayout.ts` | Pixel art do time, feita no Aseprite | Integrado |
+| MAP-002 | `public/assets/environments/station-map.png` | `assets/environments/_source/station-map-original.png` | 1600×800, PNG RGBA (fundo magenta removido) | Mapa da estação; piso navegável em `src/game/world/shipLayout.ts` | **Gerado com IA**, guiado pelo time a partir da planta da ISS | Integrado (com marca d'água) |
+| ENV-002 | `public/assets/environments/mars-backdrop.jpg` | `src/assets/environments/_source/mars-backdrop-original.png` | 1672×941, JPEG q86 (~180 KB; original PNG 1,9 MB) | Fundo atrás da nave: órbita de Marte. Fixo na tela (não rola com o mapa), cobre a tela inteira, filtro linear. Também é o fundo do mapa grande (M) | Fornecido pelo time (origem a confirmar: se for IA, precisa de marca d'água) | Integrado |
 | CHR-020 | `public/assets/characters/cmdr-mcclain-walk.png` | `assets/characters/_source/cmdr-mcclain-sheet-original.png` | 160×192, 4×4 quadros de 40×48 no tamanho nativo do pixel art, linhas: baixo, esquerda, direita, cima; pés em y=46 | Comandante Anne McClain (jogador), escala 1, filtro nearest | Pixel art do time, feita no Aseprite | Integrado |
 
-Observação: feitos à mão no Aseprite (não são IA), então não precisam de marca d'água. Creditados na tela de créditos. Estilo oficial atualizado para pixel art (ART_DIRECTION §0).
+Observação MAP-002: imagem gerada com ferramenta de IA. O time partiu da planta da ISS e foi guiando a geração. Pela regra do briefing, imagens de IA levam marca d'água visível: o `GameScene.addAiWatermark()` repete "AI-generated map" sobre o mapa, abaixo dos personagens. O uso está declarado em "Use of AI" na tela de créditos.
+
+Observação CHR-020: feito à mão no Aseprite (não é IA), então não precisa de marca d'água. Creditados na tela de créditos. Estilo oficial atualizado para pixel art (ART_DIRECTION §0).
+
+| CHR-030 | `src/assets/cabecas/exports/web-v2/uniforme-nasa.png` + `.json` + `uniforme-nasa-head-anchors.json` | `src/assets/cabecas/` (spec, master) | 27 quadros 32×47: idle/walk para baixo, cima e direita (esquerda = direita espelhada); pés em (16,46) | Corpo do astronauta modular (jogador sem folha própria e todos os tripulantes) | Pixel art do time (confirmar ferramenta, ver nota) | Integrado |
+| CHR-031 | `src/assets/cabecas/exports/web-v2/cabecas.png` + `cabecas.json` | `src/assets/cabecas/master/` | 5 cabeças × 3 vistas, 32×26; pino do pescoço por vista | Rostos: cabeca-1 (loira), cabeca-2 (castanho), cabeca-3 (crespo), cabeca-4 (ruiva) e capacete; atribuição por astronauta em `src/data/astronauts.ts` (campo `head`) | Pixel art do time (confirmar ferramenta, ver nota) | Integrado |
+
+Nota CHR-030/031: montados em tempo de carga por `src/game/world/modularAstronaut.ts` (uma folha por rosto). Origem confirmada pelo time (2026-11-15): corpo e cabeças desenhados à mão no Aseprite por um integrante do time. A arte também passou por uma ferramenta de IA (citada no cabeçalho de `AstronautaModular.jsx` como "Agent Sprite Forge / codeart2d"), apenas como opção para melhorar a qualidade. Os pixels são do time, e `heads-manual.json` registra os ajustes manuais. Essa passagem pela IA está declarada em "Use of AI" na tela de créditos. Se algum PNG final tiver saído diretamente da IA, aplicar a marca d'água exigida pelo briefing.

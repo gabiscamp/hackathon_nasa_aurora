@@ -10,6 +10,9 @@
  */
 export const SHIP_BG_KEY = 'station-map';
 export const SHIP_BG_URL = '/assets/environments/station-map.png';
+/** Mars orbit backdrop seen behind the station (fixed to the screen, not to the map). ENV-002 */
+export const SPACE_BG_KEY = 'mars-backdrop';
+export const SPACE_BG_URL = '/assets/environments/mars-backdrop.jpg';
 
 export const WORLD_WIDTH = 1600;
 export const WORLD_HEIGHT = 800;

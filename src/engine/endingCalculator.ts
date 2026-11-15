@@ -1,9 +1,7 @@
-export function calculateEnding(resources: {
-  energy: number;
-  oxygen: number;
-  shielding: number;
-}): 'good' | 'medium' | 'bad' {
-  const avg = (resources.energy + resources.oxygen + resources.shielding) / 3;
+import { stationScore, type Resources } from '../stores/useResourceStore';
+
+export function calculateEnding(resources: Resources): 'good' | 'medium' | 'bad' {
+  const avg = stationScore(resources);
   if (avg > 30) return 'good';
   if (avg >= 10) return 'medium';
   return 'bad';

@@ -1,4 +1,4 @@
-/* "Meet your crew". Palette + Nunito from the spaceship-game-design skill.
+/* "Meet your crew". Palette + Lexend from the spaceship-game-design skill.
    Kid UI rules (team briefing): text ≥18px, targets ≥44px, never color-only. Mobile first. */
 
 .crew-screen {
@@ -16,7 +16,7 @@
     radial-gradient(ellipse at 15% 0%, rgba(77, 201, 246, 0.1), transparent 55%),
     linear-gradient(180deg, #0a0e27 0%, #10183a 100%);
   color: var(--cs-text);
-  font-family: 'Nunito', 'Nunito Sans', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-family);
 }
 
 .crew-container {
@@ -40,7 +40,7 @@
 .crew-title {
   margin: 0;
   font-size: clamp(28px, 4vw, 40px);
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.5px;
   line-height: 1.2;
 }
@@ -55,7 +55,7 @@
   margin: 6px 0 0;
   padding: 4px 14px;
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--cs-blue);
   border: 1px solid var(--cs-border);
   border-radius: 999px;
@@ -112,7 +112,7 @@
 .crew-tab__name {
   margin-top: 6px;
   font-size: 20px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .crew-tab__role {
@@ -128,7 +128,7 @@
   margin-top: 6px;
   padding: 1px 10px;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--cs-amber);
   border: 1px solid currentColor;
   border-radius: 999px;
@@ -159,7 +159,7 @@
   display: grid;
   place-items: center;
   font-size: 32px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .crew-photo--tab {
@@ -239,7 +239,7 @@
   gap: 8px;
   padding: 6px 16px;
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 700;
   color: #0a0e27;
   background: var(--role-color);
   border-radius: 999px;
@@ -255,7 +255,7 @@
 .crew-profile__you {
   margin: 0 0 2px;
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--cs-amber);
@@ -264,7 +264,7 @@
 .crew-profile__name {
   margin: 0;
   font-size: clamp(26px, 3.4vw, 34px);
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.15;
 }
 
@@ -302,7 +302,7 @@
 .crew-skills__title {
   margin: 0 0 12px;
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--cs-muted);
@@ -350,7 +350,7 @@
 
 .crew-skill__value {
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 700;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
@@ -404,7 +404,7 @@
   padding: 12px 28px;
   font: inherit;
   font-size: 22px;
-  font-weight: 800;
+  font-weight: 700;
   color: #0a0e27;
   background: #2ecc71;
   border: none;

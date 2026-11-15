@@ -17,7 +17,7 @@
   justify-content: center;
   padding: 16px;
   background: var(--cr-bg);
-  font-family: 'Nunito', system-ui, sans-serif;
+  font-family: var(--font-family);
   color: var(--cr-text);
   font-size: 18px;
   line-height: 1.5;
@@ -47,7 +47,7 @@
 .credits-header h1 {
   margin: 0;
   font-size: 30px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--cr-blue);
 }
 
@@ -68,7 +68,7 @@
 .credits-body h2 {
   margin: 0 0 8px;
   font-size: 22px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--cr-amber);
 }
 
@@ -86,7 +86,7 @@
   padding: 6px 14px;
   border-radius: 999px;
   border: 2px solid var(--cr-muted);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .credits-badge--live {
@@ -156,7 +156,7 @@
   min-width: 120px;
   padding: 8px 20px;
   font: inherit;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--cr-text);
   background: rgba(77, 201, 246, 0.12);
   border: 2px solid var(--cr-blue);
