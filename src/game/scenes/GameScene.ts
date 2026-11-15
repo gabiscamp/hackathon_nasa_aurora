@@ -21,6 +21,8 @@ const PLAYER_SIZE = 28;
 /** Half extents of the player's feet box used for walkability checks (world px). */
 const FEET_HALF_W = 10;
 const FEET_HALF_H = 5;
+/** Minimum time between PLAYER_MOVED events sent to the React HUD (ms). */
+const POSITION_EMIT_INTERVAL = 80;
 
 export class GameScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Container;
@@ -30,6 +32,7 @@ export class GameScene extends Phaser.Scene {
   private wasd!: Record<string, Phaser.Input.Keyboard.Key>;
   private walkableDebug: Phaser.GameObjects.Graphics | null = null;
   private currentRoom: RoomId | null = null;
+  private lastPositionEmit = 0;
 
   constructor() {
     super({ key: 'GameScene' });
@@ -68,6 +71,7 @@ export class GameScene extends Phaser.Scene {
     camera.centerOn(WORLD_WIDTH / 2, WORLD_HEIGHT / 2);
 
     this.updateRoom();
+    this.emitPosition(true);
   }
 
   /** TODO: replace with real asset — reference illustration used as the map base. */
@@ -157,6 +161,13 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  private emitPosition(force = false) {
+    const now = this.time.now;
+    if (!force && now - this.lastPositionEmit < POSITION_EMIT_INTERVAL) return;
+    this.lastPositionEmit = now;
+    gameEvents.emit(EVENTS.PLAYER_MOVED, { x: this.player.x, y: this.player.y });
+  }
+
   update(_time: number, delta: number) {
     const up = this.cursors.up.isDown || this.wasd.W.isDown;
     const down = this.cursors.down.isDown || this.wasd.S.isDown;
@@ -193,6 +204,7 @@ export class GameScene extends Phaser.Scene {
     // Point the direction indicator (0 rad = facing up)
     if (vx !== 0 || vy !== 0) {
       this.directionDot.setRotation(Math.atan2(vy, vx) + Math.PI / 2);
+      this.emitPosition();
     }
 
     this.updateRoom();

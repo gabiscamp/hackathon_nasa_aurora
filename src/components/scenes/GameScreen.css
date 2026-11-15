@@ -1,67 +1,55 @@
+/* Full-screen game: the Phaser canvas fills a 16:9 stage and the HUD floats on top. */
 .game-screen {
-  display: grid;
-  grid-template-columns: 220px 1fr 220px;
-  grid-template-rows: 1fr auto;
-  gap: var(--space-md);
-  height: 100vh;
-  padding: var(--space-md);
-  background-color: var(--bg-primary);
-  position: relative;
-  overflow: hidden;
-}
-
-.game-sidebar-left {
-  grid-column: 1;
-  grid-row: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-  overflow-y: auto;
-}
-
-.game-center {
-  grid-column: 2;
-  grid-row: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-  overflow-y: auto;
-}
-
-.game-sidebar-right {
-  grid-column: 3;
-  grid-row: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-  overflow-y: auto;
-}
-
-.game-bottom {
-  grid-column: 1 / -1;
-  grid-row: 2;
-}
-
-.station-view {
-  flex: 1;
-  min-height: 200px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  position: fixed;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 4rem;
-  color: var(--text-secondary);
-  position: relative;
+  background-color: #0a0e27;
   overflow: hidden;
 }
 
-.station-view::before {
-  content: '';
+.game-stage {
+  position: relative;
+  width: min(100vw, calc(100vh * 16 / 9));
+  aspect-ratio: 16 / 9;
+}
+
+.station-view {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+}
+
+.game-decision {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  width: min(560px, calc(100% - 32px));
+  max-height: calc(100% - 220px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  z-index: 6;
+  animation: hud-fade-in 250ms ease;
+}
+
+.game-decision .panel,
+.game-bottom .panel {
+  background-color: rgba(20, 27, 45, 0.94);
+  border: 1px solid rgba(77, 201, 246, 0.3);
+  border-radius: 8px;
+  padding: var(--space-base);
+}
+
+.game-bottom {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  width: min(80%, 900px);
+  z-index: 6;
 }
 
 .game-overlay {

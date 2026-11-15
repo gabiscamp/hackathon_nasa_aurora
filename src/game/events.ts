@@ -13,4 +13,10 @@ export const EVENTS = {
   HIDE_DIALOGUE: 'hide-dialogue',
   MISSION_START: 'mission-start',
   MISSION_COMPLETE: 'mission-complete',
+  PLAYER_MOVED: 'player-moved',
 } as const;
+
+export interface PlayerMovedPayload {
+  x: number;
+  y: number;
+}

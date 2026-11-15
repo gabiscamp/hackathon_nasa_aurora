@@ -4,9 +4,6 @@ import { useMissionStore } from '../../stores/useMissionStore';
 import { useNarrativeStore } from '../../stores/useNarrativeStore';
 import { pickMissionForDay } from '../../engine/eventResolver';
 import { MISSIONS } from '../../data/missions';
-import { CrewPanel } from '../panels/CrewPanel';
-import { ResourcePanel } from '../panels/ResourcePanel';
-import { DayTracker } from '../panels/DayTracker';
 import { MissionPanel } from '../panels/MissionPanel';
 import { CommandConsole } from '../panels/CommandConsole';
 import { DialogueBox } from '../narrative/DialogueBox';
@@ -14,6 +11,7 @@ import { DaySummary } from '../narrative/DaySummary';
 import { Button } from '../ui/Button';
 import { getAct } from '../panels/DayTracker';
 import { PhaserGame } from '../../game/PhaserGame';
+import { Hud } from '../hud/Hud';
 import './GameScreen.css';
 
 export function GameScreen() {
@@ -39,42 +37,30 @@ export function GameScreen() {
 
   return (
     <div className="game-screen">
-      {/* Left sidebar */}
-      <div className="game-sidebar-left">
-        <CrewPanel />
-      </div>
-
-      {/* Center */}
-      <div className="game-center">
+      <div className="game-stage">
         <PhaserGame className="station-view" />
+        <Hud />
 
         {phase === 'decision' && (
-          <>
+          <div className="game-decision">
             <MissionPanel />
             <CommandConsole />
-          </>
+          </div>
+        )}
+
+        {phase === 'result' && (
+          <div className="game-bottom">
+            <DialogueBox />
+            {!currentDialogue && (
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--space-sm)' }}>
+                <Button variant="primary" size="sm" onClick={nextPhase}>
+                  Continue to Summary
+                </Button>
+              </div>
+            )}
+          </div>
         )}
       </div>
-
-      {/* Right sidebar */}
-      <div className="game-sidebar-right">
-        <ResourcePanel />
-        <DayTracker />
-      </div>
-
-      {/* Bottom dialogue */}
-      {phase === 'result' && (
-        <div className="game-bottom">
-          <DialogueBox />
-          {!currentDialogue && (
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--space-sm)' }}>
-              <Button variant="primary" size="sm" onClick={nextPhase}>
-                Continue to Summary
-              </Button>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Briefing overlay */}
       {phase === 'briefing' && (
