@@ -58,7 +58,14 @@ export function MissionBriefing({ playerName, onContinue, onBack }: MissionBrief
         backLabel="Main menu"
         onBack={onBack}
         skipLabel={allDone ? undefined : 'Skip message'}
-        onSkip={allDone ? undefined : () => setAllDone(true)}
+        onSkip={
+          allDone
+            ? undefined
+            : () => {
+                setMessageIndex(MESSAGES.length - 1);
+                setAllDone(true);
+              }
+        }
       />
       <main className="briefing-container">
         <h1 className="sr-only">Message from Mission Control</h1>
@@ -74,12 +81,12 @@ export function MissionBriefing({ playerName, onContinue, onBack }: MissionBrief
         </div>
 
         <div className="briefing-message-box">
-          <TypeWriter
-            key={messageIndex}
-            text={currentMessage}
-            speed={25}
-            className="briefing-text"
-          />
+          {allDone ? (
+            // Skipped or finished: no more typing, so "Meet Your Crew" works with one click.
+            <span className="typewriter typewriter-done briefing-text">{currentMessage}</span>
+          ) : (
+            <TypeWriter key={messageIndex} text={currentMessage} speed={25} className="briefing-text" />
+          )}
         </div>
 
         <div className="briefing-dots" role="img" aria-label={`Message ${messageIndex + 1} of ${MESSAGES.length}`}>

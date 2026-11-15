@@ -346,7 +346,7 @@ function dayTick(day: number): void {
   useDutyStore.getState().setAll(crew);
 
   // Yesterday's food, water and air, the protocols and the chain failures (src/engine/survival.ts).
-  for (const line of liveOneDay()) addNews(line);
+  for (const line of liveOneDay(day)) addNews(line);
 
   // Multi-day jobs that ended normally pay off now (e.g. the recycler repair is done).
   for (const { task, slots } of finished.values()) {
@@ -359,7 +359,7 @@ function dayTick(day: number): void {
   const { conditions } = useMissionStore.getState();
   for (const c of conditions) {
     if (c.startDay < day && (c.untilDay === undefined || c.untilDay >= day)) {
-      applyEffects(useResourceStore.getState(), weigh(c.daily));
+      applyEffects(useResourceStore.getState(), c.daily);
       // Some lasting problems can make someone sick, more likely each day (e.g. no vitamins).
       if (c.sickChance?.length) {
         const chance = c.sickChance[Math.min(day - c.startDay - 1, c.sickChance.length - 1)];
@@ -374,7 +374,7 @@ function dayTick(day: number): void {
   const flagsNow = useMissionStore.getState().flags;
   for (const p of pending.filter((x) => x.day <= day)) {
     if (p.unlessFlag && flagsNow.includes(p.unlessFlag)) continue;
-    applyEffects(useResourceStore.getState(), weigh(p.effects));
+    applyEffects(useResourceStore.getState(), p.effects);
     addNews(p.text);
   }
   useMissionStore.setState({ pendingEffects: pending.filter((x) => x.day > day) });
@@ -707,13 +707,14 @@ export function sendCrew(mission: Mission, choice: Choice, slots: CrewSlot[], da
     ...(success ? choice.effects : (choice.failEffects ?? choice.effects)),
     ...(success && specialist ? (choice.bestBonus ?? []) : []),
   ];
-  // Decisions weigh more than the written numbers, failures even more (src/data/difficulty.ts).
+  // The choice itself weighs more than the written numbers, a failure even more (src/data/difficulty.ts).
+  // Only here: side risks, delays, lasting problems and "tomorrow" keep their numbers, because their texts say them.
   const changes = applyAndMeasure(weigh(effects, !success));
 
   // A second risk that does not depend on success (e.g. ripping food packets while moving them).
   const riskChance = sideRiskChance(choice.sideRisk, day);
   if (choice.sideRisk && riskChance !== null && rollSuccess(riskChance)) {
-    const extra = applyAndMeasure(weigh(choice.sideRisk.effects));
+    const extra = applyAndMeasure(choice.sideRisk.effects);
     for (const [k, v] of Object.entries(extra) as [ResourceKey, number][]) changes[k] = (changes[k] ?? 0) + v;
     if (choice.sideRisk.setFlags?.length) {
       const f = useMissionStore.getState().flags;
@@ -797,7 +798,7 @@ function finishMission(mission: Mission, day: number): void {
 
 /** "Deal with it tomorrow": pays the cost of waiting and moves the problem to the next day. */
 export function deferMission(mission: Mission, day: number): Partial<Record<ResourceKey, number>> {
-  const changes = mission.defer ? applyAndMeasure(weigh(mission.defer.effects)) : {};
+  const changes = mission.defer ? applyAndMeasure(mission.defer.effects) : {};
   const state = useMissionStore.getState();
   useMissionStore.setState({
     openEvents: state.openEvents.filter((id) => id !== mission.id),

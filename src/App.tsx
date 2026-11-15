@@ -126,7 +126,10 @@ export default function App() {
           onRetry={restoreCheckpoint}
         />
       )}
-      {showCredits && <CreditsScreen onClose={() => setShowCredits(false)} />}
+      {/* Own boundary: loading the credits must never hide (and restart) the game behind them. */}
+      <Suspense fallback={null}>
+        {showCredits && <CreditsScreen onClose={() => setShowCredits(false)} />}
+      </Suspense>
     </Suspense>
   );
 }

@@ -84,7 +84,7 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
 
   return (
     <>
-      <div className="gm-top-actions">
+      <div className="gm-top-actions" data-typing-pass>
         <button type="button" className="gm-menu-btn" onClick={() => openMenu()} aria-haspopup="dialog">
           <svg
             width="22"

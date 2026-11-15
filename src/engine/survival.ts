@@ -148,11 +148,13 @@ export function daysLeft(resource: 'oxygen' | 'health', r: Resources = useResour
  * One day of living on the station (applied the next morning, for every day, skipped days too):
  * protocols switch, the crew uses food/water/air, and the chain failures hurt. Returns news lines.
  */
-export function liveOneDay(): string[] {
+export function liveOneDay(day: number): string[] {
   const news = updateProtocols(useResourceStore.getState());
   useResourceStore.getState().applyDelta(dailyUse());
   const r = useResourceStore.getState();
-  const { delta } = chainEffects(r);
+  const { delta, reasons } = chainEffects(r);
+  // Kept for the game-over screen: by the time the station is lost, a bar may have come back.
+  lastReasons = { day, reasons };
   if (Object.keys(delta).length) useResourceStore.getState().applyDelta(delta);
 
   // Hungry crews get tired faster: rationing a little, no food at all a lot.
@@ -174,6 +176,15 @@ export function liveOneDay(): string[] {
   return news;
 }
 
+/** What was hurting the station this morning (see liveOneDay). */
+let lastReasons: { day: number; reasons: string[] } = { day: 0, reasons: [] };
+
+const CAUSE_LINE: Record<CollapseCause, string> = {
+  oxygen: 'The oxygen reached 0.',
+  health: 'Crew health reached 0.',
+  radiation: 'Radiation reached 100.',
+};
+
 /** Chance (%) today that someone gets sick: weak crew, high radiation, or both. */
 export function sickChanceToday(r: Resources = useResourceStore.getState()): number {
   return (r.health < LOW_HEALTH ? LOW_HEALTH_SICK_CHANCE : 0) + (r.radiation > HIGH_RADIATION ? HIGH_RADIATION_SICK_CHANCE : 0);
@@ -189,7 +200,9 @@ export function checkCollapse(day: number): Collapse | null {
   else if (r.health <= HEALTH_GAME_OVER) cause = 'health';
   else if (r.radiation >= RADIATION_GAME_OVER) cause = 'radiation';
   if (!cause) return null;
-  const collapse: Collapse = { cause, day, reasons: chainEffects(r).reasons };
+  const morning = lastReasons.day === day ? lastReasons.reasons : [];
+  const reasons = [...new Set([...morning, ...chainEffects(r).reasons])];
+  const collapse: Collapse = { cause, day, reasons: reasons.length ? reasons : [CAUSE_LINE[cause]] };
   useMissionStore.setState({ collapse });
   return collapse;
 }

@@ -41,7 +41,7 @@ export function RobotPortrait({ className, size = 72 }: RobotPortraitProps) {
       width={FRAME_WIDTH}
       height={FRAME_HEIGHT}
       style={{ width: size, height: size, objectFit: 'contain' }}
-      aria-label="Robô explorador"
+      aria-label="Explorer robot"
     />
   );
 }

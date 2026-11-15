@@ -200,15 +200,14 @@ export class GameScene extends Phaser.Scene {
 
     this.input.keyboard!.on('keydown-E', () => {
       if (this.frozen) return;
-      if (this.isNearRobot()) {
-        gameEvents.emit(EVENTS.ROBOT_INTERACT);
-        return;
-      }
+      // A mission "!" comes first: the robot walking by must never block a problem.
       const id = this.nearestMarker();
       if (id) {
         this.activeMarkerId = id;
         gameEvents.emit(EVENTS.MISSION_START, id);
+        return;
       }
+      if (this.isNearRobot()) gameEvents.emit(EVENTS.ROBOT_INTERACT);
     });
 
     // Mission events from React (MissionOverlay / GameScreen). Removed when the scene ends:
@@ -470,7 +469,10 @@ export class GameScene extends Phaser.Scene {
       .setDepth(9)
       .setInteractive({ useHandCursor: true });
     this.robot.anims.play('robot-idle');
-    this.robot.on('pointerdown', () => {
+    this.robot.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      // Phaser also hears clicks on HTML windows drawn over the canvas (a crew card, a button):
+      // only a click really on the game canvas, with no window open, talks to the robot.
+      if (this.frozen || pointer.event?.target !== this.game.canvas) return;
       if (useExplorationStore.getState().status === 'aboard') gameEvents.emit(EVENTS.ROBOT_INTERACT);
     });
 

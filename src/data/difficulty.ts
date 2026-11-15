@@ -11,7 +11,9 @@ import type { ResourceKey } from '../stores/useResourceStore';
  * Losses from mission choices are bigger than the numbers written in missoes.txt.
  * Only losses (resources going down, radiation going up): gains stay the same, so a careful
  * choice still pays off and a careless one hurts more.
- * Used for: choice effects, side risks, "deal with it tomorrow", lasting conditions and delayed effects.
+ * Used ONLY for what the chosen option does (success or failure), which the result screen shows as measured.
+ * Side risks, "deal with it tomorrow", lasting conditions and delayed effects keep their written numbers,
+ * because their texts say them ("Mars shadow: energy -15"), and a loss/gain pair must cancel out.
  */
 export const LOSS_WEIGHT = 1.5;
 /** A failed job costs more than the written failure (on top of LOSS_WEIGHT). */

@@ -344,7 +344,7 @@ All numbers live in `src/data/difficulty.ts`; the rules run every morning in `sr
 - **Food rationing** (food < 20, off at 30): half the daily food use, satisfaction −1 per day, 20% chance per person per day of getting more tired.
 
 ### Weight of decisions
-- Losses from mission choices are ×1.5 the numbers written in `missoes.txt` (gains stay as written).
+- Losses of the chosen option are ×1.5 the numbers written in `missoes.txt` (gains stay as written). Side risks, "deal with it tomorrow", lasting conditions and delayed effects keep their written numbers, because their texts state them.
 - A failed job costs ×1.25 more on top of that, and tires everyone on it one extra step.
 - Daily use of a crew of four: food −1, water −1, oxygen −0.5, satisfaction −0.3, radiation +0.5.
 

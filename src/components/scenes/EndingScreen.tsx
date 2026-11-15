@@ -66,7 +66,7 @@ export function EndingScreen({ playerName, resources, onReplay, onOpenCredits, r
   const worst = lost ? worstDecisions(decisions, lost.related) : [];
 
   return (
-    <div className={`ending-screen ${lost ? 'ending-screen--lost' : ''}`}>
+    <main className={`ending-screen ${lost ? 'ending-screen--lost' : ''}`}>
       <div className="ending-container animate-fadeIn" data-read>
         <div className="ending-icon" aria-hidden="true">{ENDING_ICONS[endingType]}</div>
         {lost && <p className="ending-gameover">Game over</p>}
@@ -149,6 +149,6 @@ export function EndingScreen({ playerName, resources, onReplay, onOpenCredits, r
           </Button>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
