@@ -250,7 +250,8 @@ export const MISSIONS_BATCH_2: Mission[] = [
         crew: { min: 1, best: ['engineer'] },
         time: '2 hours',
         effects: [],
-        onSuccess: { setFlags: ['battery-aging-early'] },
+        // "A bateria envelhece mais rápido: o problema 33 aparece 10 dias antes" (day 20 instead of 30).
+        onSuccess: { setFlags: ['battery-aging-early'], followUps: [{ missionId: 'battery-aged', afterDays: 14 }] },
         narrative:
           '{crew} connected the spare battery to the greenhouse. Energy stays the same and the plants are fine. But the battery will wear out faster.',
       },

@@ -154,6 +154,7 @@ export function CrewPicker({ mission, choice, day, lockedSlot, chanceFor, onBack
         <span className="crew-card__state">{dutyText(d, day)}</span>
         <span className={`crew-card__tired crew-card__tired--${Math.min(d.fatigue, 4)}`}>{fatigueLabel(d.fatigue)}</span>
         {r.health !== undefined && r.health < 100 && <span className="crew-card__health">Health {Math.round(r.health)}</span>}
+        {(d.dose ?? 0) > 0 && <span className="crew-card__health">Radiation dose {Math.round(d.dose ?? 0)}</span>}
       </>
     );
   }

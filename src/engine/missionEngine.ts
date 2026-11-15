@@ -73,6 +73,8 @@ const SEVERE_DAYS_OTHER = 5;
 /** Station health below this: someone may get sick (problems 6, 11…: "Se a Saúde ficar abaixo de 30"). */
 export const SICK_HEALTH = 30;
 const LOW_HEALTH_SICK_CHANCE = 30;
+/** A problem set off by a low bar does not come back for this many days after a decision. */
+const TRIGGER_COOLDOWN_DAYS = 5;
 
 export function crewNeed(choice: Choice): CrewNeed {
   return choice.crew ?? DEFAULT_CREW_NEED;
@@ -364,6 +366,8 @@ function dayTick(day: number): void {
     const t = m.trigger;
     if (!t || isClosed(m.id) || day < (t.fromDay ?? 1)) continue;
     const st = useMissionStore.getState();
+    // Not every morning: a triggered problem waits 5 days after it was last decided.
+    if (st.decisions.some((d) => d.missionId === m.id && day - d.day < TRIGGER_COOLDOWN_DAYS)) continue;
     if (st.openEvents.includes(m.id) || st.scheduled.some((x) => x.missionId === m.id)) continue;
     const v = res[t.resource];
     const crossed = (t.below !== undefined && v < t.below) || (t.above !== undefined && v > t.above);
@@ -511,6 +515,11 @@ function applyOutcome(outcome: Outcome, slots: CrewSlot[], day: number, missionI
       else crewStore.updateCrew(s, { health: clamp(crewStore.crew[s].health + outcome.crewHealth, 0, 100) });
     }
     const duty = useDutyStore.getState().crew[s];
+    if (outcome.crewDose) {
+      // A spacewalk dose is personal; a quarter of it shows on the station Radiation bar (4 crew).
+      useDutyStore.getState().setDuty(s, { dose: clamp((duty.dose ?? 0) + outcome.crewDose, 0, 100) });
+      applyEffects(useResourceStore.getState(), [{ resource: 'radiation', delta: outcome.crewDose / 4 }]);
+    }
     useDutyStore.getState().setDuty(s, {
       fatigue: clamp(duty.fatigue + (outcome.crewFatigue ?? 0), 0, FATIGUE_EXHAUSTED),
       restUntilDay: outcome.crewRestDays ? Math.max(duty.restUntilDay, day + outcome.crewRestDays) : duty.restUntilDay,
@@ -700,7 +709,8 @@ function finishMission(mission: Mission, day: number): void {
     openEvents: now.openEvents.filter((id) => id !== mission.id),
     patients,
   });
-  if (mission.repeatEveryDays !== undefined) {
+  const repeatAllowed = !mission.repeatIfFlag || useMissionStore.getState().flags.includes(mission.repeatIfFlag);
+  if (mission.repeatEveryDays !== undefined && repeatAllowed) {
     const next = day + mission.repeatEveryDays;
     const st = useMissionStore.getState();
     if (next <= MISSION_LAST_DAY && !st.scheduled.some((s) => s.missionId === mission.id)) {

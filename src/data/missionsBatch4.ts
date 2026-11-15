@@ -17,6 +17,9 @@ export const MISSIONS_BATCH_4: Mission[] = [
     id: 'mars-shadow',
     sourceRef: 'P27',
     repeatable: true,
+    // "O problema 27 volta em toda sombra" when the station runs on solar panels (P28).
+    repeatEveryDays: 12,
+    repeatIfFlag: 'solar-power',
     title: "Mars' Shadow Is Coming",
     description:
       "The station is about to pass into Mars' shadow. No sunlight means the solar panels make no power, and the battery can't run everything. What do we turn off?",

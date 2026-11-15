@@ -5,7 +5,6 @@ import type { Mission } from './missions';
  * Numbers come from the file's own references ("problema 8" = the first harvest, etc.).
  *
  * Links to problems that are not in the game yet are kept as flags/counters for later batches:
- *   P35 (stuck solar panel) ← trash thrown into space,
  *   P44 (trash wall) ← compacted trash, P49 (not written in missoes.txt yet) ← bad days for morale.
  * Days follow the 45-day mission (the file's "day 80" became day 40).
  */
@@ -476,12 +475,7 @@ export const MISSIONS_BATCH_3: Mission[] = [
           { resource: 'water', delta: -2 },
           { resource: 'satisfaction', delta: -3 },
         ],
-        sideRisk: {
-          chance: 10,
-          effects: [],
-          text: 'Some trash is floating near the station. It might hit a solar panel later...',
-          setFlags: ['trash-in-space'],
-        },
+        onSuccess: { followUps: [{ missionId: 'stuck-solar-panel', afterDays: 3, afterDaysMax: 8, chance: 10 }] },
         narrative: '{crew} pushed the trash out through the airlock. Gone! But the airlock lost some water vapor, and the crew is not proud of it.',
       },
       {

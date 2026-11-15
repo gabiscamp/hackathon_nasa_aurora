@@ -3,6 +3,7 @@ import { MISSIONS_BATCH_1 } from './missionsBatch1';
 import { MISSIONS_BATCH_2 } from './missionsBatch2';
 import { MISSIONS_BATCH_3 } from './missionsBatch3';
 import { MISSIONS_BATCH_4 } from './missionsBatch4';
+import { MISSIONS_BATCH_5 } from './missionsBatch5';
 
 export type MissionSeverity = 'normal' | 'critical';
 
@@ -109,6 +110,8 @@ export interface Outcome {
   /** Changes a counter (e.g. weeks in a row eating the newest food). */
   counter?: { id: string; add?: number; reset?: boolean };
   delayed?: DelayedEffect[];
+  /** Personal radiation dose for each crew member sent (a spacewalk). A quarter also adds to station Radiation. */
+  crewDose?: number;
 }
 
 export interface Choice {
@@ -187,6 +190,8 @@ export interface Mission {
   sourceRef?: string;
   /** Comes back every N days until the mission ends (weekly choices). */
   repeatEveryDays?: number;
+  /** With repeatEveryDays: only comes back while this flag is set (e.g. solar power → every Mars shadow). */
+  repeatIfFlag?: string;
   /** Can happen more than once (e.g. someone gets sick). */
   repeatable?: boolean;
   /** About one sick crew member: {patient} in the texts. */
@@ -214,40 +219,6 @@ export const MISSIONS_BASE: Mission[] = [
 
 
 
-  {
-    id: 'small-solar-storm',
-    title: 'Small Solar Storm',
-    description:
-      'DONKI detected a solar storm heading toward Mars! It\'s small, but radiation is invisible energy from the Sun — too much can make astronauts sick.',
-    act: 1,
-    day: 8,
-    system: 'radiation',
-    room: 'bridge',
-    icon: '☢️',
-    severity: 'critical',
-    nasaSource: 'NASA DONKI (Database Of Notifications, Knowledge, Information)',
-    nasaYear: 2026,
-    popup:
-      'The DONKI system tracks real solar storms. CMEs (Coronal Mass Ejections) take 4-7 days to reach Mars. On Mars, radiation is about 0.64 mSv per day — like getting a chest X-ray every 2 days!',
-    choices: [
-      {
-        id: 'full-shelter',
-        label: 'Everyone to the shelter now',
-        icon: '🛡️',
-        effects: [{ resource: 'radiation', delta: 2 }],
-        narrative:
-          'Everyone moved to the radiation shelter. The water tanks around the walls block most radiation. Safe! But 2 hours of work lost.',
-      },
-      {
-        id: 'keep-working',
-        label: 'Keep working with extra shielding',
-        icon: '💪',
-        effects: [{ resource: 'radiation', delta: 6 }],
-        narrative:
-          'The crew kept working. More got done, but everyone absorbed extra radiation. Maya warns that radiation adds up — it never goes away.',
-      },
-    ],
-  },
 
   {
     id: 'family-message',
@@ -509,63 +480,6 @@ export const MISSIONS_BASE: Mission[] = [
     ],
   },
 
-  {
-    id: 'outside-repair',
-    title: 'Outside Repair Needed',
-    description:
-      'A sensor on the outside of the station is broken. Without it, you can\'t detect debris or storms. Someone needs to go outside to fix it.',
-    act: 2,
-    day: 27,
-    system: 'shielding',
-    room: 'engineering',
-    icon: '🧑‍🚀',
-    severity: 'critical',
-    nasaSource: 'ISS Spacewalks (EVA)',
-    popup:
-      'Spacewalks (EVAs) are dangerous. Astronauts train underwater for years. A suit leak, a tool drifting away, or getting tangled in cables could be deadly. The ISS has done over 260 spacewalks since 1998.',
-    choices: [
-      {
-        id: 'full-eva',
-        label: 'Do a proper spacewalk to fix it',
-        icon: '🧑‍🚀',
-        effects: [
-          { resource: 'oxygen', delta: -5 },
-          { resource: 'energy', delta: -5 },
-          { resource: 'health', delta: -3 },
-        ],
-        narrative:
-          'The engineer went out, replaced the sensor, and came back safely. It took 4 hours. The engineer is exhausted but the sensor works perfectly.',
-      },
-      {
-        id: 'robot-arm',
-        label: 'Use the robot arm from inside',
-        icon: '🦾',
-        effects: [
-          { resource: 'energy', delta: -8 },
-        ],
-        narrative:
-          'The pilot controlled the robot arm. It was tricky, but the sensor got replaced without anyone going outside. Slower but safer.',
-        successRate: 65,
-        failNarrative:
-          'The robot arm couldn\'t reach the right angle. Someone will have to go outside after all.',
-        failEffects: [
-          { resource: 'energy', delta: -5 },
-          { resource: 'oxygen', delta: -5 },
-          { resource: 'health', delta: -3 },
-        ],
-      },
-      {
-        id: 'work-without',
-        label: 'Work without the sensor for now',
-        icon: '🙈',
-        effects: [
-          { resource: 'satisfaction', delta: -5 },
-        ],
-        narrative:
-          'No repair needed today, but you\'re flying blind. If debris or a storm comes, you might not see it in time.',
-      },
-    ],
-  },
 
 
 
@@ -624,62 +538,6 @@ export const MISSIONS_BASE: Mission[] = [
   // ACT 3 — Days 66-100 — Critical, survival
   // ═══════════════════════════════════════════════════════════════
 
-  {
-    id: 'battery-failing',
-    title: 'Battery Failing',
-    description:
-      'The main battery is losing charge faster than normal. If it dies, the station goes dark. No lights, no heat, no oxygen machine.',
-    act: 3,
-    day: 32,
-    system: 'energy',
-    room: 'engineering',
-    icon: '🔋',
-    severity: 'critical',
-    nasaSource: 'ISS Battery Replacement EVAs',
-    nasaYear: 2017,
-    popup:
-      'In 2017, ISS astronauts replaced all 48 batteries during multiple spacewalks. The old nickel-hydrogen batteries were swapped for new lithium-ion ones. If the batteries failed completely, the station would lose power during every orbital night.',
-    choices: [
-      {
-        id: 'rewire-backup',
-        label: 'Rewire to the backup battery',
-        icon: '🔌',
-        effects: [
-          { resource: 'energy', delta: -10 },
-          { resource: 'satisfaction', delta: -5 },
-        ],
-        narrative:
-          'Kira rewired the power system to the smaller backup battery. You have power, but at reduced capacity. Everything runs slower.',
-      },
-      {
-        id: 'repair-main',
-        label: 'Try to repair the main battery',
-        icon: '🔧',
-        effects: [{ resource: 'energy', delta: -5 }],
-        narrative:
-          'Kira found a corroded connection and cleaned it. Battery is holding charge again — for now.',
-        successRate: 60,
-        failNarrative:
-          'The repair didn\'t work. The battery is still failing. You need to switch to backup.',
-        failEffects: [
-          { resource: 'energy', delta: -18 },
-          { resource: 'satisfaction', delta: -8 },
-        ],
-      },
-      {
-        id: 'power-down',
-        label: 'Shut down non-essential systems',
-        icon: '⚡',
-        effects: [
-          { resource: 'energy', delta: -5 },
-          { resource: 'satisfaction', delta: -10 },
-          { resource: 'food', delta: -3 },
-        ],
-        narrative:
-          'You turned off everything except life support. The station is dark and cold. But the battery is lasting. Greenhouse is off — no fresh food for now.',
-      },
-    ],
-  },
 
 
   {
@@ -953,7 +811,7 @@ export const MISSIONS_BASE: Mission[] = [
  * Every mission in the game: the missions above plus the ones rewritten from the team's
  * missoes.txt, one batch of up to 10 at a time (src/data/missionsBatch1.ts = missions 1-10).
  */
-export const MISSIONS: Mission[] = [...MISSIONS_BASE, ...MISSIONS_BATCH_1, ...MISSIONS_BATCH_2, ...MISSIONS_BATCH_3, ...MISSIONS_BATCH_4];
+export const MISSIONS: Mission[] = [...MISSIONS_BASE, ...MISSIONS_BATCH_1, ...MISSIONS_BATCH_2, ...MISSIONS_BATCH_3, ...MISSIONS_BATCH_4, ...MISSIONS_BATCH_5];
 
 export function getMission(id: string): Mission | undefined {
   return MISSIONS.find((m) => m.id === id);

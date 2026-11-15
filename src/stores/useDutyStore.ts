@@ -46,13 +46,15 @@ export interface CrewDuty {
   /** Can't be sent until after this day (resting after an exhausting or scary job). */
   restUntilDay: number;
   illness?: Illness | null;
+  /** Personal radiation dose from spacewalks (0-100). At 100 the crew member must go home (problem 39). */
+  dose?: number;
 }
 
 type DutyRecord = Record<CrewSlot, CrewDuty>;
 
 function freshCrew(): DutyRecord {
   const record = {} as DutyRecord;
-  for (const slot of CREW_SLOTS) record[slot] = { fatigue: 0, task: null, restUntilDay: 0, illness: null };
+  for (const slot of CREW_SLOTS) record[slot] = { fatigue: 0, task: null, restUntilDay: 0, illness: null, dose: 0 };
   return record;
 }
 
