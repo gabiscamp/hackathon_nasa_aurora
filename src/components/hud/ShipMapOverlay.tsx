@@ -3,12 +3,16 @@ import { createPortal } from "react-dom";
 import { gameEvents, EVENTS } from "../../game/events";
 import {
   NPC_SPAWNS,
-  SHIP_BG_URL,
+  PLACEMENTS,
+  STATION_SCALE,
   WALKABLE_AREAS,
   WORLD_HEIGHT,
   WORLD_WIDTH,
+  placedCenter,
   type RoomId,
 } from "../../game/world/shipLayout";
+import { PIECES } from "../../game/world/stationLayout";
+import { STATION_TEXTURE_URLS } from "../../game/world/stationAssets";
 import { useCrewStore } from "../../stores/useCrewStore";
 import { useGameStore } from "../../stores/useGameStore";
 import { getTeam } from "../../data/crews";
@@ -37,8 +41,51 @@ const ROOM_LABELS = (() => {
   });
 })();
 
-const left = (x: number) => `${(x / WORLD_WIDTH) * 100}%`;
-const top = (y: number) => `${(y / WORLD_HEIGHT) * 100}%`;
+/**
+ * World region shown: the pressurized modules (every floor rect) plus a margin.
+ * The solar wings at the far ends of the truss stay out, so room names have room.
+ */
+const VIEW = (() => {
+  const PAD = 70;
+  const x = Math.max(0, Math.min(...WALKABLE_AREAS.map((a) => a.x)) - PAD);
+  const y = Math.max(0, Math.min(...WALKABLE_AREAS.map((a) => a.y)) - PAD * 2);
+  const right = Math.min(WORLD_WIDTH, Math.max(...WALKABLE_AREAS.map((a) => a.x + a.w)) + PAD);
+  const bottom = Math.min(WORLD_HEIGHT, Math.max(...WALKABLE_AREAS.map((a) => a.y + a.h)) + PAD);
+  return { x, y, w: right - x, h: bottom - y };
+})();
+
+/** The station drawn from the same pieces the game places (flip, then rotate, then move). */
+function StationDrawing() {
+  return (
+    <svg
+      viewBox={`${VIEW.x} ${VIEW.y} ${VIEW.w} ${VIEW.h}`}
+      role="img"
+      aria-label="Top view of the whole station"
+    >
+      {[...PLACEMENTS]
+        .sort((a, b) => a.depth - b.depth)
+        .map((p, i) => {
+          const c = placedCenter(p);
+          const w = PIECES[p.piece].width * STATION_SCALE;
+          const h = PIECES[p.piece].height * STATION_SCALE;
+          return (
+            <image
+              key={i}
+              href={STATION_TEXTURE_URLS[p.piece]}
+              x={-w / 2}
+              y={-h / 2}
+              width={w}
+              height={h}
+              transform={`translate(${c.x} ${c.y}) rotate(${p.angle}) scale(${p.flipX ? -1 : 1} ${p.flipY ? -1 : 1})`}
+            />
+          );
+        })}
+    </svg>
+  );
+}
+
+const left = (x: number) => `${((x - VIEW.x) / VIEW.w) * 100}%`;
+const top = (y: number) => `${((y - VIEW.y) / VIEW.h) * 100}%`;
 
 /**
  * Full-screen ship map (M or click the minimap). Pauses the world like the menu does.
@@ -96,12 +143,11 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
             </button>
           </header>
 
-          <div className="ship-map__frame">
-            <img
-              src={SHIP_BG_URL}
-              alt="Top view of the whole station"
-              draggable={false}
-            />
+          <div
+            className="ship-map__frame"
+            style={{ aspectRatio: `${VIEW.w} / ${VIEW.h}` }}
+          >
+            <StationDrawing />
             <span className="ship-map__watermark">AI-generated map</span>
 
             {ROOM_LABELS.map((r) => (

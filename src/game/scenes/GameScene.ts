@@ -17,18 +17,22 @@ import {
   type SpriteDirection,
 } from '../world/characterSprites';
 import {
-  SHIP_BG_KEY,
   SPACE_BG_KEY,
   WORLD_WIDTH,
   WORLD_HEIGHT,
   WALKABLE_AREAS,
+  BLOCKED_AREAS,
+  PLACEMENTS,
+  STATION_SCALE,
   PLAYER_SPAWN,
   NPC_SPAWNS,
   ROOM_CENTERS,
+  placedCenter,
   isBoxWalkable,
   roomAt,
   type RoomId,
 } from '../world/shipLayout';
+import { stationTextureKey } from '../world/stationAssets';
 
 const PLAYER_SPEED = 160;
 const PLAYER_SIZE = 28;
@@ -198,14 +202,27 @@ export class GameScene extends Phaser.Scene {
     if (useGameStore.getState().phase === 'decision' && mission) this.showMissionMarker(mission.room as RoomId);
   }
 
-  /** Station illustration over the Mars-orbit backdrop (the map PNG has a transparent background). */
+  /** ISS-style station (modules, nodes, truss, radiators, solar wings) over the Mars-orbit backdrop. */
   private createShipBackground() {
     if (this.textures.exists(SPACE_BG_KEY)) {
       // Painted (not pixel art): smooth scaling instead of the game-wide nearest filter.
       this.textures.get(SPACE_BG_KEY).setFilter(Phaser.Textures.FilterMode.LINEAR);
       this.spaceBackdrop = this.add.image(0, 0, SPACE_BG_KEY).setScrollFactor(0).setDepth(0);
     }
-    this.add.image(0, 0, SHIP_BG_KEY).setOrigin(0, 0).setDepth(1);
+    for (const p of PLACEMENTS) {
+      const key = stationTextureKey(p.piece);
+      // Module art is drawn larger than it shows on screen: smooth filtering avoids
+      // the shimmer nearest-neighbour gives when it is scaled down.
+      this.textures.get(key).setFilter(Phaser.Textures.FilterMode.LINEAR);
+      const c = placedCenter(p);
+      this.add
+        .image(c.x, c.y, key)
+        .setScale(STATION_SCALE)
+        .setAngle(p.angle)
+        .setFlip(p.flipX, p.flipY)
+        // Pieces stack between the backdrop (0) and the debug overlay (5).
+        .setDepth(1 + p.depth / 10);
+    }
   }
 
   /**
@@ -398,6 +415,8 @@ export class GameScene extends Phaser.Scene {
     const g = this.add.graphics().setDepth(5);
     g.fillStyle(0x2ecc71, 0.35);
     for (const a of WALKABLE_AREAS) g.fillRect(a.x, a.y, a.w, a.h);
+    g.fillStyle(0xe74c3c, 0.4);
+    for (const b of BLOCKED_AREAS) g.fillRect(b.x, b.y, b.w, b.h);
     this.walkableDebug = g;
   }
 

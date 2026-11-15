@@ -368,6 +368,7 @@
   background: #070b1c url('/assets/environments/mars-backdrop.jpg') center / cover no-repeat;
 }
 
+.ship-map__frame > svg,
 .ship-map__frame > img {
   display: block;
   width: 100%;
