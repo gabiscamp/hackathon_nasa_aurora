@@ -72,6 +72,7 @@ This project uses three Claude skills:
 
 - **NEVER** alter the visual identity (colors, typography, HUD layout, art style) without first checking the reference wireframes and the `spaceship-game-design` skill.
 - **NEVER** replace game assets with emoji in production code. Emoji may be used only as temporary placeholders during early prototyping and must be explicitly marked with `// TODO: replace with real asset`.
+- **ALWAYS** use **Lexend** (Google Fonts, weights 400–700) as the default font for all game text, UI and Phaser labels. It is defined once as `--font-family` in `src/styles/global.css` (also Tailwind `font-sans`); stylesheets use `var(--font-family)`. Don't add other fonts. Team decision, 2026-11-15 (replaced Nunito).
 - **NEVER** use `any` type. Define proper interfaces for all game objects and state.
 - **ALWAYS** test movement and collision after modifying physics or tilemap code.
 - **ALWAYS** keep the HUD coverage under 20% of screen area.

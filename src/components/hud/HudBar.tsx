@@ -9,12 +9,14 @@ interface HudBarProps {
   max?: number;
   /** CSS color for the filled part of the bar. */
   color: string;
+  /** true when a FULL bar is bad (radiation): the warning fires when it gets high, not low. */
+  higherIsWorse?: boolean;
 }
 
-/** Game-style resource bar: round icon badge + capsule gauge with the value inside. */
-export function HudBar({ icon, label, value, max = 100, color }: HudBarProps) {
+/** Game-style resource bar: round icon badge + name, gauge and number side by side on the dark panel (never color-only, never text over the fill). */
+export function HudBar({ icon, label, value, max = 100, color, higherIsWorse = false }: HudBarProps) {
   const pct = Math.max(0, Math.min(100, (value / max) * 100));
-  const isLow = pct < LOW_THRESHOLD;
+  const isLow = higherIsWorse ? pct > 100 - LOW_THRESHOLD : pct < LOW_THRESHOLD;
 
   return (
     <div
@@ -28,10 +30,11 @@ export function HudBar({ icon, label, value, max = 100, color }: HudBarProps) {
       title={`${label}: ${Math.round(value)}`}
     >
       <span className="hud-bar__badge">{icon}</span>
+      <span className="hud-bar__label">{label}</span>
       <span className="hud-bar__track">
         <span className="hud-bar__fill" style={{ width: `${pct}%` }} />
-        <span className="hud-bar__value">{Math.round(value)}</span>
       </span>
+      <span className="hud-bar__value">{Math.round(value)}</span>
     </div>
   );
 }

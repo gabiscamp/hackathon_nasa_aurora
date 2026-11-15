@@ -30,20 +30,44 @@ export function OxygenIcon({ size = 16 }: IconProps) {
   );
 }
 
-export function ShieldIcon({ size = 16 }: IconProps) {
+/** Apple: station food supply. */
+export function FoodIcon({ size = 16 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 2 4 5v6.2c0 5 3.4 9.2 8 10.8 4.6-1.6 8-5.8 8-10.8V5l-8-3Z" fill="currentColor" />
-      <path d="M12 5.2v13.6c-3-1.4-5-4.3-5-7.6V7.1l5-1.9Z" fill="rgba(255,255,255,0.28)" />
+      <path
+        d="M12 7.2c-1.4-1-3.4-1.3-5-.5C4.4 8 3.6 11.4 4.6 14.6 5.6 18 8 21 10 21c.9 0 1.3-.5 2-.5s1.1.5 2 .5c2 0 4.4-3 5.4-6.4 1-3.2.2-6.6-2.4-7.9-1.6-.8-3.6-.5-5 .5Z"
+        fill="currentColor"
+      />
+      <path d="M12 7.5c0-2 .8-3.6 2.4-4.6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
 
-export function AlertIcon({ size = 16 }: IconProps) {
+/** Water drop. */
+export function WaterIcon({ size = 16 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-      <rect x="10.4" y="4" width="3.2" height="10.5" rx="1.6" fill="currentColor" />
-      <circle cx="12" cy="18.6" r="2" fill="currentColor" />
+      <path d="M12 2.5S5 10.2 5 14.7A7 7 0 0 0 19 14.7C19 10.2 12 2.5 12 2.5Z" fill="currentColor" />
+      <path d="M9 15.2a3.2 3.2 0 0 0 2.6 3" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** Radiation trefoil (the warning symbol kids see on real equipment). */
+export function RadiationIcon({ size = 16 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="2.2" fill="currentColor" />
+      <path d="M8.40 12.00L2.00 12.00A10 10 0 0 1 7.00 3.34L10.20 8.88A3.6 3.6 0 0 0 8.40 12.00Z M13.80 8.88L17.00 3.34A10 10 0 0 1 22.00 12.00L15.60 12.00A3.6 3.6 0 0 0 13.80 8.88Z M13.80 15.12L17.00 20.66A10 10 0 0 1 7.00 20.66L10.20 15.12A3.6 3.6 0 0 0 13.80 15.12Z" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function MapIcon({ size = 16 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M2.5 5.5 8.5 3l7 2.5 6-2.5v15.5l-6 2.5-7-2.5-6 2.5Z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M8.5 3v15.5M15.5 5.5V21" stroke="currentColor" strokeWidth="2" />
     </svg>
   );
 }

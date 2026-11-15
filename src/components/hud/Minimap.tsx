@@ -1,52 +1,41 @@
-import { useEffect, useState } from 'react';
-import { gameEvents, EVENTS, type PlayerMovedPayload } from '../../game/events';
-import { WALKABLE_AREAS, NPC_SPAWNS, PLAYER_SPAWN } from '../../game/world/shipLayout';
+import { WALKABLE_AREAS, NPC_SPAWNS } from '../../game/world/shipLayout';
 import { useCrewStore } from '../../stores/useCrewStore';
 import { CREW_ROLES } from '../../data/crew';
+import { usePlayerPosition } from './usePlayerPosition';
 
-/** Square region of the world (ship bounds) shown inside the round minimap. */
-const VIEW = { x: 230, y: -225, size: 1240 } as const;
+const PAD = 30;
+/** World region shown: the walkable floor's bounding box plus a margin (ship is about 2:1 wide). */
+const VIEW = (() => {
+  const x = Math.min(...WALKABLE_AREAS.map((a) => a.x)) - PAD;
+  const y = Math.min(...WALKABLE_AREAS.map((a) => a.y)) - PAD;
+  const w = Math.max(...WALKABLE_AREAS.map((a) => a.x + a.w)) + PAD - x;
+  const h = Math.max(...WALKABLE_AREAS.map((a) => a.y + a.h)) + PAD - y;
+  return { x, y, w, h };
+})();
 
-/** Bottom-right HUD: round radar with room floors, crew dots and the player. */
-export function Minimap() {
-  const [pos, setPos] = useState<PlayerMovedPayload>(PLAYER_SPAWN);
+/** Bottom-right HUD: ship-shaped map with room floors, crew dots and the player ("You"). */
+export function Minimap({ onOpen }: { onOpen: () => void }) {
+  const pos = usePlayerPosition();
   const crew = useCrewStore((s) => s.crew);
 
-  useEffect(() => {
-    const onMove = (p: PlayerMovedPayload) => setPos({ x: p.x, y: p.y });
-    gameEvents.on(EVENTS.PLAYER_MOVED, onMove);
-    return () => {
-      gameEvents.off(EVENTS.PLAYER_MOVED, onMove);
-    };
-  }, []);
-
   return (
-    <div className="hud-minimap" aria-label="Minimap">
-      <svg viewBox={`${VIEW.x} ${VIEW.y} ${VIEW.size} ${VIEW.size}`} className="hud-minimap__map">
-        {/* radar grid */}
-        <g stroke="rgba(77, 201, 246, 0.14)" strokeWidth="5">
-          {[1, 2, 3].map((i) => (
-            <line key={`v${i}`} x1={VIEW.x + (VIEW.size / 4) * i} y1={VIEW.y} x2={VIEW.x + (VIEW.size / 4) * i} y2={VIEW.y + VIEW.size} />
-          ))}
-          {[1, 2, 3].map((i) => (
-            <line key={`h${i}`} x1={VIEW.x} y1={VIEW.y + (VIEW.size / 4) * i} x2={VIEW.x + VIEW.size} y2={VIEW.y + (VIEW.size / 4) * i} />
-          ))}
-        </g>
+    <button type="button" className="hud-panel hud-minimap" onClick={onOpen} aria-label="Open the full ship map (M)" title="Open the full ship map (M)">
+      <svg viewBox={`${VIEW.x} ${VIEW.y} ${VIEW.w} ${VIEW.h}`} className="hud-minimap__map" aria-hidden="true">
         {/* floors */}
-        <g fill="rgba(154, 143, 130, 0.55)">
+        <g fill="#b9c3d6">
           {WALKABLE_AREAS.map((a, i) => (
             <rect key={i} x={a.x} y={a.y} width={a.w} height={a.h} />
           ))}
         </g>
         {/* crew */}
         {CREW_ROLES.map((role) => (
-          <circle key={role} cx={NPC_SPAWNS[role].x} cy={NPC_SPAWNS[role].y - 14} r="28" fill={crew[role].color} stroke="#0a0e27" strokeWidth="8" />
+          <circle key={role} cx={NPC_SPAWNS[role].x} cy={NPC_SPAWNS[role].y - 14} r="22" fill={crew[role].color} stroke="#0a0e27" strokeWidth="7" />
         ))}
         {/* player */}
-        <circle cx={pos.x} cy={pos.y - 14} r="60" fill="rgba(245, 166, 35, 0.3)" className="hud-minimap__ping" />
-        <circle cx={pos.x} cy={pos.y - 14} r="36" fill="#f5a623" stroke="#0a0e27" strokeWidth="9" />
+        <circle cx={pos.x} cy={pos.y - 14} r="48" fill="rgba(245, 166, 35, 0.35)" className="hud-minimap__ping" />
+        <circle cx={pos.x} cy={pos.y - 14} r="28" fill="#f5a623" stroke="#0a0e27" strokeWidth="8" />
       </svg>
-      <span className="hud-minimap__north">N</span>
-    </div>
+      <kbd className="hud-minimap__key">M</kbd>
+    </button>
   );
 }

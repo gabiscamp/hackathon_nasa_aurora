@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { stationScore, type Resources } from './useResourceStore';
 import { CREW_ROLES, type CrewMember, type CrewRole } from '../data/crew';
 import { DEFAULT_TEAM_ID, getTeam } from '../data/crews';
 import { clamp } from '../utils/clamp';
@@ -14,7 +15,7 @@ interface CrewState {
   /** Puts a crew on board with full health and morale. */
   selectTeam: (teamId: string) => void;
   updateCrew: (id: string, partial: Partial<CrewMember>) => void;
-  dailyMoraleTick: (resources: { energy: number; oxygen: number; shielding: number }) => void;
+  dailyMoraleTick: (resources: Resources) => void;
   reset: () => void;
 }
 
@@ -48,7 +49,7 @@ export const useCrewStore = create<CrewState>()(
 
       dailyMoraleTick: (resources) =>
         set((state) => {
-          const avg = (resources.energy + resources.oxygen + resources.shielding) / 3;
+          const avg = stationScore(resources);
           if (avg >= 50) return state;
 
           const decay = avg < 20 ? -3 : -1;

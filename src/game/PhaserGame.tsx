@@ -15,6 +15,8 @@ export function PhaserGame({ className }: PhaserGameProps) {
 
     const config = createGameConfig(containerRef.current.id);
     gameRef.current = new Phaser.Game(config);
+    // Dev only: lets Playwright QA scripts read the game state (skill game-qa-visual-testing).
+    if (import.meta.env.DEV) (window as unknown as { __game?: Phaser.Game }).__game = gameRef.current;
 
     return () => {
       if (gameRef.current) {

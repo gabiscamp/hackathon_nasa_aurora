@@ -10,6 +10,9 @@
  */
 export const SHIP_BG_KEY = 'station-map';
 export const SHIP_BG_URL = '/assets/environments/station-map.png';
+/** Mars orbit backdrop seen behind the station (fixed to the screen, not to the map). ENV-002 */
+export const SPACE_BG_KEY = 'mars-backdrop';
+export const SPACE_BG_URL = '/assets/environments/mars-backdrop.jpg';
 
 export const WORLD_WIDTH = 1600;
 export const WORLD_HEIGHT = 800;
@@ -93,16 +96,20 @@ export const NPC_SPAWNS = {
   scientist: { x: 797, y: 235, room: 'lab' },
 } as const satisfies Record<string, { x: number; y: number; room: RoomId }>;
 
-export const ROOM_CENTERS: Record<RoomId, { x: number; y: number }> = {
-  bridge: { x: 800, y: 290 },
-  quarters: { x: 470, y: 290 },
-  lab: { x: 1060, y: 310 },
-  storage: { x: 560, y: 570 },
-  medical: { x: 780, y: 620 },
-  common: { x: 940, y: 470 },
-  engineering: { x: 1080, y: 610 },
-  corridor: { x: 790, y: 440 },
-};
+/**
+ * Mission marker spot per room: the middle of the room's biggest floor area, so it always
+ * sits on walkable floor of the current station map (rooms: see RoomId).
+ */
+export const ROOM_CENTERS = (() => {
+  const best = {} as Record<RoomId, { x: number; y: number; area: number }>;
+  for (const a of WALKABLE_AREAS) {
+    const area = a.w * a.h;
+    if (!best[a.room] || area > best[a.room].area) best[a.room] = { x: a.x + a.w / 2, y: a.y + a.h / 2, area };
+  }
+  const centers = {} as Record<RoomId, { x: number; y: number }>;
+  for (const room of Object.keys(best) as RoomId[]) centers[room] = { x: best[room].x, y: best[room].y };
+  return centers;
+})();
 
 export function isPointWalkable(x: number, y: number): boolean {
   return WALKABLE_AREAS.some((a) => x >= a.x && x <= a.x + a.w && y >= a.y && y <= a.y + a.h);

@@ -8,14 +8,14 @@
 
 ## 0. Revisão de 2026-11-15: o jogo agora é pixel art
 
-Decisão do time: o estilo oficial passa a ser **pixel art top-down**, feito no **Aseprite**, como os dois primeiros assets integrados (`MAP-002` mapa da estação e `CHR-020` comandante McClain, ver `assets/ASSET_CATALOG.md`). Onde este documento falar em "pintado à mão", "pincelada" ou "não é pixel art", vale esta seção:
+Decisão do time: o estilo oficial passa a ser **pixel art top-down**, feito no **Aseprite**, como a comandante McClain (`CHR-020`) e o astronauta modular (`CHR-030/031`), ver `src/assets/ASSET_CATALOG.md`. O mapa da estação (`MAP-002`) segue o mesmo estilo, mas foi gerado com IA, guiado pelo time a partir da planta da ISS. Onde este documento falar em "pintado à mão", "pincelada" ou "não é pixel art", vale esta seção:
 
 - Contorno escuro de 1 pixel de arte, sombreamento por blocos de cor, sem pincelada nem gradiente suave.
 - Vista top-down em 3/4 e luz vinda do noroeste continuam valendo, assim como a paleta e os tokens de cor da UI.
 - Personagens: chibi, folha 4×4 (linhas baixo, esquerda, direita e cima; 4 quadros cada), pés na mesma linha em todos os quadros. O jogo usa quadros de 40×48 no tamanho nativo (1 pixel de arte = 1 pixel do mapa), personagem com ~40 px de altura.
 - Renderização: `pixelArt: true` (filtro nearest) e canvas no tamanho real da tela (`Scale.RESIZE`); a câmera mostra ~380 px de altura do mapa. Não exportar arte já ampliada.
 - Fundo do mapa: chroma-key magenta (#FF00FF) ou PNG com transparência. Personagens: fundo transparente ou branco liso, sem tocar a borda da célula.
-- Os assets 2D continuam desenhados pelo time; IA não gera arte final (se gerar, exige marca d'água visível, regra do briefing).
+- A ideia, o estilo e as decisões de arte são do time. Personagens são desenhados à mão no Aseprite. Toda imagem gerada com IA (hoje só o mapa `MAP-002`) é declarada nos créditos e leva marca d'água visível no jogo (regra do briefing).
 
 ---
 

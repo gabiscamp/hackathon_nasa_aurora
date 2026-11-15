@@ -29,16 +29,25 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
   const [confirmHome, setConfirmHome] = useState(false);
   const resumeRef = useRef<HTMLButtonElement>(null);
 
+  // Tracks whether this menu currently holds the world paused, so OPENED/CLOSED always come in pairs.
+  const pausingRef = useRef(false);
+
   const openMenu = useCallback(() => {
     setView('menu');
     setOpen(true);
-    gameEvents.emit(EVENTS.MENU_OPENED);
+    if (!pausingRef.current) {
+      pausingRef.current = true;
+      gameEvents.emit(EVENTS.MENU_OPENED);
+    }
   }, []);
 
   const closeMenu = useCallback(() => {
     setOpen(false);
     setConfirmHome(false);
-    gameEvents.emit(EVENTS.MENU_CLOSED);
+    if (pausingRef.current) {
+      pausingRef.current = false;
+      gameEvents.emit(EVENTS.MENU_CLOSED);
+    }
   }, []);
 
   useEffect(() => {
@@ -58,7 +67,15 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
   }, [open, view]);
 
   // Leaving the game screen with the menu open must not leave the world paused.
-  useEffect(() => () => void gameEvents.emit(EVENTS.MENU_CLOSED), []);
+  useEffect(
+    () => () => {
+      if (pausingRef.current) {
+        pausingRef.current = false;
+        gameEvents.emit(EVENTS.MENU_CLOSED);
+      }
+    },
+    [],
+  );
 
   return (
     <>

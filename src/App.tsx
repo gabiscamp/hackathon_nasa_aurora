@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useGameStore } from './stores/useGameStore';
 import { useResourceStore } from './stores/useResourceStore';
 import { useCrewStore } from './stores/useCrewStore';
@@ -42,9 +43,18 @@ export default function App() {
   const resetMissions = useMissionStore((s) => s.reset);
   const setScene = useGameStore((s) => s.setScene);
   const resetGame = useGameStore((s) => s.resetGame);
-  const food = useResourceStore((s) => s.food);
-  const health = useResourceStore((s) => s.health);
-  const satisfaction = useResourceStore((s) => s.satisfaction);
+  // Ending screen reads all resources (mission system from main: 7 resources).
+  const resources = useResourceStore(
+    useShallow((s) => ({
+      food: s.food,
+      water: s.water,
+      energy: s.energy,
+      oxygen: s.oxygen,
+      health: s.health,
+      satisfaction: s.satisfaction,
+      radiation: s.radiation,
+    })),
+  );
   const resetResources = useResourceStore((s) => s.reset);
   const resetCrew = useCrewStore((s) => s.reset);
   const loadSpaceWeather = useSpaceWeatherStore((s) => s.load);
@@ -92,7 +102,7 @@ export default function App() {
         <GameScreen onMainMenu={goHome} onOpenCredits={() => setShowCredits(true)} creditsOpen={showCredits} />
       )}
       {scene === 'ending' && (
-        <EndingScreen playerName={playerName} resources={{ food, health, satisfaction }} onReplay={handleReplay} onOpenCredits={() => setShowCredits(true)} />
+        <EndingScreen playerName={playerName} resources={resources} onReplay={handleReplay} onOpenCredits={() => setShowCredits(true)} />
       )}
       {showCredits && <CreditsScreen onClose={() => setShowCredits(false)} />}
     </Suspense>

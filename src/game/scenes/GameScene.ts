@@ -3,7 +3,10 @@ import { gameEvents, EVENTS } from '../events';
 import { useCrewStore } from '../../stores/useCrewStore';
 import { CREW_ROLES } from '../../data/crew';
 import { useGameStore } from '../../stores/useGameStore';
+import { useMissionStore } from '../../stores/useMissionStore';
 import { getTeam } from '../../data/crews';
+import { ASTRONAUTS, getAstronaut, type HeadId } from '../../data/astronauts';
+import { ASTRO_ORIGIN_Y, astronautAnim, astronautTextureKey } from '../world/modularAstronaut';
 import {
   CHARACTER_SPRITES,
   SPRITE_COLS,
@@ -14,6 +17,7 @@ import {
 } from '../world/characterSprites';
 import {
   SHIP_BG_KEY,
+  SPACE_BG_KEY,
   WORLD_WIDTH,
   WORLD_HEIGHT,
   WALKABLE_AREAS,
@@ -37,16 +41,17 @@ const CORNER_ASSIST = 8;
  * The zoom is chosen so the screen always shows about this many world pixels
  * of height (~one room), whatever the window size.
  */
-const VIEW_HEIGHT = 380;
+const VIEW_HEIGHT = 480;
 /** Never zoom out below 1:1 (that would show the edge of the map). */
 const MIN_ZOOM = 1;
 /** 1 = rigid lock on the player; a little below keeps it from feeling jerky. */
 const FOLLOW_LERP = 0.25;
 /** Minimum time between PLAYER_MOVED events sent to the React HUD (ms). */
 const POSITION_EMIT_INTERVAL = 80;
-const STARFIELD_KEY = 'starfield';
 
 const INTERACT_DISTANCE = 80;
+/** Extra zoom when the camera flies to a mission spot. */
+const MISSION_ZOOM = 1.4;
 
 export class GameScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Container;
@@ -54,7 +59,10 @@ export class GameScene extends Phaser.Scene {
   /** Placeholder arrow, only when the commander has no spritesheet yet. */
   private directionDot: Phaser.GameObjects.Graphics | null = null;
   private playerSprite: Phaser.GameObjects.Sprite | null = null;
+  private spaceBackdrop: Phaser.GameObjects.Image | null = null;
   private spriteKey = '';
+  /** Set when the player uses the modular astronaut (body + head) instead of a full sheet. */
+  private playerHead: HeadId | null = null;
   private facing: SpriteDirection = 'down';
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<string, Phaser.Input.Keyboard.Key>;
@@ -63,7 +71,6 @@ export class GameScene extends Phaser.Scene {
   private lastPositionEmit = 0;
   private missionMarker: Phaser.GameObjects.Container | null = null;
   private missionGlow: Phaser.GameObjects.Graphics | null = null;
-  private missionMarkerRoom: RoomId | null = null;
   private frozen = false;
 
   constructor() {
@@ -76,12 +83,19 @@ export class GameScene extends Phaser.Scene {
     this.createShipBackground();
     this.createPlayer();
 
-    // Pause menu (React) freezes the world while it is open.
-    const onMenuOpened = () => this.scene.pause();
+    // React windows (pause menu, big map) freeze the world while open. Counted, so closing one
+    // window while another is still open doesn't unfreeze the game; a new scene always starts at 0.
+    let openWindows = 0;
+    const onMenuOpened = () => {
+      openWindows += 1;
+      if (!this.scene.isPaused()) this.scene.pause();
+    };
     const onMenuClosed = () => {
+      openWindows = Math.max(0, openWindows - 1);
+      if (openWindows > 0) return;
       // Keys released during the pause would otherwise stay "down".
       this.input.keyboard?.resetKeys();
-      this.scene.resume();
+      if (this.scene.isPaused()) this.scene.resume();
     };
     gameEvents.on(EVENTS.MENU_OPENED, onMenuOpened);
     gameEvents.on(EVENTS.MENU_CLOSED, onMenuClosed);
@@ -99,10 +113,14 @@ export class GameScene extends Phaser.Scene {
       const member = crew[role];
       const spawn = NPC_SPAWNS[role];
       const firstName = member.name.replace(/^Dr\.\s*/, '').split(' ')[0];
-      this.createNPC(spawn.x, spawn.y, Phaser.Display.Color.HexStringToColor(member.color).color, firstName);
+      const head = ASTRONAUTS.find((a) => a.name === member.name)?.head ?? null;
+      this.createNPC(spawn.x, spawn.y, Phaser.Display.Color.HexStringToColor(member.color).color, firstName, head);
     }
 
-    // Input — WASD and arrows work simultaneously
+    // Input — WASD and arrows work simultaneously. Start clean: keys held while the
+    // home screen was open (e.g. Enter on "Continue") must not stay stuck "down".
+    this.input.keyboard!.enabled = true;
+    this.input.keyboard!.resetKeys();
     this.cursors = this.input.keyboard!.createCursorKeys();
     this.wasd = {
       W: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.W),
@@ -139,51 +157,65 @@ export class GameScene extends Phaser.Scene {
       }
     });
 
-    gameEvents.on('SHOW_MISSION_MARKER', (room: RoomId) => {
-      this.showMissionMarker(room);
-    });
-
-    gameEvents.on('REMOVE_MISSION_MARKER', () => {
-      this.removeMissionMarker();
-    });
-
-    gameEvents.on('CAMERA_ZOOM_IN', () => {
+    // Mission events from React (MissionOverlay / GameScreen). Removed when the scene ends:
+    // otherwise a destroyed scene from an earlier visit keeps reacting after "Continue mission".
+    const onShowMarker = (room: RoomId) => this.showMissionMarker(room);
+    const onRemoveMarker = () => this.removeMissionMarker();
+    const onZoomIn = () => {
       this.frozen = true;
       const cam = this.cameras.main;
       const target = this.missionMarker
         ? { x: this.missionMarker.x, y: this.missionMarker.y + 30 }
         : { x: this.player.x, y: this.player.y };
-      const targetZoom = Math.min(this.scale.width / WORLD_WIDTH, this.scale.height / WORLD_HEIGHT) * 1.8;
       cam.pan(target.x, target.y, 600, 'Sine.easeInOut');
-      cam.zoomTo(targetZoom, 600, 'Sine.easeInOut');
-    });
-
-    gameEvents.on('CAMERA_ZOOM_OUT', () => {
+      cam.zoomTo(this.baseZoom() * MISSION_ZOOM, 600, 'Sine.easeInOut');
+    };
+    const onZoomOut = () => {
       this.frozen = false;
+      // Back to the normal follow camera (pan to the player, then startFollow takes over again).
       const cam = this.cameras.main;
-      const baseZoom = Math.min(this.scale.width / WORLD_WIDTH, this.scale.height / WORLD_HEIGHT);
-      cam.pan(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 500, 'Sine.easeInOut');
-      cam.zoomTo(baseZoom, 500, 'Sine.easeInOut');
-    });
+      cam.pan(this.player.x, this.player.y - 16, 500, 'Sine.easeInOut');
+      cam.zoomTo(this.baseZoom(), 500, 'Sine.easeInOut');
+    };
+    gameEvents.on('SHOW_MISSION_MARKER', onShowMarker);
+    gameEvents.on('REMOVE_MISSION_MARKER', onRemoveMarker);
+    gameEvents.on('CAMERA_ZOOM_IN', onZoomIn);
+    gameEvents.on('CAMERA_ZOOM_OUT', onZoomOut);
+    const removeMissionListeners = () => {
+      gameEvents.off('SHOW_MISSION_MARKER', onShowMarker);
+      gameEvents.off('REMOVE_MISSION_MARKER', onRemoveMarker);
+      gameEvents.off('CAMERA_ZOOM_IN', onZoomIn);
+      gameEvents.off('CAMERA_ZOOM_OUT', onZoomOut);
+    };
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, removeMissionListeners);
+    this.events.once(Phaser.Scenes.Events.DESTROY, removeMissionListeners);
+
+    // React may have sent SHOW_MISSION_MARKER before this scene existed (e.g. "Continue mission"
+    // while the map was still loading): draw the marker from the saved state too.
+    const mission = useMissionStore.getState().currentMission;
+    if (useGameStore.getState().phase === 'decision' && mission) this.showMissionMarker(mission.room as RoomId);
   }
 
-  /** Station illustration over a simple starfield (the map PNG has a transparent background). */
+  /** Station illustration over the Mars-orbit backdrop (the map PNG has a transparent background). */
   private createShipBackground() {
-    // TODO: replace with real asset — ENV-001 star layer. Seeded so stars don't move between visits.
-    // Drawn ONCE into a texture: a live Graphics object is re-triangulated every frame,
-    // which cost ~6 ms per frame (and made the game lag while screen sharing).
-    if (!this.textures.exists(STARFIELD_KEY)) {
-      const rnd = new Phaser.Math.RandomDataGenerator(['aurora-stars']);
-      const g = this.make.graphics({}, false);
-      for (let i = 0; i < 260; i++) {
-        g.fillStyle(0xf0ece4, rnd.realInRange(0.25, 0.9));
-        g.fillRect(rnd.between(0, WORLD_WIDTH), rnd.between(0, WORLD_HEIGHT), rnd.pick([1, 1, 2]), rnd.pick([1, 1, 2]));
-      }
-      g.generateTexture(STARFIELD_KEY, WORLD_WIDTH, WORLD_HEIGHT);
-      g.destroy();
+    if (this.textures.exists(SPACE_BG_KEY)) {
+      // Painted (not pixel art): smooth scaling instead of the game-wide nearest filter.
+      this.textures.get(SPACE_BG_KEY).setFilter(Phaser.Textures.FilterMode.LINEAR);
+      this.spaceBackdrop = this.add.image(0, 0, SPACE_BG_KEY).setScrollFactor(0).setDepth(0);
     }
-    this.add.image(0, 0, STARFIELD_KEY).setOrigin(0, 0).setDepth(0);
     this.add.image(0, 0, SHIP_BG_KEY).setOrigin(0, 0).setDepth(1);
+  }
+
+  /**
+   * Keeps the backdrop covering the whole screen. It ignores camera scroll (scrollFactor 0) but
+   * still gets the camera zoom, which scales around the view center — so place it there and undo the zoom.
+   */
+  private fitBackdrop() {
+    if (!this.spaceBackdrop) return;
+    // Read the size from the scale manager: on RESIZE it is updated before the camera may be.
+    const { width, height } = this.scale;
+    const cover = Math.max(width / this.spaceBackdrop.width, height / this.spaceBackdrop.height);
+    this.spaceBackdrop.setPosition(width / 2, height / 2).setScale(cover / this.cameras.main.zoom);
   }
 
   /** Walk animations for a 4×4 sheet (rows: down, left, right, up). Frame 0 of each row = standing. */
@@ -203,10 +235,18 @@ export class GameScene extends Phaser.Scene {
   private createPlayer() {
     this.player = this.add.container(PLAYER_SPAWN.x, PLAYER_SPAWN.y).setDepth(10);
 
-    // The player is the chosen crew's commander; use their spritesheet when one exists.
+    // The player is the chosen crew's commander, drawn as the team's modular astronaut with
+    // their face (McClain = cabeca-1). Her older 4×4 sheet is only a fallback.
     const crewId = useGameStore.getState().crewId;
-    const sprite = crewId ? CHARACTER_SPRITES[getTeam(crewId).commander.astronautId] : undefined;
-    if (sprite && this.textures.exists(sprite.key)) {
+    const commanderId = crewId ? getTeam(crewId).commander.astronautId : '';
+    const sprite = CHARACTER_SPRITES[commanderId];
+    const head = getAstronaut(commanderId)?.head;
+    if (head && this.textures.exists(astronautTextureKey(head))) {
+      this.playerHead = head;
+      this.playerSprite = this.add.sprite(0, 0, astronautTextureKey(head), 0).setOrigin(0.5, ASTRO_ORIGIN_Y);
+      this.playerSprite.anims.play(astronautAnim(head, 'idle', 'down'));
+      this.player.add(this.playerSprite);
+    } else if (sprite && this.textures.exists(sprite.key)) {
       this.spriteKey = sprite.key;
       this.createWalkAnimations(sprite.key);
       this.playerSprite = this.add.sprite(0, 0, sprite.key, 0).setOrigin(0.5, SPRITE_ORIGIN_Y).setScale(SPRITE_SCALE);
@@ -239,10 +279,18 @@ export class GameScene extends Phaser.Scene {
     this.player.add([body, this.directionDot]);
   }
 
-  private createNPC(x: number, y: number, color: number, name: string) {
-    // TODO: replace with real asset — crew placeholder
+  private createNPC(x: number, y: number, color: number, name: string, head: HeadId | null) {
     const npc = this.add.container(x, y).setDepth(9);
 
+    if (head && this.textures.exists(astronautTextureKey(head))) {
+      const sprite = this.add.sprite(0, 0, astronautTextureKey(head), 0).setOrigin(0.5, ASTRO_ORIGIN_Y);
+      sprite.anims.play(astronautAnim(head, 'idle', 'down'));
+      npc.add([sprite, this.npcLabel(name, -50)]);
+      npc.setData('name', name);
+      return;
+    }
+
+    // TODO: replace with real asset — fallback marker when an astronaut has no sprite
     const circle = this.add.graphics();
     circle.fillStyle(color, 1);
     // Same footprint as the ~40 px astronaut sprite.
@@ -250,21 +298,23 @@ export class GameScene extends Phaser.Scene {
     circle.lineStyle(1.5, 0xe2e8f0, 1);
     circle.strokeCircle(0, -10, 10);
 
-    // Rendered at 4x so the name stays sharp under the zoomed pixel-art camera.
-    const label = this.add
-      .text(0, -28, name, {
+    npc.add([circle, this.npcLabel(name, -28)]);
+    npc.setData('name', name);
+  }
+
+  /** Name tag rendered at 4x so it stays sharp under the zoomed pixel-art camera. */
+  private npcLabel(name: string, y: number): Phaser.GameObjects.Text {
+    return this.add
+      .text(0, y, name, {
         fontSize: '9px',
         fontStyle: 'bold',
         color: '#f0ece4',
-        fontFamily: 'Nunito, sans-serif',
+        fontFamily: 'Lexend, sans-serif',
         stroke: '#0a0e27',
         strokeThickness: 2,
         resolution: 4,
       })
       .setOrigin(0.5);
-
-    npc.add([circle, label]);
-    npc.setData('name', name);
   }
 
   showMissionMarker(room: RoomId) {
@@ -299,11 +349,10 @@ export class GameScene extends Phaser.Scene {
       fontSize: '22px',
       fontStyle: 'bold',
       color: '#1a1a2e',
-      fontFamily: 'Arial, sans-serif',
+      fontFamily: 'Lexend, sans-serif',
     }).setOrigin(0.5);
 
     container.add([bg, text]);
-    this.missionMarkerRoom = room;
     this.missionMarker = container;
 
     this.tweens.add({
@@ -320,7 +369,6 @@ export class GameScene extends Phaser.Scene {
     if (this.missionMarker) {
       this.missionMarker.destroy();
       this.missionMarker = null;
-      this.missionMarkerRoom = null;
     }
     if (this.missionGlow) {
       this.missionGlow.destroy();
@@ -363,7 +411,14 @@ export class GameScene extends Phaser.Scene {
   }
 
   private applyZoom() {
-    this.cameras.main.setZoom(Math.max(MIN_ZOOM, this.scale.height / VIEW_HEIGHT));
+    // While a mission zoom is running, leave the camera to it (it zooms back out itself).
+    if (!this.frozen) this.cameras.main.setZoom(this.baseZoom());
+    this.fitBackdrop();
+  }
+
+  /** Normal follow-camera zoom: about VIEW_HEIGHT world pixels of height on screen. */
+  private baseZoom(): number {
+    return Math.max(MIN_ZOOM, this.scale.height / VIEW_HEIGHT);
   }
 
   private canStand(x: number, y: number): boolean {
@@ -436,7 +491,11 @@ export class GameScene extends Phaser.Scene {
       this.directionDot?.setRotation(Math.atan2(vy, vx) + Math.PI / 2);
       this.emitPosition();
     }
-    if (this.playerSprite) {
+    if (this.playerSprite && this.playerHead) {
+      // Modular astronaut: side frames face right, so left is the same animation flipped.
+      this.playerSprite.setFlipX(this.facing === 'left');
+      this.playerSprite.anims.play(astronautAnim(this.playerHead, moving ? 'walk' : 'idle', this.facing), true);
+    } else if (this.playerSprite) {
       if (moving) {
         this.playerSprite.anims.play(`${this.spriteKey}-walk-${this.facing}`, true);
       } else if (this.playerSprite.anims.isPlaying) {

@@ -13,6 +13,7 @@ import { Hud } from '../hud/Hud';
 import { gameEvents, EVENTS } from '../../game/events';
 import { playAlertSound } from '../../utils/sounds';
 import type { RoomId } from '../../game/world/shipLayout';
+import { ROOM_NAMES } from '../hud/LocationHint';
 import { PauseMenu } from '../hud/PauseMenu';
 import './GameScreen.css';
 
@@ -27,7 +28,6 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
   const phase = useGameStore((s) => s.phase);
   const nextPhase = useGameStore((s) => s.nextPhase);
   const nextDay = useGameStore((s) => s.nextDay);
-  const setPhase = useGameStore((s) => s.setPhase);
   const completedMissions = useMissionStore((s) => s.completedMissions);
   const setMission = useMissionStore((s) => s.setMission);
   const currentMission = useMissionStore((s) => s.currentMission);
@@ -91,7 +91,7 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
 
         {phase === 'decision' && !missionOpen && currentMission && (
           <div className="game-hint-banner">
-            <span>{currentMission.icon} Go to the {currentMission.room} and press <kbd>E</kbd> to investigate!</span>
+            <span>{currentMission.icon} Go to {ROOM_NAMES[currentMission.room as RoomId] ?? currentMission.room} and press <kbd>E</kbd> to investigate!</span>
           </div>
         )}
 

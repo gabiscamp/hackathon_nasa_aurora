@@ -96,9 +96,9 @@ Use these exact values as the canonical palette. Every asset, UI element, and ef
 
 ## Typography
 
-**Font Family**: Nunito (Google Fonts) — rounded, kid-friendly, highly legible sans-serif.
+**Font Family**: Lexend (Google Fonts) — sans-serif designed for reading ease; wide, open letters that stay legible at small sizes. Chosen by the team on 2026-11-15 (replaced Nunito).
 
-**Fallback Stack**: `'Nunito', 'Nunito Sans', system-ui, -apple-system, sans-serif`
+**Fallback Stack**: `'Lexend', system-ui, -apple-system, sans-serif`
 
 ### Size Scale
 
@@ -111,7 +111,7 @@ Use these exact values as the canonical palette. Every asset, UI element, and ef
 
 ### Typography Rules
 
-- All game text uses Nunito. No mixing fonts.
+- All game text uses Lexend. Use weights 400–700 only (no 800). No mixing fonts.
 - Line height: 1.5 for body, 1.2 for headings.
 - Letter spacing: normal for body, +0.5px for headings.
 - Text on dark panels always uses `text-light` (#f0ece4). Never pure white (#fff).

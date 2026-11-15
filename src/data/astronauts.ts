@@ -14,8 +14,15 @@ import { ASTRONAUT_PHOTOS } from './astronautPhotos';
  */
 export type SeatRole = 'commander' | CrewRole;
 
+/**
+ * Faces of the modular astronaut sprite (team pixel art, src/assets/cabecas/exports/web-v2).
+ * Only 4 faces exist, so each astronaut gets the one closest to their official NASA photo.
+ */
+export type HeadId = 'cabeca-1' | 'cabeca-2' | 'cabeca-3' | 'cabeca-4';
+
 export interface Astronaut {
   id: string;
+  head: HeadId;
   name: string;
   role: SeatRole;
   specialty: string;
@@ -31,6 +38,7 @@ export const ASTRONAUTS: readonly Astronaut[] = [
   // --- From the team briefing (Options A and B) ---
   {
     id: 'mcclain',
+    head: 'cabeca-1',
     name: 'Anne McClain',
     role: 'commander',
     specialty: 'Command, piloting and navigation',
@@ -47,6 +55,7 @@ export const ASTRONAUTS: readonly Astronaut[] = [
   },
   {
     id: 'armstrong',
+    head: 'cabeca-2',
     name: 'Neil Armstrong',
     role: 'commander',
     specialty: 'Command, piloting and navigation',
@@ -63,6 +72,7 @@ export const ASTRONAUTS: readonly Astronaut[] = [
   },
   {
     id: 'aunon',
+    head: 'cabeca-2',
     name: 'Serena Auñón-Chancellor',
     role: 'medic',
     specialty: 'Medicine and crew health',
@@ -79,6 +89,7 @@ export const ASTRONAUTS: readonly Astronaut[] = [
   },
   {
     id: 'pontes',
+    head: 'cabeca-2',
     name: 'Marcos Pontes',
     role: 'engineer',
     specialty: 'Engineering and systems',
@@ -95,6 +106,7 @@ export const ASTRONAUTS: readonly Astronaut[] = [
   },
   {
     id: 'schmitt',
+    head: 'cabeca-2',
     name: 'Harrison Schmitt',
     role: 'scientist',
     specialty: 'Geology and planetary science',
@@ -111,6 +123,7 @@ export const ASTRONAUTS: readonly Astronaut[] = [
   },
   {
     id: 'watkins',
+    head: 'cabeca-3',
     name: 'Jessica Watkins',
     role: 'scientist',
     specialty: 'Geology and planetary science',
@@ -129,6 +142,7 @@ export const ASTRONAUTS: readonly Astronaut[] = [
   // --- From the team's list of 10 candidates ---
   {
     id: 'wiseman',
+    head: 'cabeca-2',
     name: 'Reid Wiseman',
     role: 'engineer',
     specialty: 'Systems engineering and naval aviation',
@@ -136,6 +150,7 @@ export const ASTRONAUTS: readonly Astronaut[] = [
   },
   {
     id: 'glover',
+    head: 'cabeca-3',
     name: 'Victor Glover',
     role: 'engineer',
     specialty: 'Engineering and test piloting',
@@ -143,6 +158,7 @@ export const ASTRONAUTS: readonly Astronaut[] = [
   },
   {
     id: 'moghbeli',
+    head: 'cabeca-2',
     name: 'Jasmin Moghbeli',
     role: 'engineer',
     specialty: 'Aerospace engineering and piloting',
@@ -150,6 +166,7 @@ export const ASTRONAUTS: readonly Astronaut[] = [
   },
   {
     id: 'koch',
+    head: 'cabeca-1',
     name: 'Christina Koch',
     role: 'engineer',
     specialty: 'Electrical engineering',
@@ -157,6 +174,7 @@ export const ASTRONAUTS: readonly Astronaut[] = [
   },
   {
     id: 'rubio',
+    head: 'cabeca-2',
     name: 'Frank Rubio',
     role: 'medic',
     specialty: 'Medicine and military aviation',
@@ -164,6 +182,7 @@ export const ASTRONAUTS: readonly Astronaut[] = [
   },
   {
     id: 'lindgren',
+    head: 'cabeca-2',
     name: 'Kjell Lindgren',
     role: 'medic',
     specialty: 'Medicine and space operations',
@@ -171,6 +190,7 @@ export const ASTRONAUTS: readonly Astronaut[] = [
   },
   {
     id: 'meir',
+    head: 'cabeca-4',
     name: 'Jessica Meir',
     role: 'scientist',
     specialty: 'Marine biology and physiology',
@@ -178,6 +198,7 @@ export const ASTRONAUTS: readonly Astronaut[] = [
   },
   {
     id: 'maurer',
+    head: 'cabeca-2',
     name: 'Matthias Maurer',
     role: 'scientist',
     specialty: 'Materials science and exploration',

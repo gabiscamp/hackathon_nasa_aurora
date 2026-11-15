@@ -1,18 +1,13 @@
-import { useResourceStore } from '../../stores/useResourceStore';
+import { useResourceStore, type Resources } from '../../stores/useResourceStore';
 import { useCrewStore } from '../../stores/useCrewStore';
 import { useGameStore } from '../../stores/useGameStore';
 import { Button } from '../ui/Button';
 import { useState } from 'react';
 
-interface Snapshot {
-  energy: number;
-  oxygen: number;
-  shielding: number;
-}
-
-function Delta({ label, before, after }: { label: string; before: number; after: number }) {
+function Delta({ label, before, after, higherIsWorse = false }: { label: string; before: number; after: number; higherIsWorse?: boolean }) {
   const diff = after - before;
-  const color = diff > 0 ? 'var(--accent-green)' : diff < 0 ? 'var(--accent-red)' : 'var(--text-secondary)';
+  const good = higherIsWorse ? diff < 0 : diff > 0;
+  const color = diff === 0 ? 'var(--text-secondary)' : good ? 'var(--accent-green)' : 'var(--accent-red)';
   const arrow = diff > 0 ? '▲' : diff < 0 ? '▼' : '—';
 
   return (
@@ -26,14 +21,18 @@ function Delta({ label, before, after }: { label: string; before: number; after:
 }
 
 export function DaySummary() {
-  const energy = useResourceStore((s) => s.energy);
+  const food = useResourceStore((s) => s.food);
+  const water = useResourceStore((s) => s.water);
   const oxygen = useResourceStore((s) => s.oxygen);
-  const shielding = useResourceStore((s) => s.shielding);
+  const radiation = useResourceStore((s) => s.radiation);
+  const energy = useResourceStore((s) => s.energy);
+  const health = useResourceStore((s) => s.health);
+  const satisfaction = useResourceStore((s) => s.satisfaction);
   const crew = useCrewStore((s) => s.crew);
   const nextDay = useGameStore((s) => s.nextDay);
   const day = useGameStore((s) => s.day);
 
-  const [snapshot] = useState<Snapshot>({ energy, oxygen, shielding });
+  const [snapshot] = useState<Resources>({ food, water, oxygen, radiation, energy, health, satisfaction });
 
   return (
     <div
@@ -54,9 +53,13 @@ export function DaySummary() {
       <h2 style={{ textAlign: 'center', fontSize: 'var(--text-xl)', margin: 0, color: 'var(--text-primary)' }}>Day {day} Complete</h2>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-1)' }}>
-        <Delta label="⚡ Energy" before={snapshot.energy} after={energy} />
+        <Delta label="🍎 Food" before={snapshot.food} after={food} />
+        <Delta label="💧 Water" before={snapshot.water} after={water} />
         <Delta label="🫁 Oxygen" before={snapshot.oxygen} after={oxygen} />
-        <Delta label="🛡️ Shielding" before={snapshot.shielding} after={shielding} />
+        <Delta label="☢️ Radiation" before={snapshot.radiation} after={radiation} higherIsWorse />
+        <Delta label="⚡ Energy" before={snapshot.energy} after={energy} />
+        <Delta label="❤️ Health" before={snapshot.health} after={health} />
+        <Delta label="😊 Satisfaction" before={snapshot.satisfaction} after={satisfaction} />
       </div>
 
       <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-3)' }}>
