@@ -6,13 +6,32 @@ import { ASTRONAUT_PHOTOS } from '../../data/astronautPhotos';
 import { HudBar } from './HudBar';
 import { CommanderPortrait, EnergyIcon, OxygenIcon, ShieldIcon } from './HudIcons';
 
-/** Top-left HUD: commander portrait, day badge, resource bars and crew chips. */
+function FoodIcon() {
+  return <span style={{ fontSize: 14 }}>🍽</span>;
+}
+function WaterIcon() {
+  return <span style={{ fontSize: 14 }}>💧</span>;
+}
+function HealthIcon() {
+  return <span style={{ fontSize: 14 }}>❤️</span>;
+}
+function SatisfactionIcon() {
+  return <span style={{ fontSize: 14 }}>😊</span>;
+}
+function RadiationIcon() {
+  return <span style={{ fontSize: 14 }}>☢️</span>;
+}
+
 export function PlayerStatus() {
   const playerName = useGameStore((s) => s.playerName);
   const day = useGameStore((s) => s.day);
+  const food = useResourceStore((s) => s.food);
+  const water = useResourceStore((s) => s.water);
   const energy = useResourceStore((s) => s.energy);
   const oxygen = useResourceStore((s) => s.oxygen);
-  const shielding = useResourceStore((s) => s.shielding);
+  const health = useResourceStore((s) => s.health);
+  const satisfaction = useResourceStore((s) => s.satisfaction);
+  const radiation = useResourceStore((s) => s.radiation);
   const crew = useCrewStore((s) => s.crew);
   const crewId = useGameStore((s) => s.crewId);
   const commanderPhoto = crewId ? getTeam(crewId).commander.photo : undefined;
@@ -27,14 +46,18 @@ export function PlayerStatus() {
           <div className="hud-portrait__frame">
             {commanderPhoto ? <img src={commanderPhoto} alt="" /> : <CommanderPortrait size={76} />}
           </div>
-          <span className="hud-portrait__badge">Day {day}</span>
+          <span className="hud-portrait__badge">Day {day}/90</span>
         </div>
 
         <div className="hud-status__bars">
           <span className="hud-status__name">{playerName || 'Commander'}</span>
+          <HudBar icon={<FoodIcon />} label="Food" value={food} color="#e67e22" />
+          <HudBar icon={<WaterIcon />} label="Water" value={water} color="#3498db" />
           <HudBar icon={<EnergyIcon />} label="Energy" value={energy} color="var(--hud-blue)" />
           <HudBar icon={<OxygenIcon />} label="Oxygen" value={oxygen} color="var(--hud-green)" />
-          <HudBar icon={<ShieldIcon />} label="Shielding" value={shielding} color="var(--hud-purple)" />
+          <HudBar icon={<HealthIcon />} label="Health" value={health} color="#e74c3c" />
+          <HudBar icon={<SatisfactionIcon />} label="Satisfaction" value={satisfaction} color="#f1c40f" />
+          <HudBar icon={<RadiationIcon />} label="Radiation" value={radiation} color="#9b59b6" />
         </div>
       </div>
 

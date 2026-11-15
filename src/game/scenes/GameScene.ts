@@ -19,6 +19,7 @@ import {
   WALKABLE_AREAS,
   PLAYER_SPAWN,
   NPC_SPAWNS,
+  ROOM_CENTERS,
   isBoxWalkable,
   roomAt,
   type RoomId,
@@ -45,6 +46,8 @@ const FOLLOW_LERP = 0.25;
 const POSITION_EMIT_INTERVAL = 80;
 const STARFIELD_KEY = 'starfield';
 
+const INTERACT_DISTANCE = 80;
+
 export class GameScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Container;
   private playerBody!: Phaser.Physics.Arcade.Body;
@@ -58,6 +61,10 @@ export class GameScene extends Phaser.Scene {
   private walkableDebug: Phaser.GameObjects.Graphics | null = null;
   private currentRoom: RoomId | null = null;
   private lastPositionEmit = 0;
+  private missionMarker: Phaser.GameObjects.Container | null = null;
+  private missionGlow: Phaser.GameObjects.Graphics | null = null;
+  private missionMarkerRoom: RoomId | null = null;
+  private frozen = false;
 
   constructor() {
     super({ key: 'GameScene' });
@@ -124,6 +131,40 @@ export class GameScene extends Phaser.Scene {
 
     this.updateRoom();
     this.emitPosition(true);
+
+    this.input.keyboard!.on('keydown-E', () => {
+      if (this.frozen) return;
+      if (this.isNearMarker()) {
+        gameEvents.emit(EVENTS.MISSION_START);
+      }
+    });
+
+    gameEvents.on('SHOW_MISSION_MARKER', (room: RoomId) => {
+      this.showMissionMarker(room);
+    });
+
+    gameEvents.on('REMOVE_MISSION_MARKER', () => {
+      this.removeMissionMarker();
+    });
+
+    gameEvents.on('CAMERA_ZOOM_IN', () => {
+      this.frozen = true;
+      const cam = this.cameras.main;
+      const target = this.missionMarker
+        ? { x: this.missionMarker.x, y: this.missionMarker.y + 30 }
+        : { x: this.player.x, y: this.player.y };
+      const targetZoom = Math.min(this.scale.width / WORLD_WIDTH, this.scale.height / WORLD_HEIGHT) * 1.8;
+      cam.pan(target.x, target.y, 600, 'Sine.easeInOut');
+      cam.zoomTo(targetZoom, 600, 'Sine.easeInOut');
+    });
+
+    gameEvents.on('CAMERA_ZOOM_OUT', () => {
+      this.frozen = false;
+      const cam = this.cameras.main;
+      const baseZoom = Math.min(this.scale.width / WORLD_WIDTH, this.scale.height / WORLD_HEIGHT);
+      cam.pan(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 500, 'Sine.easeInOut');
+      cam.zoomTo(baseZoom, 500, 'Sine.easeInOut');
+    });
   }
 
   /** Station illustration over a simple starfield (the map PNG has a transparent background). */
@@ -226,6 +267,74 @@ export class GameScene extends Phaser.Scene {
     npc.setData('name', name);
   }
 
+  showMissionMarker(room: RoomId) {
+    this.removeMissionMarker();
+    const center = ROOM_CENTERS[room];
+    if (!center) return;
+
+    const glow = this.add.graphics().setDepth(15).setAlpha(0.6);
+    glow.fillStyle(0xf59e0b, 0.35);
+    glow.fillCircle(center.x, center.y, 55);
+    glow.fillStyle(0xf59e0b, 0.15);
+    glow.fillCircle(center.x, center.y, 80);
+    this.missionGlow = glow;
+
+    this.tweens.add({
+      targets: glow,
+      alpha: { from: 0.4, to: 1 },
+      duration: 800,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    });
+
+    const container = this.add.container(center.x, center.y - 30).setDepth(20);
+
+    const bg = this.add.graphics();
+    bg.fillStyle(0xf59e0b, 1);
+    bg.fillRoundedRect(-14, -18, 28, 36, 6);
+    bg.fillTriangle(-8, 18, 8, 18, 0, 28);
+
+    const text = this.add.text(0, 0, '!', {
+      fontSize: '22px',
+      fontStyle: 'bold',
+      color: '#1a1a2e',
+      fontFamily: 'Arial, sans-serif',
+    }).setOrigin(0.5);
+
+    container.add([bg, text]);
+    this.missionMarkerRoom = room;
+    this.missionMarker = container;
+
+    this.tweens.add({
+      targets: container,
+      y: center.y - 40,
+      duration: 500,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    });
+  }
+
+  removeMissionMarker() {
+    if (this.missionMarker) {
+      this.missionMarker.destroy();
+      this.missionMarker = null;
+      this.missionMarkerRoom = null;
+    }
+    if (this.missionGlow) {
+      this.missionGlow.destroy();
+      this.missionGlow = null;
+    }
+  }
+
+  private isNearMarker(): boolean {
+    if (!this.missionMarker) return false;
+    const dx = this.player.x - this.missionMarker.x;
+    const dy = this.player.y - (this.missionMarker.y + 30);
+    return Math.sqrt(dx * dx + dy * dy) < INTERACT_DISTANCE;
+  }
+
   private toggleWalkableDebug() {
     if (this.walkableDebug) {
       this.walkableDebug.destroy();
@@ -279,6 +388,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number) {
+    if (this.frozen) return;
+
     const up = this.cursors.up.isDown || this.wasd.W.isDown;
     const down = this.cursors.down.isDown || this.wasd.S.isDown;
     const left = this.cursors.left.isDown || this.wasd.A.isDown;

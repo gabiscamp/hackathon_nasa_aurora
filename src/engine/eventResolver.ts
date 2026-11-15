@@ -21,36 +21,22 @@ export function pickMissionForDay(
 
 export interface ResolvedChoice {
   success: boolean;
-  consequences: Choice['consequences'];
   narrative: string;
+  effects: Choice['effects'];
 }
 
 export function resolveChoice(choice: Choice): ResolvedChoice {
-  const { consequences } = choice;
-  const { successRate } = consequences;
-
-  if (successRate !== undefined && successRate < 100) {
-    const success = rollSuccess(successRate);
-    if (!success && consequences.failEffects) {
+  if (choice.successRate !== undefined && choice.successRate < 100) {
+    const success = rollSuccess(choice.successRate);
+    if (!success && choice.failEffects) {
       return {
         success: false,
-        consequences: {
-          ...consequences.failEffects,
-          narrative: consequences.failNarrative ?? consequences.narrative,
-        },
-        narrative: consequences.failNarrative ?? consequences.narrative,
+        narrative: choice.failNarrative ?? choice.narrative,
+        effects: choice.failEffects,
       };
     }
-    return {
-      success,
-      consequences,
-      narrative: consequences.narrative,
-    };
+    return { success, narrative: choice.narrative, effects: choice.effects };
   }
 
-  return {
-    success: true,
-    consequences,
-    narrative: consequences.narrative,
-  };
+  return { success: true, narrative: choice.narrative, effects: choice.effects };
 }

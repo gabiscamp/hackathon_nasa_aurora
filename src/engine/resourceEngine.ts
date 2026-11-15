@@ -1,56 +1,20 @@
 import { clamp } from '../utils/clamp';
-import type { Choice } from '../data/missions';
-
-interface Resources {
-  energy: number;
-  oxygen: number;
-  shielding: number;
-}
+import type { ResourceKey } from '../stores/useResourceStore';
+import type { ChoiceEffect } from '../data/missions';
 
 interface ResourceStore {
-  applyDelta: (delta: Partial<Resources>) => void;
+  applyDelta: (delta: Partial<Record<ResourceKey, number>>) => void;
 }
 
-interface CrewStore {
-  updateCrew: (id: string, partial: { health?: number; morale?: number }) => void;
-}
-
-export function applyConsequences(
+export function applyEffects(
   resourceStore: ResourceStore,
-  crewStore: CrewStore,
-  consequences: Choice['consequences'],
+  effects: ChoiceEffect[],
 ): void {
-  const { energy, oxygen, shielding, crewEffects } = consequences;
-
-  const delta: Partial<Resources> = {};
-  if (energy !== undefined) delta.energy = energy;
-  if (oxygen !== undefined) delta.oxygen = oxygen;
-  if (shielding !== undefined) delta.shielding = shielding;
-
+  const delta: Partial<Record<ResourceKey, number>> = {};
+  for (const eff of effects) {
+    delta[eff.resource] = (delta[eff.resource] ?? 0) + eff.delta;
+  }
   if (Object.keys(delta).length > 0) {
     resourceStore.applyDelta(delta);
   }
-
-  if (crewEffects) {
-    for (const effect of crewEffects) {
-      crewStore.updateCrew(effect.id, {
-        ...(effect.health !== undefined && { health: effect.health }),
-        ...(effect.morale !== undefined && { morale: effect.morale }),
-      });
-    }
-  }
-}
-
-export function dailyTick(
-  act: 1 | 2 | 3,
-  current: Resources,
-): Resources {
-  const decay = act === 1 ? 1 : act === 2 ? 2 : 3;
-  const oxygenMultiplier = current.energy < 20 ? 2 : 1;
-
-  return {
-    energy: clamp(current.energy - decay, 0, 100),
-    oxygen: clamp(current.oxygen - decay * oxygenMultiplier, 0, 100),
-    shielding: clamp(current.shielding - decay, 0, 100),
-  };
 }

@@ -93,6 +93,17 @@ export const NPC_SPAWNS = {
   scientist: { x: 797, y: 235, room: 'lab' },
 } as const satisfies Record<string, { x: number; y: number; room: RoomId }>;
 
+export const ROOM_CENTERS: Record<RoomId, { x: number; y: number }> = {
+  bridge: { x: 800, y: 290 },
+  quarters: { x: 470, y: 290 },
+  lab: { x: 1060, y: 310 },
+  storage: { x: 560, y: 570 },
+  medical: { x: 780, y: 620 },
+  common: { x: 940, y: 470 },
+  engineering: { x: 1080, y: 610 },
+  corridor: { x: 790, y: 440 },
+};
+
 export function isPointWalkable(x: number, y: number): boolean {
   return WALKABLE_AREAS.some((a) => x >= a.x && x <= a.x + a.w && y >= a.y && y <= a.y + a.h);
 }

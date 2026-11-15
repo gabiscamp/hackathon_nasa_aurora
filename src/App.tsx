@@ -42,9 +42,9 @@ export default function App() {
   const resetMissions = useMissionStore((s) => s.reset);
   const setScene = useGameStore((s) => s.setScene);
   const resetGame = useGameStore((s) => s.resetGame);
-  const energy = useResourceStore((s) => s.energy);
-  const oxygen = useResourceStore((s) => s.oxygen);
-  const shielding = useResourceStore((s) => s.shielding);
+  const food = useResourceStore((s) => s.food);
+  const health = useResourceStore((s) => s.health);
+  const satisfaction = useResourceStore((s) => s.satisfaction);
   const resetResources = useResourceStore((s) => s.reset);
   const resetCrew = useCrewStore((s) => s.reset);
   const loadSpaceWeather = useSpaceWeatherStore((s) => s.load);
@@ -92,7 +92,7 @@ export default function App() {
         <GameScreen onMainMenu={goHome} onOpenCredits={() => setShowCredits(true)} creditsOpen={showCredits} />
       )}
       {scene === 'ending' && (
-        <EndingScreen playerName={playerName} resources={{ energy, oxygen, shielding }} onReplay={handleReplay} onOpenCredits={() => setShowCredits(true)} />
+        <EndingScreen playerName={playerName} resources={{ food, health, satisfaction }} onReplay={handleReplay} onOpenCredits={() => setShowCredits(true)} />
       )}
       {showCredits && <CreditsScreen onClose={() => setShowCredits(false)} />}
     </Suspense>
