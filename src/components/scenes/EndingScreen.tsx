@@ -11,7 +11,7 @@ interface EndingScreenProps {
   onOpenCredits: () => void;
 }
 
-const ENDING_ICONS = { good: '🎉', medium: '😮‍💨', bad: '💪' };
+const ENDING_ICONS: Record<string, string> = { good: '🎉', medium: '😮‍💨', bad: '💪', radiation: '☢️' };
 // TODO: replace with real asset — emoji icons on the ending screen.
 const ENDING_STATS = [
   { key: 'food', icon: '🍎', label: 'Food' },

@@ -1,0 +1,36 @@
+.dayskip-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  pointer-events: none;
+}
+
+.dayskip-overlay__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 8, 20, 0.35);
+  pointer-events: auto;
+}
+
+.dayskip-hud {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.dayskip-hud__day {
+  font-size: 0.8rem;
+  color: rgba(77, 201, 246, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  background: rgba(10, 16, 35, 0.8);
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(77, 201, 246, 0.2);
+}

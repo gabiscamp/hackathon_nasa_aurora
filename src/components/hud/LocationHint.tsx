@@ -10,6 +10,7 @@ export const ROOM_NAMES: Record<RoomId, string> = {
   bridge: 'Bridge',
   quarters: 'Crew Quarters',
   lab: 'Lab & Greenhouse',
+  greenhouse: 'Greenhouse',
   common: 'Kitchen',
   engineering: 'Engineering',
   storage: 'Storage Bay',

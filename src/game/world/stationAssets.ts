@@ -3,6 +3,7 @@
  * scripts/build_station_assets.py (magenta keyed out, trimmed, scaled).
  */
 import type { PieceKey } from './stationLayout';
+import greenhouseUrl from '../../assets/station/greenhouse.png';
 import labUrl from '../../assets/station/lab.png';
 import gymUrl from '../../assets/station/gym.png';
 import kitchenUrl from '../../assets/station/kitchen.png';
@@ -16,6 +17,7 @@ import radiatorUrl from '../../assets/station/radiator.png';
 import solarUrl from '../../assets/station/solar.png';
 
 export const STATION_TEXTURE_URLS: Record<PieceKey, string> = {
+  greenhouse: greenhouseUrl,
   lab: labUrl,
   gym: gymUrl,
   kitchen: kitchenUrl,

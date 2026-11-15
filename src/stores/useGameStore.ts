@@ -32,6 +32,7 @@ interface GameState {
   goHome: () => void;
   resumeMission: () => void;
   setScene: (scene: GameScene) => void;
+  setDay: (day: number) => void;
   setPhase: (phase: DayPhase) => void;
   nextPhase: () => void;
   nextDay: () => void;
@@ -72,6 +73,8 @@ export const useGameStore = create<GameState>()((set) => ({
     set((state) => ({ scene: state.resumeScene ?? 'briefing', resumeScene: null })),
 
   setScene: (scene) => set({ scene }),
+
+  setDay: (day) => set({ day }),
 
   setPhase: (phase) => set({ phase }),
 
