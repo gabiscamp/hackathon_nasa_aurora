@@ -67,7 +67,9 @@
 .hud-status {
   top: var(--hud-edge);
   left: var(--hud-edge);
-  gap: 5px;
+  width: 370px;
+  gap: 10px;
+  padding: 14px 16px 16px;
 }
 
 .hud-group__label {
@@ -76,18 +78,26 @@
   font-weight: 500;
   line-height: 1.2;
   color: var(--hud-text-dim);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 /* Resource bar: [icon] Name [gauge] 85 — text on the dark panel, not on the fill. */
 .hud-bar {
   display: grid;
-  grid-template-columns: 26px 96px 120px 40px;
+  grid-template-columns: 30px minmax(0, 1fr) 54px;
+  grid-template-areas:
+    'icon label value'
+    'icon track track';
   position: relative;
   align-items: center;
-  column-gap: 8px;
+  column-gap: 10px;
+  row-gap: 6px;
+  min-height: 40px;
 }
 
 .hud-bar__badge {
+  grid-area: icon;
   display: grid;
   place-items: center;
   width: 26px;
@@ -101,6 +111,7 @@
 }
 
 .hud-bar__label {
+  grid-area: label;
   font-size: 18px;
   font-weight: 500;
   line-height: 1;
@@ -145,28 +156,40 @@
 }
 
 .hud-bar__track {
+  grid-area: track;
   position: relative;
-  height: 12px;
-  border-radius: 6px;
-  background: rgba(240, 236, 228, 0.12);
+  height: 10px;
+  border: 1px solid rgba(240, 236, 228, 0.12);
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, transparent 24%, rgba(240, 236, 228, 0.14) 25%, transparent 26%, transparent 49%, rgba(240, 236, 228, 0.14) 50%, transparent 51%, transparent 74%, rgba(240, 236, 228, 0.14) 75%, transparent 76%),
+    rgba(240, 236, 228, 0.1);
   overflow: hidden;
 }
 
 .hud-bar__fill {
   position: absolute;
   inset: 0 auto 0 0;
-  border-radius: 4px;
-  background: var(--bar-color);
+  border-radius: 999px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--bar-color), #fff 12%), var(--bar-color));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--bar-color), transparent 55%);
   transition: width 400ms ease, background-color 300ms ease;
 }
 
 .hud-bar__value {
+  grid-area: value;
   font-size: 18px;
   font-weight: 600;
   line-height: 1;
   text-align: right;
   color: var(--hud-text);
   font-variant-numeric: tabular-nums;
+}
+
+.hud-bar__value small {
+  margin-left: 1px;
+  font-size: 11px;
+  color: var(--hud-text-dim);
 }
 
 .hud-bar--low .hud-bar__badge,
@@ -648,7 +671,7 @@
   }
 }
 
-/* ---------- Phones and tablets: stack the panels at the top, keep the bottom for the mission hint ---------- */
+/* ---------- Compact landscape: keep controls in four safe zones around the game world. ---------- */
 @media (max-width: 960px) {
   .hud {
     --hud-edge: 8px;
@@ -656,11 +679,12 @@
   }
 
   .hud > .hud-top {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+    display: grid;
+    grid-template-columns: minmax(250px, 0.9fr) minmax(300px, 1.1fr);
+    align-items: start;
+    gap: 8px;
     position: absolute;
-    top: 60px;
+    top: max(8px, env(safe-area-inset-top));
     left: 8px;
     right: 8px;
     pointer-events: none;
@@ -685,6 +709,7 @@
 
   /* Station: five mini meters in one row (icon, number, bar); names stay for screen readers. */
   .hud-status {
+    width: auto;
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 8px;
@@ -754,5 +779,23 @@
     left: 8px;
     transform: none;
     font-size: 13px;
+  }
+}
+
+@media (max-width: 680px) and (orientation: landscape) {
+  .hud > .hud-top {
+    grid-template-columns: minmax(220px, 0.85fr) minmax(270px, 1.15fr);
+  }
+
+  .hud-objective__day,
+  .hud-objective__track {
+    display: none;
+  }
+
+  .hud-objective__task {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 }

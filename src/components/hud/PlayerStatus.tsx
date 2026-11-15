@@ -3,7 +3,7 @@ import { useMissionStore } from '../../stores/useMissionStore';
 import { PROTOCOLS } from '../../data/difficulty';
 import { daysLeft } from '../../engine/survival';
 import { HudBar, isDanger } from './HudBar';
-import { EnergyIcon, FoodIcon, HealthIcon, OxygenIcon, RadiationIcon, WarningIcon, WaterIcon } from './HudIcons';
+import { EnergyIcon, FoodIcon, OxygenIcon, RadiationIcon, WarningIcon, WaterIcon } from './HudIcons';
 
 /** "About 3 days left!" for a vital bar that is falling (game over at 0). */
 function left(n: number | null): string {
@@ -16,6 +16,7 @@ function left(n: number | null): string {
  * Radiation is the level inside the station: a full bar is bad, so it warns when HIGH.
  * A danger bar turns red, blinks AND gets a written alert line (never color only).
  * Oxygen or health at 0 (or radiation at 100) is game over, so those warnings say how long is left.
+ * Health has no bar (it stays in the background, see SHOWN_RESOURCES), only this written warning.
  */
 export function PlayerStatus() {
   const food = useResourceStore((s) => s.food);
@@ -39,7 +40,6 @@ export function PlayerStatus() {
   return (
     <section className="hud-panel hud-status" aria-label="Station" data-read>
       <h2 className="hud-group__label">Station</h2>
-      <HudBar icon={<HealthIcon />} label="Health" value={health} color="var(--hud-pink)" />
       <HudBar icon={<FoodIcon />} label="Food" value={food} color="var(--hud-orange)" />
       <HudBar icon={<WaterIcon />} label="Water" value={water} color="var(--hud-blue)" />
       <HudBar icon={<OxygenIcon />} label="Oxygen" value={oxygen} color="var(--hud-green)" />

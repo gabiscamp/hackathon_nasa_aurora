@@ -8,6 +8,13 @@ type ResourceValues = Record<ResourceKey, number>;
 export type Resources = ResourceValues;
 export const RESOURCE_KEYS: readonly ResourceKey[] = ['food', 'water', 'energy', 'oxygen', 'health', 'satisfaction', 'radiation'];
 
+/**
+ * The bars the player sees (HUD, missions, day summary, ending). Health and morale
+ * (satisfaction) still count in the game, game over included, but stay in the background:
+ * kids don't need those numbers. Team decision, 2026-11-15.
+ */
+export const SHOWN_RESOURCES: readonly ResourceKey[] = ['food', 'water', 'oxygen', 'radiation', 'energy'];
+
 /** 0–100 "how is the station doing" (radiation counts inverted: 0 radiation = best). */
 export function stationScore(r: Resources): number {
   const good = RESOURCE_KEYS.reduce((sum, k) => sum + (k === 'radiation' ? 100 - r[k] : r[k]), 0);

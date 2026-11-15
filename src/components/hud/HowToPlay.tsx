@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { EnergyIcon, FoodIcon, HealthIcon, OxygenIcon, RadiationIcon, WarningIcon, WaterIcon } from './HudIcons';
+import { EnergyIcon, FoodIcon, OxygenIcon, RadiationIcon, WarningIcon, WaterIcon } from './HudIcons';
 
 const CONTROLS: { keys: string[]; action: string }[] = [
   { keys: ['W', 'A', 'S', 'D'], action: 'Walk (arrow keys work too)' },
@@ -11,12 +11,6 @@ const CONTROLS: { keys: string[]; action: string }[] = [
 ];
 
 const BARS: { icon: ReactNode; name: string; color: string; text: string }[] = [
-  {
-    icon: <HealthIcon size={22} />,
-    name: 'Health',
-    color: '#f472b6',
-    text: 'How well the crew feels. Air, water and food keep it up. At 0, the station is lost!',
-  },
   {
     icon: <FoodIcon size={22} />,
     name: 'Food',
@@ -75,9 +69,9 @@ export function HowToPlay() {
         <section>
           <h3>How you can lose</h3>
           <p>
-            If <strong>oxygen</strong> or <strong>health</strong> reach 0, or <strong>radiation</strong> reaches 100, the
+            If <strong>oxygen</strong> reaches 0, <strong>radiation</strong> reaches 100, or the crew gets too sick, the
             station is lost and the crew escapes in the capsule. One bad bar pulls the others down: no energy stops the
-            air, and no air, water or food hurts the crew's health every day.
+            air, and no air, water or food makes the crew sick a little more every day.
           </p>
         </section>
 
