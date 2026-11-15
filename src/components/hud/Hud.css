@@ -32,9 +32,14 @@
   z-index: 5;
 }
 
-.hud > * {
+.hud > *,
+.hud-top > * {
   position: absolute;
   pointer-events: auto;
+}
+
+.hud > .hud-top {
+  display: contents;
 }
 
 /* Corner panels grow together; offsets stay readable because zoom also scales them. */
@@ -227,70 +232,6 @@
   color: var(--hud-text-dim);
   background: rgba(10, 14, 32, 0.6);
   pointer-events: none;
-}
-
-/* ---------- Bottom-center: inventory ---------- */
-.hud-inventory {
-  bottom: calc(var(--hud-edge) + 8px);
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 10px;
-}
-
-.hud-slot {
-  position: relative;
-  width: 60px;
-  height: 60px;
-  border-radius: 10px;
-  background: radial-gradient(circle at 50% 30%, #26304d, #121933);
-  border: 2px solid #3a4666;
-  box-shadow: inset 0 0 0 2px rgba(10, 14, 39, 0.8), 0 4px 10px rgba(0, 0, 0, 0.55);
-  cursor: pointer;
-  transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
-}
-
-.hud-slot:hover {
-  transform: translateY(-2px);
-  border-color: var(--hud-blue);
-}
-
-.hud-slot--empty::before {
-  content: '';
-  position: absolute;
-  inset: 8px;
-  border-radius: 6px;
-  border: 2px dashed rgba(240, 236, 228, 0.12);
-}
-
-.hud-slot--active {
-  border-color: var(--hud-amber);
-  box-shadow:
-    inset 0 0 0 2px rgba(10, 14, 39, 0.8),
-    0 0 14px rgba(245, 166, 35, 0.55),
-    0 4px 10px rgba(0, 0, 0, 0.55);
-}
-
-.hud-slot__key {
-  position: absolute;
-  left: 50%;
-  bottom: -11px;
-  transform: translateX(-50%);
-  min-width: 22px;
-  padding: 0 5px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 20px;
-  color: var(--hud-text);
-  background: var(--hud-bg-deep);
-  border: 1px solid #3a4666;
-}
-
-.hud-slot--active .hud-slot__key {
-  color: var(--hud-bg-deep);
-  background: var(--hud-amber);
-  border-color: var(--hud-amber);
 }
 
 /* ---------- Bottom-right: map (click or M opens the big map) ---------- */
@@ -614,5 +555,112 @@
 @media (max-width: 1400px) {
   .hud-ai-mark {
     top: var(--hud-edge);
+  }
+}
+
+/* ---------- Phones and tablets: stack the panels at the top, keep the bottom for the mission hint ---------- */
+@media (max-width: 960px) {
+  .hud {
+    --hud-edge: 8px;
+    --hud-scale: 1;
+  }
+
+  .hud > .hud-top {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: absolute;
+    top: 60px;
+    left: 8px;
+    right: 8px;
+    pointer-events: none;
+  }
+
+  .hud-top > * {
+    position: static;
+  }
+
+  .hud-objective {
+    width: auto;
+    padding: 8px 12px;
+  }
+
+  .hud-objective__title {
+    font-size: 18px;
+  }
+
+  .hud-objective__task {
+    font-size: 17px;
+  }
+
+  /* Station: five mini meters in one row (icon, number, bar); names stay for screen readers. */
+  .hud-status {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .hud-group__label {
+    display: none;
+  }
+
+  .hud-bar {
+    grid-template-columns: auto auto;
+    grid-template-areas:
+      'icon value'
+      'track track';
+    justify-content: center;
+    column-gap: 4px;
+    row-gap: 4px;
+  }
+
+  .hud-bar__badge {
+    grid-area: icon;
+    width: 20px;
+    height: 20px;
+  }
+
+  .hud-bar__badge svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .hud-bar__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .hud-bar__value {
+    grid-area: value;
+    font-size: 16px;
+  }
+
+  .hud-bar__track {
+    grid-area: track;
+    width: 100%;
+    min-width: 44px;
+    height: 8px;
+  }
+
+  .hud-alert {
+    grid-column: 1 / -1;
+    font-size: 16px;
+  }
+
+  /* No keyboard on a phone and little room: the big map stays one tap away in Help/Menu. */
+  .hud-minimap,
+  .hud-location {
+    display: none;
+  }
+
+  .hud-ai-mark {
+    top: 8px;
+    left: 8px;
+    transform: none;
+    font-size: 13px;
   }
 }

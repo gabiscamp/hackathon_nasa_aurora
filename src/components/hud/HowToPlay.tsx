@@ -5,7 +5,6 @@ const CONTROLS: { keys: string[]; action: string }[] = [
   { keys: ['W', 'A', 'S', 'D'], action: 'Walk (arrow keys work too)' },
   { keys: ['E'], action: 'Talk or use things' },
   { keys: ['M'], action: 'Open the ship map' },
-  { keys: ['1', '2', '3', '4', '5'], action: 'Pick an inventory slot' },
   { keys: ['H'], action: 'Open this help' },
   { keys: ['Esc'], action: 'Pause the game' },
 ];

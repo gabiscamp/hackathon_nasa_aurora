@@ -445,3 +445,20 @@
   font-size: 16px;
   color: #c9cfdb;
 }
+
+@media (max-width: 960px) {
+  .gm-top-actions {
+    top: 8px;
+    right: 8px;
+  }
+
+  .gm-top-actions .gm-menu-btn {
+    min-height: 44px;
+    padding: 4px 12px;
+    font-size: 17px;
+  }
+
+  .gm-top-actions .gm-kbd {
+    display: none;
+  }
+}
