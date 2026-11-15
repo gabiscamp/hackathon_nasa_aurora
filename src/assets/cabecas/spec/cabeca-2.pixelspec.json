@@ -1,0 +1,147 @@
+{
+ "schema": "codeart2d.pixelspec.v1",
+ "name": "cabeca-2",
+ "canvas": [
+  32,
+  26
+ ],
+ "anchor_px": [
+  16,
+  24
+ ],
+ "palette": {
+  "k": "#1b1d2a",
+  "Q": "#ffffff",
+  "h": "#5a3b2a",
+  "H": "#8d6246",
+  "j": "#3a2519",
+  "J": "#24160f",
+  "s": "#e8b48f",
+  "S": "#cc916c",
+  "e": "#2a1d14",
+  "I": "#6b4226",
+  "i": "#b07d50",
+  "p": "#e59a85"
+ },
+ "outline": {
+  "mode": "solid",
+  "color": "k"
+ },
+ "poses": {
+  "front": [
+   "................................",
+   "................................",
+   "..............h..h..............",
+   "............hh.hh.hh............",
+   "..........hhhHHhhHHhhh..........",
+   "..........hHHhhhhhhHhh..........",
+   ".........hhhhhhhhhhhhhj.........",
+   "........hhhhhhhhhhhhhhjj........",
+   "........hhhhhhhhhhhhhhjj........",
+   ".......hhhhhhhhhhhhhhhjjj.......",
+   ".......hhhhhhhhhhhhhhhjjj.......",
+   ".......hhhhjhhjhhjhhjhjjj.......",
+   ".......hhhhjhhjhhjhhjhjjj.......",
+   "........hssssssssssssssj........",
+   "........hsseeeessseeeesj........",
+   ".......sssssQIesssQIessss.......",
+   ".......SssssIIIsssIIIsssS.......",
+   ".........sssIIIsssIIIss.........",
+   ".........sssiiisssiiiss.........",
+   "..........ppsssssssspp..........",
+   "...........ssssssssss...........",
+   ".............SSSSSS.............",
+   "..............SSSS..............",
+   "................................",
+   "................................",
+   "................................"
+  ],
+  "side": [
+   "................................",
+   "................................",
+   "..............h..h..............",
+   "............hkkkhhkh............",
+   "..........jkhHHHhHHhhh..........",
+   ".........jkhHhhhhhhHhhh.........",
+   ".........kjhhhhhhhhhhhhh........",
+   "........jjjhhhhhhhhhhhhhh.......",
+   ".........jjhhhhhhhhhhhhhh.......",
+   "........jjjhhhhhhhhhhhhhhh......",
+   "........jjjhhhhhhhhhjhhjhh......",
+   "........jjjhhhhhhhhhjhhjhh......",
+   "........jjjhhhhhhhhhjhhjhh......",
+   ".........jjhhhhhsssssssss.......",
+   ".........jjhhhhhsssseeess.......",
+   ".........jjjjjjjSsssQIIss.......",
+   ".........jjjjjjjssssIIIss.......",
+   "...........jjjssssssIIIss.......",
+   "............jsssssssiiiss.......",
+   ".............sssssppssss........",
+   "..............sssssssss.........",
+   "...............kSSSSS...........",
+   "................SSSS............",
+   "................................",
+   "................................",
+   "................................"
+  ],
+  "back": [
+   "................................",
+   "................................",
+   "..............h..h..............",
+   "............hh.hh.hh............",
+   "..........hhhHHhhHHhhh..........",
+   "..........hHHhhhhhhHhh..........",
+   ".........hhhhhhhhhhhhhj.........",
+   "........hhhhhhhhhhhhhhjj........",
+   "........hhhhjhhhjhhhjhjj........",
+   ".......hhhhhjhhhjhhhjhjjj.......",
+   ".......hhhhhjhhhjhhhjhjjj.......",
+   ".......hhhhhjhhhjhhhjhjjj.......",
+   ".......hhhhhjhhhjhhhjhjjj.......",
+   ".......hhhhhjhhhjhhhjhjjj.......",
+   ".......shhhhjhhhjhhhjhjjs.......",
+   ".......ShhhhjhhhjhhhjhjjS.......",
+   "........jjjjjjjjjjjjjjjj........",
+   ".........jjjjjjjjjjjjjj.........",
+   ".........sjjjjjjjjjjjjj.........",
+   "..........sjjjjjjjjjjs..........",
+   "...........ssssjjssss...........",
+   ".............ssssss.............",
+   "..............SSSS..............",
+   "................................",
+   "................................",
+   "................................"
+  ]
+ },
+ "layers": [
+  {
+   "name": "cabeca",
+   "origin": [
+    0,
+    0
+   ],
+   "rows": "front"
+  }
+ ],
+ "frames": [
+  {
+   "name": "front"
+  },
+  {
+   "name": "side",
+   "layers": {
+    "cabeca": {
+     "rows": "side"
+    }
+   }
+  },
+  {
+   "name": "back",
+   "layers": {
+    "cabeca": {
+     "rows": "back"
+    }
+   }
+  }
+ ]
+}

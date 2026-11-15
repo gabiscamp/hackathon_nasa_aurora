@@ -5,9 +5,10 @@ interface EndingScreenProps {
   playerName: string;
   resources: { food: number; health: number; satisfaction: number };
   onReplay: () => void;
+  onOpenCredits: () => void;
 }
 
-export function EndingScreen({ playerName, resources, onReplay }: EndingScreenProps) {
+export function EndingScreen({ playerName, resources, onReplay, onOpenCredits }: EndingScreenProps) {
   const avg = Math.round((resources.food + resources.health + resources.satisfaction) / 3);
   const endingType = avg > 30 ? 'good' : avg > 10 ? 'medium' : 'bad';
 
@@ -53,9 +54,19 @@ export function EndingScreen({ playerName, resources, onReplay }: EndingScreenPr
           </div>
         </div>
 
-        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', textAlign: 'center', marginTop: 16 }}>
-          Everything in this game was based on real NASA data and events.
-        </p>
+        <div className="ending-nasa-box">
+          <h3>🚀 You just lived what real astronauts face!</h3>
+          <p>
+            Everything in this game was based on real events from NASA missions:
+            Apollo 13, MIR, the International Space Station, and the CHAPEA Mars simulation.
+          </p>
+          <p className="ending-source">
+            Data sources: NASA DONKI, NASA ECLSS, NASA OSDR
+          </p>
+          <button type="button" className="ending-credits" onClick={onOpenCredits}>
+            See credits &amp; NASA sources
+          </button>
+        </div>
 
         <Button variant="primary" onClick={onReplay}>
           Play Again

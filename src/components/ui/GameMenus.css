@@ -1,0 +1,215 @@
+/* Menus, confirmations and back/skip bar. Palette from spaceship-game-design skill.
+   Kid UI rules (team briefing): text ≥18px, targets ≥44px, never color-only. */
+.gm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(10, 14, 39, 0.78);
+  font-family: 'Nunito', system-ui, sans-serif;
+}
+
+.gm-backdrop--top {
+  z-index: 120;
+}
+
+.gm-card {
+  width: min(460px, 100%);
+  padding: 28px;
+  background: rgba(20, 27, 45, 0.97);
+  border: 2px solid rgba(77, 201, 246, 0.45);
+  border-radius: 18px;
+  box-shadow: 0 0 32px rgba(77, 201, 246, 0.15);
+  color: #f0ece4;
+  text-align: center;
+}
+
+.gm-card--warn {
+  border-color: #f5a623;
+}
+
+.gm-title {
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 800;
+  color: #4dc9f6;
+}
+
+.gm-card--warn .gm-title {
+  color: #f5a623;
+}
+
+.gm-text {
+  margin: 0 0 20px;
+  font-size: 18px;
+  line-height: 1.5;
+  color: #d6dbe6;
+}
+
+.gm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.gm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+.gm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 10px 22px;
+  font: inherit;
+  font-size: 20px;
+  font-weight: 800;
+  color: #f0ece4;
+  background: rgba(77, 201, 246, 0.12);
+  border: 2px solid #4dc9f6;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.gm-btn:hover {
+  background: rgba(77, 201, 246, 0.25);
+  transform: translateY(-1px);
+}
+
+.gm-btn:focus-visible,
+.gm-menu-btn:focus-visible {
+  outline: 3px solid #f5a623;
+  outline-offset: 3px;
+}
+
+.gm-btn--primary {
+  color: #0a0e27;
+  background: #4dc9f6;
+}
+
+.gm-btn--primary:hover {
+  background: #7fdaf9;
+}
+
+.gm-btn--wide {
+  width: 100%;
+}
+
+.gm-btn--ghost {
+  white-space: nowrap;
+  background: rgba(20, 27, 45, 0.85);
+  border-color: rgba(77, 201, 246, 0.5);
+  font-size: 18px;
+  min-height: 52px;
+}
+
+.gm-kbd {
+  display: inline-block;
+  min-width: 28px;
+  padding: 1px 7px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.4;
+  color: inherit;
+  border: 2px solid currentColor;
+  border-radius: 7px;
+  opacity: 0.85;
+}
+
+.gm-controls {
+  list-style: none;
+  margin: 8px 0 20px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+  font-size: 18px;
+}
+
+.gm-controls li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gm-controls__keys {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 150px;
+}
+
+/* Back / skip bar on the screens before the game; kept 24px away from the edges. */
+.gm-screen-nav {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  right: 24px;
+  z-index: 20;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.gm-screen-nav > * {
+  pointer-events: auto;
+}
+
+/* In-game Menu button: top centre of the HUD, between status and objective. */
+.gm-menu-btn {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 6px 16px;
+  font-family: 'Nunito', system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #f0ece4;
+  background: rgba(20, 27, 45, 0.9);
+  border: 2px solid rgba(77, 201, 246, 0.55);
+  border-radius: 12px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.gm-menu-btn:hover {
+  background: rgba(36, 48, 78, 0.95);
+}
+
+@media (max-width: 560px) {
+  .gm-screen-nav {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+  }
+  .gm-btn--ghost .gm-kbd {
+    display: none;
+  }
+  .gm-btn--ghost {
+    gap: 6px;
+    padding: 8px 14px;
+    font-size: 18px;
+  }
+}
+
+/* global.css lifts every button on hover; keep this one centred. */
+.gm-menu-btn:hover {
+  transform: translateX(-50%);
+}

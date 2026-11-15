@@ -6,12 +6,13 @@ import { PinIcon } from './HudIcons';
 const ROOM_NAMES: Record<RoomId, string> = {
   bridge: 'Bridge',
   quarters: 'Crew Quarters',
-  lab: 'Science Lab',
-  storage: 'Storage Bay',
-  medical: 'Medical Bay',
-  common: 'Common Room',
+  lab: 'Lab & Greenhouse',
+  common: 'Kitchen',
   engineering: 'Engineering',
-  corridor: 'Corridor',
+  storage: 'Storage Bay',
+  airlock: 'Airlock & Suits',
+  gym: 'Gym & Health',
+  corridor: 'Main Corridor',
 };
 
 /** Bottom-left HUD: current room + control hints. */

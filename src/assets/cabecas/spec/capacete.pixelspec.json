@@ -1,0 +1,151 @@
+{
+ "schema": "codeart2d.pixelspec.v1",
+ "name": "capacete",
+ "canvas": [
+  32,
+  26
+ ],
+ "anchor_px": [
+  16,
+  24
+ ],
+ "palette": {
+  "k": "#1b1d2a",
+  "W": "#f5f5f1",
+  "Q": "#ffffff",
+  "w": "#d3d7de",
+  "x": "#a4aab6",
+  "X": "#6c7381",
+  "y": "#f2c94c",
+  "Y": "#c99a2e",
+  "Z": "#7d5a14",
+  "q": "#fff4c2",
+  "L": "#fffbe0",
+  "l": "#d8d3b0",
+  "r": "#c8102e",
+  "R": "#8e0c22",
+  "b": "#0b3d91",
+  "B": "#4a7fd6"
+ },
+ "outline": {
+  "mode": "solid",
+  "color": "k"
+ },
+ "poses": {
+  "front": [
+   "................................",
+   "................................",
+   ".............WWWWWW.............",
+   "..........WWWWWWWWWWWW..........",
+   ".........WWWQQQWWWWWWWW.........",
+   "........WWWQWWWWWWWWWWWW........",
+   ".......WWWWWWWWWWWWWWWWWW.......",
+   "......WWWWWWWWWZZWWWWWWWWW......",
+   "......WWWWWWZZYyyYZZWWWWWW......",
+   ".....xWWWWZZyyqyyyyyZZWWWWx.....",
+   "....xLxWWZYyqqyyyyqyyYZWWxLx....",
+   "....xLxWWZyqyyyyyyyyyyZWWxLx....",
+   "....xlxWZYyqyyyyyyyyyyYZWxlx....",
+   ".....xWWZyyyyyyyyyyyyyyZWwx.....",
+   ".....WWWZYyyyyyyyyyyyyYZwww.....",
+   ".....WWWZYyyyyyyyyyyyyYZwww.....",
+   "......WWWZYYYYYYYYYYyYZwww......",
+   "......WWWZYYYYYYYYYyYYZwww......",
+   "......WWWWZZYYYYYYYYZZwwxx......",
+   ".......WWWWWZZYYYYZZwwwxx.......",
+   "........WWWWWWWZZwwwwwxx........",
+   ".........WWWWWWwwwwwxxx.........",
+   "..........WWWwwwwwwxxx..........",
+   ".............wwwwwx.............",
+   "................................",
+   "................................"
+  ],
+  "side": [
+   "................................",
+   "................................",
+   ".............WWWWWWW............",
+   "...........WWWWWWWWWWW..........",
+   "..........WWWQQQWWWWWWW.........",
+   ".........WWWQWWWWWWWWWWW........",
+   "........WWWWWWWWWWWWWWWWW.......",
+   ".......WWWWWWWWWWWWWWZZZZZ......",
+   ".......WWWWWWWWWWWWWZYyyyYZ.....",
+   ".......WWWxxWWWWWWWZYyqyyyYZ....",
+   "......WWWxLLxWWWWWWZyqyyyyyZ....",
+   "......WWWxLxxWWWWWZyyqyyyyyyZ...",
+   "......WWWxxlxWWWWWZyyqyyyyyyZ...",
+   "......WWWWxxWWWWWWZyyyyyyyyyZ...",
+   "......WWWWWWWWWWWWZyyyyyyyyyZ...",
+   "......WWWWWWWWWWWWZYyyyyyyyYZ...",
+   ".......WWWWWWWWWWWZYYYYYYYyYZ...",
+   ".......WWWWWWWWWWWWZYYYYYyYZ....",
+   ".......WWWWWWWWWWWWZYYYYYYYZ....",
+   "........WWWWWWWWWWwwZYYYYYZ.....",
+   ".........WWWWWWwwwwwwZZZZZ......",
+   "..........WWwwwwwwwwwwx.........",
+   "...........wwwwwwwwxxx..........",
+   ".............wwwxxxx............",
+   "................................",
+   "................................"
+  ],
+  "back": [
+   "................................",
+   "................................",
+   ".............WWWWWW.............",
+   "..........WWWWWWWWWWWW..........",
+   ".........WWWQQQWWWWWWWW.........",
+   "........WWWQWWWWWWWWWWWW........",
+   ".......WWWWWWWWWWWWWWWWWW.......",
+   "......WWWWWWWWWWWWWWWWWWWW......",
+   "......WWWWWWWWWWWWWWWWWWWW......",
+   "......WWWWWWWWWWWWWWWWWWWW......",
+   "....xxxWWWWWWWWWWWWWWWWWWxxx....",
+   "....xlxWWWWWWWWWWWWWWWWWWxlx....",
+   "....xlxWWWWWWWWWWWWWWWWWWxlx....",
+   "....xxxWWWWWWWWWWWWWWWWWWxxx....",
+   ".....WWWWWWWWWWWWWWWWWWWwww.....",
+   ".....WWWWWWWWWWWWWWWWWWwwww.....",
+   "......WWxxxxxxxxxxxxxxxxxw......",
+   "......WWWWWWWWWWWWWWwwwwww......",
+   "......WWWWWWWWWWWWWwwwwwxx......",
+   ".......WWWWWWWWWWwwwwwwxx.......",
+   "........WWWWWWWWwwwwwwxx........",
+   ".........WWWWWWwwwwwxxx.........",
+   "..........WWWwwwwwwxxx..........",
+   ".............wwwwwx.............",
+   "................................",
+   "................................"
+  ]
+ },
+ "layers": [
+  {
+   "name": "cabeca",
+   "origin": [
+    0,
+    0
+   ],
+   "rows": "front"
+  }
+ ],
+ "frames": [
+  {
+   "name": "front"
+  },
+  {
+   "name": "side",
+   "layers": {
+    "cabeca": {
+     "rows": "side"
+    }
+   }
+  },
+  {
+   "name": "back",
+   "layers": {
+    "cabeca": {
+     "rows": "back"
+    }
+   }
+  }
+ ]
+}

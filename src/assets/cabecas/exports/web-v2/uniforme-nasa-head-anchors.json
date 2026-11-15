@@ -1,0 +1,323 @@
+{
+ "schema": "astro-game.head-anchors.v1",
+ "frame": [
+  32,
+  47
+ ],
+ "note": "Pixel where the head sprite's neck pin goes, per body frame. atlasFrames[i] matches frames[i] of the exported Aseprite atlas (uniforme-nasa.json, clip order). Draw the head at (anchor.x - pin.x, anchor.y - pin.y).",
+ "headAnchor": {
+  "front": [
+   16,
+   22
+  ],
+  "back": [
+   16,
+   22
+  ],
+  "side": [
+   17,
+   22
+  ]
+ },
+ "frames": {
+  "front-stand": {
+   "view": "front",
+   "x": 16,
+   "y": 22
+  },
+  "front-walk-0": {
+   "view": "front",
+   "x": 16,
+   "y": 23
+  },
+  "front-walk-1": {
+   "view": "front",
+   "x": 16,
+   "y": 22
+  },
+  "front-walk-2": {
+   "view": "front",
+   "x": 16,
+   "y": 22
+  },
+  "front-walk-3": {
+   "view": "front",
+   "x": 16,
+   "y": 22
+  },
+  "front-walk-4": {
+   "view": "front",
+   "x": 16,
+   "y": 23
+  },
+  "front-walk-5": {
+   "view": "front",
+   "x": 16,
+   "y": 22
+  },
+  "front-walk-6": {
+   "view": "front",
+   "x": 16,
+   "y": 22
+  },
+  "front-walk-7": {
+   "view": "front",
+   "x": 16,
+   "y": 22
+  },
+  "back-stand": {
+   "view": "back",
+   "x": 16,
+   "y": 22
+  },
+  "back-walk-0": {
+   "view": "back",
+   "x": 16,
+   "y": 23
+  },
+  "back-walk-1": {
+   "view": "back",
+   "x": 16,
+   "y": 22
+  },
+  "back-walk-2": {
+   "view": "back",
+   "x": 16,
+   "y": 22
+  },
+  "back-walk-3": {
+   "view": "back",
+   "x": 16,
+   "y": 22
+  },
+  "back-walk-4": {
+   "view": "back",
+   "x": 16,
+   "y": 23
+  },
+  "back-walk-5": {
+   "view": "back",
+   "x": 16,
+   "y": 22
+  },
+  "back-walk-6": {
+   "view": "back",
+   "x": 16,
+   "y": 22
+  },
+  "back-walk-7": {
+   "view": "back",
+   "x": 16,
+   "y": 22
+  },
+  "side-stand": {
+   "view": "side",
+   "x": 17,
+   "y": 22
+  },
+  "side-walk-0": {
+   "view": "side",
+   "x": 17,
+   "y": 22
+  },
+  "side-walk-1": {
+   "view": "side",
+   "x": 17,
+   "y": 23
+  },
+  "side-walk-2": {
+   "view": "side",
+   "x": 17,
+   "y": 22
+  },
+  "side-walk-3": {
+   "view": "side",
+   "x": 17,
+   "y": 22
+  },
+  "side-walk-4": {
+   "view": "side",
+   "x": 17,
+   "y": 22
+  },
+  "side-walk-5": {
+   "view": "side",
+   "x": 17,
+   "y": 23
+  },
+  "side-walk-6": {
+   "view": "side",
+   "x": 17,
+   "y": 22
+  },
+  "side-walk-7": {
+   "view": "side",
+   "x": 17,
+   "y": 22
+  }
+ },
+ "atlasFrames": [
+  {
+   "view": "front",
+   "x": 16,
+   "y": 22,
+   "name": "front-stand"
+  },
+  {
+   "view": "front",
+   "x": 16,
+   "y": 23,
+   "name": "front-walk-0"
+  },
+  {
+   "view": "front",
+   "x": 16,
+   "y": 22,
+   "name": "front-walk-1"
+  },
+  {
+   "view": "front",
+   "x": 16,
+   "y": 22,
+   "name": "front-walk-2"
+  },
+  {
+   "view": "front",
+   "x": 16,
+   "y": 22,
+   "name": "front-walk-3"
+  },
+  {
+   "view": "front",
+   "x": 16,
+   "y": 23,
+   "name": "front-walk-4"
+  },
+  {
+   "view": "front",
+   "x": 16,
+   "y": 22,
+   "name": "front-walk-5"
+  },
+  {
+   "view": "front",
+   "x": 16,
+   "y": 22,
+   "name": "front-walk-6"
+  },
+  {
+   "view": "front",
+   "x": 16,
+   "y": 22,
+   "name": "front-walk-7"
+  },
+  {
+   "view": "back",
+   "x": 16,
+   "y": 22,
+   "name": "back-stand"
+  },
+  {
+   "view": "back",
+   "x": 16,
+   "y": 23,
+   "name": "back-walk-0"
+  },
+  {
+   "view": "back",
+   "x": 16,
+   "y": 22,
+   "name": "back-walk-1"
+  },
+  {
+   "view": "back",
+   "x": 16,
+   "y": 22,
+   "name": "back-walk-2"
+  },
+  {
+   "view": "back",
+   "x": 16,
+   "y": 22,
+   "name": "back-walk-3"
+  },
+  {
+   "view": "back",
+   "x": 16,
+   "y": 23,
+   "name": "back-walk-4"
+  },
+  {
+   "view": "back",
+   "x": 16,
+   "y": 22,
+   "name": "back-walk-5"
+  },
+  {
+   "view": "back",
+   "x": 16,
+   "y": 22,
+   "name": "back-walk-6"
+  },
+  {
+   "view": "back",
+   "x": 16,
+   "y": 22,
+   "name": "back-walk-7"
+  },
+  {
+   "view": "side",
+   "x": 17,
+   "y": 22,
+   "name": "side-stand"
+  },
+  {
+   "view": "side",
+   "x": 17,
+   "y": 22,
+   "name": "side-walk-0"
+  },
+  {
+   "view": "side",
+   "x": 17,
+   "y": 23,
+   "name": "side-walk-1"
+  },
+  {
+   "view": "side",
+   "x": 17,
+   "y": 22,
+   "name": "side-walk-2"
+  },
+  {
+   "view": "side",
+   "x": 17,
+   "y": 22,
+   "name": "side-walk-3"
+  },
+  {
+   "view": "side",
+   "x": 17,
+   "y": 22,
+   "name": "side-walk-4"
+  },
+  {
+   "view": "side",
+   "x": 17,
+   "y": 23,
+   "name": "side-walk-5"
+  },
+  {
+   "view": "side",
+   "x": 17,
+   "y": 22,
+   "name": "side-walk-6"
+  },
+  {
+   "view": "side",
+   "x": 17,
+   "y": 22,
+   "name": "side-walk-7"
+  }
+ ]
+}

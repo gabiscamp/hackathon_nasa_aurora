@@ -1,0 +1,132 @@
+{
+ "schema": "astro-game.head-anchors.v1",
+ "frame": [
+  32,
+  47
+ ],
+ "note": "Pixel where the head sprite's own neck anchor is placed, per body frame (frame-local coords). Heads are drawn over the body in every view. atlasFrames[i] matches frame i of uniforme-nasa.json.",
+ "headAnchor": {
+  "front": [
+   16,
+   22
+  ],
+  "side": [
+   17,
+   22
+  ]
+ },
+ "frames": {
+  "front-stand": {
+   "view": "front",
+   "x": 16,
+   "y": 22
+  },
+  "side-stand": {
+   "view": "side",
+   "x": 17,
+   "y": 22
+  },
+  "side-walk-0": {
+   "view": "side",
+   "x": 17,
+   "y": 22
+  },
+  "side-walk-1": {
+   "view": "side",
+   "x": 17,
+   "y": 23
+  },
+  "side-walk-2": {
+   "view": "side",
+   "x": 17,
+   "y": 22
+  },
+  "side-walk-3": {
+   "view": "side",
+   "x": 17,
+   "y": 22
+  },
+  "side-walk-4": {
+   "view": "side",
+   "x": 17,
+   "y": 22
+  },
+  "side-walk-5": {
+   "view": "side",
+   "x": 17,
+   "y": 23
+  },
+  "side-walk-6": {
+   "view": "side",
+   "x": 17,
+   "y": 22
+  },
+  "side-walk-7": {
+   "view": "side",
+   "x": 17,
+   "y": 22
+  }
+ },
+ "atlasFrames": [
+  {
+   "view": "front",
+   "x": 16,
+   "y": 22,
+   "name": "front-stand"
+  },
+  {
+   "view": "side",
+   "x": 17,
+   "y": 22,
+   "name": "side-stand"
+  },
+  {
+   "view": "side",
+   "x": 17,
+   "y": 22,
+   "name": "side-walk-0"
+  },
+  {
+   "view": "side",
+   "x": 17,
+   "y": 23,
+   "name": "side-walk-1"
+  },
+  {
+   "view": "side",
+   "x": 17,
+   "y": 22,
+   "name": "side-walk-2"
+  },
+  {
+   "view": "side",
+   "x": 17,
+   "y": 22,
+   "name": "side-walk-3"
+  },
+  {
+   "view": "side",
+   "x": 17,
+   "y": 22,
+   "name": "side-walk-4"
+  },
+  {
+   "view": "side",
+   "x": 17,
+   "y": 23,
+   "name": "side-walk-5"
+  },
+  {
+   "view": "side",
+   "x": 17,
+   "y": 22,
+   "name": "side-walk-6"
+  },
+  {
+   "view": "side",
+   "x": 17,
+   "y": 22,
+   "name": "side-walk-7"
+  }
+ ]
+}

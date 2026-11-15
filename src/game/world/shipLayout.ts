@@ -1,31 +1,28 @@
 /**
- * Ship layout built on top of the reference illustration
- * `references/spaceship-reference-02.jpeg` (1600×900).
+ * Ship layout built on top of the team's station illustration
+ * `public/assets/environments/station-map.png` (1600×800, magenta key removed;
+ * original in assets/environments/_source/).
  *
- * TODO: replace with real asset — the reference image is a temporary base
- * for the map until the tileset/tilemap (MAP-001, TIL-001 in
- * assets/ASSET_CATALOG.md) is produced. All coordinates below are in
- * reference-image pixels, measured by hand from that image.
+ * All coordinates are image pixels, measured by hand over a 20 px grid.
+ * The floor is a union of rectangles that avoids furniture; the player's feet
+ * box must stay fully inside it. Order matters for `roomAt`: the first match wins,
+ * so small rooms come before the big central corridor.
  */
-import shipReferenceUrl from '../../../references/spaceship-reference-02.jpeg';
-
-export const SHIP_BG_KEY = 'ship-reference-bg';
-export const SHIP_BG_URL: string = shipReferenceUrl;
+export const SHIP_BG_KEY = 'station-map';
+export const SHIP_BG_URL = '/assets/environments/station-map.png';
 
 export const WORLD_WIDTH = 1600;
-export const WORLD_HEIGHT = 900;
-
-/** Matches the plain space color of the reference, used to hide its baked-in HUD. */
-export const SPACE_MASK_COLOR = 0x11152a;
+export const WORLD_HEIGHT = 800;
 
 export type RoomId =
   | 'bridge'
   | 'quarters'
   | 'lab'
-  | 'storage'
-  | 'medical'
   | 'common'
   | 'engineering'
+  | 'storage'
+  | 'airlock'
+  | 'gym'
   | 'corridor';
 
 export interface Rect {
@@ -39,92 +36,61 @@ export interface WalkableArea extends Rect {
   room: RoomId;
 }
 
-export interface CircleMask {
-  x: number;
-  y: number;
-  r: number;
-}
-
-/**
- * Floor regions the player may stand on. The player's feet box must be
- * fully covered by the union of these rectangles.
- * Some door openings are gameplay openings not drawn in the art
- * (quarters ↔ bridge, hub ↔ medical, hub ↔ common, common ↔ right corridor).
- */
 export const WALKABLE_AREAS: readonly WalkableArea[] = [
-  // Bridge
-  { room: 'bridge', x: 640, y: 248, w: 315, h: 104 },
-  { room: 'bridge', x: 640, y: 222, w: 60, h: 30 },
-  // Central hub + left corridor
-  { room: 'corridor', x: 735, y: 340, w: 107, h: 220 },
-  { room: 'corridor', x: 402, y: 405, w: 440, h: 87 },
-  // Crew quarters (door on its right wall)
-  { room: 'quarters', x: 585, y: 295, w: 60, h: 50 },
-  { room: 'quarters', x: 480, y: 260, w: 110, h: 85 },
-  { room: 'quarters', x: 372, y: 245, w: 110, h: 30 },
-  // Storage (door through the dark panels under the corridor)
-  { room: 'storage', x: 600, y: 485, w: 100, h: 55 },
-  { room: 'storage', x: 495, y: 535, w: 190, h: 97 },
-  { room: 'storage', x: 580, y: 530, w: 105, h: 135 },
-  { room: 'storage', x: 495, y: 625, w: 45, h: 40 },
-  // Medical bay (entered from the hub)
-  { room: 'medical', x: 735, y: 555, w: 70, h: 30 },
-  { room: 'medical', x: 705, y: 578, w: 100, h: 50 },
-  { room: 'medical', x: 790, y: 618, w: 65, h: 97 },
-  { room: 'medical', x: 855, y: 648, w: 43, h: 67 },
-  // Common room
-  { room: 'common', x: 842, y: 415, w: 33, h: 80 },
-  { room: 'common', x: 872, y: 443, w: 298, h: 27 },
-  { room: 'common', x: 872, y: 443, w: 88, h: 110 },
-  { room: 'common', x: 1082, y: 465, w: 53, h: 90 },
-  // Right corridor (links common room, lab and the lower-right room)
-  { room: 'corridor', x: 1160, y: 465, w: 45, h: 40 },
-  { room: 'corridor', x: 1203, y: 340, w: 42, h: 245 },
-  // Lab
-  { room: 'lab', x: 975, y: 287, w: 250, h: 30 },
-  { room: 'lab', x: 975, y: 287, w: 55, h: 63 },
-  { room: 'lab', x: 1100, y: 287, w: 35, h: 63 },
-  { room: 'lab', x: 1170, y: 300, w: 75, h: 52 },
-  // Lower-right room
-  { room: 'engineering', x: 975, y: 578, w: 275, h: 77 },
+  // Crew quarters (top-left): aisle between the four bunks, door to the corridor
+  { room: 'quarters', x: 455, y: 128, w: 75, h: 209 },
+  { room: 'quarters', x: 402, y: 178, w: 180, h: 35 },
+
+  // Lab + greenhouse (top-centre): open bottom, aisles beside the robot arm
+  { room: 'lab', x: 752, y: 245, w: 96, h: 60 },
+  { room: 'lab', x: 745, y: 205, w: 105, h: 50 },
+  { room: 'lab', x: 740, y: 126, w: 30, h: 86 },
+  { room: 'lab', x: 770, y: 126, w: 62, h: 12 },
+
+  // Kitchen / common room (top-right): around the dining table
+  { room: 'common', x: 1024, y: 262, w: 74, h: 75 },
+  { room: 'common', x: 1000, y: 185, w: 62, h: 92 },
+  { room: 'common', x: 1000, y: 185, w: 240, h: 20 },
+  { room: 'common', x: 1185, y: 185, w: 55, h: 92 },
+  { room: 'common', x: 1000, y: 262, w: 240, h: 15 },
+
+  // Bridge (right): capsule behind the cockpit door
+  { room: 'bridge', x: 1385, y: 292, w: 62, h: 185 },
+  { room: 'bridge', x: 1330, y: 345, w: 60, h: 85 },
+
+  // Engineering + life support (left): reactor door and the strip around the tanks
+  { room: 'engineering', x: 245, y: 355, w: 40, h: 70 },
+  { room: 'engineering', x: 282, y: 332, w: 32, h: 110 },
+  { room: 'engineering', x: 282, y: 332, w: 178, h: 16 },
+  { room: 'engineering', x: 282, y: 434, w: 178, h: 13 },
+
+  // Storage (bottom-left): door, front aisle and the aisle between racks and consoles
+  { room: 'storage', x: 470, y: 445, w: 38, h: 60 },
+  { room: 'storage', x: 470, y: 480, w: 110, h: 22 },
+  { room: 'storage', x: 547, y: 480, w: 30, h: 122 },
+
+  // EVA / airlock (bottom-centre): between the suit lockers, down to the docking hatch
+  { room: 'airlock', x: 750, y: 445, w: 95, h: 210 },
+
+  // Gym & hygiene (bottom-right): door, aisle by the shower, back strip
+  { room: 'gym', x: 1072, y: 440, w: 31, h: 70 },
+  { room: 'gym', x: 1076, y: 495, w: 24, h: 110 },
+  { room: 'gym', x: 975, y: 595, w: 290, h: 22 },
+
+  // Central corridor and its side pockets (last: it is the fallback room)
+  { room: 'corridor', x: 445, y: 335, w: 895, h: 100 },
+  { room: 'corridor', x: 370, y: 430, w: 880, h: 15 },
+  { room: 'corridor', x: 580, y: 295, w: 60, h: 45 },
+  { room: 'corridor', x: 640, y: 300, w: 310, h: 40 },
 ];
 
-/** Areas of the reference image that contain its painted HUD (to be hidden). */
-export const HUD_RECT_MASKS: readonly Rect[] = [
-  { x: 0, y: 0, w: 372, h: 132 }, // portrait + bars
-  { x: 0, y: 132, w: 160, h: 32 }, // level badge
-  { x: 1275, y: 15, w: 325, h: 102 }, // mission panel
-  { x: 585, y: 797, w: 425, h: 103 }, // inventory bar
-  { x: 8, y: 812, w: 180, h: 66 }, // "Tab Inventário"
-];
-export const HUD_CIRCLE_MASKS: readonly CircleMask[] = [{ x: 1502, y: 768, r: 92 }]; // minimap
+export const PLAYER_SPAWN = { x: 680, y: 400 } as const;
 
-/**
- * The reference has a character painted in the hub (x 770–815, y 402–478).
- * Each patch covers part of it with floor copied from (x+dx, y+dy).
- * Hub floor seams are at y=354/462/500/512 and x=752/824, so sources stay
- * inside the same floor plate, and the y=462 seam is copied sideways.
- */
-export interface ImagePatch extends Rect {
-  dx: number;
-  dy: number;
-}
-export const BAKED_CHARACTER_PATCHES: readonly ImagePatch[] = [
-  { x: 765, y: 398, w: 56, h: 32, dx: 0, dy: -42 },
-  { x: 765, y: 430, w: 56, h: 30, dx: 0, dy: -74 },
-  { x: 765, y: 460, w: 14, h: 6, dx: -10, dy: 0 },
-  { x: 779, y: 460, w: 14, h: 6, dx: -24, dy: 0 },
-  { x: 793, y: 460, w: 14, h: 6, dx: -38, dy: 0 },
-  { x: 807, y: 460, w: 14, h: 6, dx: -52, dy: 0 },
-  { x: 765, y: 466, w: 56, h: 16, dx: 0, dy: 14 },
-];
-
-export const PLAYER_SPAWN = { x: 794, y: 470 } as const;
-
+/** Where each crew role works; keys match CrewRole in src/data/crew.ts. */
 export const NPC_SPAWNS = {
-  kira: { x: 1110, y: 620, room: 'engineering' },
-  leo: { x: 760, y: 610, room: 'medical' },
-  maya: { x: 1000, y: 310, room: 'lab' },
+  engineer: { x: 298, y: 400, room: 'engineering' },
+  medic: { x: 1180, y: 608, room: 'gym' },
+  scientist: { x: 797, y: 235, room: 'lab' },
 } as const satisfies Record<string, { x: number; y: number; room: RoomId }>;
 
 export const ROOM_CENTERS: Record<RoomId, { x: number; y: number }> = {

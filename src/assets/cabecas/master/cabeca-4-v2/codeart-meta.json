@@ -1,0 +1,210 @@
+{
+  "schema": "codeart2d.codeart_meta.v1",
+  "art_source": "code",
+  "placeholder": false,
+  "disclosure": "code-drawn, no image model",
+  "generator": "render_pixelspec.py",
+  "spec_sha256": "41d96eac6eb9e551799fefedc617f23dd6b703c3ffeffd3d77f473368fc8f7f7",
+  "renderer": {
+    "name": "codeart_core.render_pixelspec",
+    "version": "1.1"
+  },
+  "palette": {
+    "colors": {
+      "k": "#1b1d2a",
+      "Q": "#ffffff",
+      "h": "#d0682e",
+      "H": "#f3a565",
+      "j": "#9c4620",
+      "J": "#6e2f14",
+      "s": "#fde3cf",
+      "S": "#f2c2a6",
+      "e": "#1e3a2a",
+      "I": "#2f8f4f",
+      "i": "#80d39b",
+      "p": "#f5a99a",
+      "f": "#d9926e",
+      "t": "#3a7bd5"
+    },
+    "variants": {}
+  },
+  "outputs": [
+    {
+      "path": "base/frames/front.png",
+      "sha256": "f4a5e69654c2cb16524123c10b243747473d3a0c8ac7d0513fd73d5c89ff81a5",
+      "bytes": 424
+    },
+    {
+      "path": "base/frames/side.png",
+      "sha256": "aeb4fd1f6f97d3278e2e150599edbd5c5b5018e2defe3787b74ad38c5336063a",
+      "bytes": 445
+    },
+    {
+      "path": "base/frames/back.png",
+      "sha256": "19f141024658d09068424eccb4bca7755f2b2fee5361c0723a92eb86b3779ce3",
+      "bytes": 374
+    },
+    {
+      "path": "preview-x6.png",
+      "sha256": "d6ced35de43aa8bfd5e97fee651ce8d9cf13a1c9d4c2375bfa1edfe4d7923f37",
+      "bytes": 1633
+    }
+  ],
+  "qa": {
+    "status": "pass",
+    "method": "render_pixelspec.py: every published frame PNG is read back and measured with codeart_core.qa_pixels against the resolved palette of its variant (alpha census, exact palette lookup and, with an outline, 4-neighbour outline gaps and L-corners); each check is the worst frame against its gate in codeart_core.QA_PIXEL_GATES",
+    "notProven": [
+      "Readability, silhouette and appeal at game scale; check them on a review sheet (pixel_qa.py --review).",
+      "Motion, timing and spacing between frames; numbers do not judge animation quality.",
+      "That the art matches the brief and the intent of the spec."
+    ],
+    "checks": [
+      {
+        "id": "partial_alpha",
+        "status": "pass",
+        "value": 0,
+        "threshold": 0
+      },
+      {
+        "id": "off_palette",
+        "status": "pass",
+        "value": 0,
+        "threshold": 0
+      },
+      {
+        "id": "outline_gaps",
+        "status": "pass",
+        "value": 0,
+        "threshold": 0
+      },
+      {
+        "id": "l_corners",
+        "status": "pass",
+        "value": 4,
+        "threshold": 10
+      }
+    ],
+    "inputs": [
+      {
+        "path": "../../spec/cabeca-4.pixelspec.json",
+        "sha256": "41d96eac6eb9e551799fefedc617f23dd6b703c3ffeffd3d77f473368fc8f7f7",
+        "bytes": 3869
+      }
+    ],
+    "outputs": [
+      {
+        "path": "base/frames/front.png",
+        "sha256": "f4a5e69654c2cb16524123c10b243747473d3a0c8ac7d0513fd73d5c89ff81a5",
+        "bytes": 424
+      },
+      {
+        "path": "base/frames/side.png",
+        "sha256": "aeb4fd1f6f97d3278e2e150599edbd5c5b5018e2defe3787b74ad38c5336063a",
+        "bytes": 445
+      },
+      {
+        "path": "base/frames/back.png",
+        "sha256": "19f141024658d09068424eccb4bca7755f2b2fee5361c0723a92eb86b3779ce3",
+        "bytes": 374
+      }
+    ],
+    "tool": {
+      "name": "render_pixelspec.py",
+      "version": "0.6.0"
+    },
+    "frames": [
+      {
+        "file": "base/frames/front.png",
+        "variant": "base",
+        "frame": "front",
+        "visible": 349,
+        "partial_alpha": 0,
+        "off_palette": 0,
+        "colors": 12,
+        "orphans": 21,
+        "l_corners": 1,
+        "outline_gaps": 0,
+        "bbox": [
+          6,
+          2,
+          27,
+          24
+        ]
+      },
+      {
+        "file": "base/frames/side.png",
+        "variant": "base",
+        "frame": "side",
+        "visible": 363,
+        "partial_alpha": 0,
+        "off_palette": 0,
+        "colors": 13,
+        "orphans": 26,
+        "l_corners": 4,
+        "outline_gaps": 0,
+        "bbox": [
+          3,
+          2,
+          27,
+          24
+        ]
+      },
+      {
+        "file": "base/frames/back.png",
+        "variant": "base",
+        "frame": "back",
+        "visible": 333,
+        "partial_alpha": 0,
+        "off_palette": 0,
+        "colors": 7,
+        "orphans": 24,
+        "l_corners": 0,
+        "outline_gaps": 0,
+        "bbox": [
+          6,
+          2,
+          26,
+          25
+        ]
+      }
+    ]
+  },
+  "pixelspec": {
+    "name": "cabeca-4",
+    "schema": "codeart2d.pixelspec.v1",
+    "canvas": [
+      32,
+      26
+    ],
+    "anchor_px": [
+      16,
+      24
+    ],
+    "outline": "solid",
+    "variants": {
+      "base": "base"
+    },
+    "frames": [
+      {
+        "index": 0,
+        "name": "front",
+        "file": "frames/front.png"
+      },
+      {
+        "index": 1,
+        "name": "side",
+        "file": "frames/side.png"
+      },
+      {
+        "index": 2,
+        "name": "back",
+        "file": "frames/back.png"
+      }
+    ],
+    "preview": {
+      "file": "preview-x6.png",
+      "scale": 6,
+      "layout": "rows are variants, columns are distinct frames"
+    }
+  }
+}

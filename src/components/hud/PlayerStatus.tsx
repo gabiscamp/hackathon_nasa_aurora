@@ -1,6 +1,8 @@
 import { useGameStore } from '../../stores/useGameStore';
 import { useResourceStore } from '../../stores/useResourceStore';
 import { useCrewStore } from '../../stores/useCrewStore';
+import { getTeam } from '../../data/crews';
+import { ASTRONAUT_PHOTOS } from '../../data/astronautPhotos';
 import { HudBar } from './HudBar';
 import { CommanderPortrait, EnergyIcon, OxygenIcon, ShieldIcon } from './HudIcons';
 
@@ -31,13 +33,18 @@ export function PlayerStatus() {
   const satisfaction = useResourceStore((s) => s.satisfaction);
   const radiation = useResourceStore((s) => s.radiation);
   const crew = useCrewStore((s) => s.crew);
+  const crewId = useGameStore((s) => s.crewId);
+  const commanderPhoto = crewId ? getTeam(crewId).commander.photo : undefined;
+  // Older saves have no photo field: look it up from the name's astronaut id.
+  const photoOf = (name: string, photo?: string) =>
+    photo ?? Object.entries(ASTRONAUT_PHOTOS).find(([id]) => name.toLowerCase().includes(id))?.[1].src;
 
   return (
     <div className="hud-status">
       <div className="hud-status__main">
         <div className="hud-portrait">
           <div className="hud-portrait__frame">
-            <CommanderPortrait size={52} />
+            {commanderPhoto ? <img src={commanderPhoto} alt="" /> : <CommanderPortrait size={76} />}
           </div>
           <span className="hud-portrait__badge">Day {day}/90</span>
         </div>
@@ -58,7 +65,11 @@ export function PlayerStatus() {
         {Object.values(crew).map((member) => (
           <li key={member.id} className="hud-crew__chip" title={`${member.name} — ${member.roleLabel}`}>
             <span className="hud-crew__avatar" style={{ ['--crew-color' as string]: member.color }}>
-              {member.name.replace('Dr. ', '').charAt(0)}
+              {photoOf(member.name, member.photo) ? (
+                <img src={photoOf(member.name, member.photo)} alt="" />
+              ) : (
+                member.name.charAt(0)
+              )}
             </span>
             <span className="hud-crew__info">
               <span className="hud-crew__name">{member.name.replace('Dr. ', '').split(' ')[0]}</span>

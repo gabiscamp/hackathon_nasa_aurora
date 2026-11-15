@@ -1,14 +1,22 @@
 import Phaser from 'phaser';
 import { gameEvents, EVENTS } from '../events';
+import { useCrewStore } from '../../stores/useCrewStore';
+import { CREW_ROLES } from '../../data/crew';
+import { useGameStore } from '../../stores/useGameStore';
+import { getTeam } from '../../data/crews';
+import {
+  CHARACTER_SPRITES,
+  SPRITE_COLS,
+  SPRITE_DIRECTIONS,
+  SPRITE_ORIGIN_Y,
+  SPRITE_SCALE,
+  type SpriteDirection,
+} from '../world/characterSprites';
 import {
   SHIP_BG_KEY,
   WORLD_WIDTH,
   WORLD_HEIGHT,
-  SPACE_MASK_COLOR,
   WALKABLE_AREAS,
-  HUD_RECT_MASKS,
-  HUD_CIRCLE_MASKS,
-  BAKED_CHARACTER_PATCHES,
   PLAYER_SPAWN,
   NPC_SPAWNS,
   ROOM_CENTERS,
@@ -20,17 +28,34 @@ import {
 const PLAYER_SPEED = 160;
 const PLAYER_SIZE = 28;
 /** Half extents of the player's feet box used for walkability checks (world px). */
-const FEET_HALF_W = 10;
-const FEET_HALF_H = 5;
+const FEET_HALF_W = 6;
+const FEET_HALF_H = 3;
+/** How far (px) the player may be nudged sideways to slip around a corner or into a doorway. */
+const CORNER_ASSIST = 8;
+/**
+ * Close follow camera, player locked in the centre (Among Us style).
+ * The zoom is chosen so the screen always shows about this many world pixels
+ * of height (~one room), whatever the window size.
+ */
+const VIEW_HEIGHT = 380;
+/** Never zoom out below 1:1 (that would show the edge of the map). */
+const MIN_ZOOM = 1;
+/** 1 = rigid lock on the player; a little below keeps it from feeling jerky. */
+const FOLLOW_LERP = 0.25;
 /** Minimum time between PLAYER_MOVED events sent to the React HUD (ms). */
 const POSITION_EMIT_INTERVAL = 80;
+const STARFIELD_KEY = 'starfield';
 
 const INTERACT_DISTANCE = 80;
 
 export class GameScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Container;
   private playerBody!: Phaser.Physics.Arcade.Body;
-  private directionDot!: Phaser.GameObjects.Graphics;
+  /** Placeholder arrow, only when the commander has no spritesheet yet. */
+  private directionDot: Phaser.GameObjects.Graphics | null = null;
+  private playerSprite: Phaser.GameObjects.Sprite | null = null;
+  private spriteKey = '';
+  private facing: SpriteDirection = 'down';
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<string, Phaser.Input.Keyboard.Key>;
   private walkableDebug: Phaser.GameObjects.Graphics | null = null;
@@ -51,9 +76,31 @@ export class GameScene extends Phaser.Scene {
     this.createShipBackground();
     this.createPlayer();
 
-    this.createNPC(NPC_SPAWNS.kira.x, NPC_SPAWNS.kira.y, 0xf5a623, 'Kira');
-    this.createNPC(NPC_SPAWNS.leo.x, NPC_SPAWNS.leo.y, 0x2ecc71, 'Leo');
-    this.createNPC(NPC_SPAWNS.maya.x, NPC_SPAWNS.maya.y, 0x8b5cf6, 'Maya');
+    // Pause menu (React) freezes the world while it is open.
+    const onMenuOpened = () => this.scene.pause();
+    const onMenuClosed = () => {
+      // Keys released during the pause would otherwise stay "down".
+      this.input.keyboard?.resetKeys();
+      this.scene.resume();
+    };
+    gameEvents.on(EVENTS.MENU_OPENED, onMenuOpened);
+    gameEvents.on(EVENTS.MENU_CLOSED, onMenuClosed);
+    // Phaser fires DESTROY (not SHUTDOWN) when React unmounts the game, so remove on both.
+    const removeMenuListeners = () => {
+      gameEvents.off(EVENTS.MENU_OPENED, onMenuOpened);
+      gameEvents.off(EVENTS.MENU_CLOSED, onMenuClosed);
+    };
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, removeMenuListeners);
+    this.events.once(Phaser.Scenes.Events.DESTROY, removeMenuListeners);
+
+    // Crew comes from the crew chosen on the home screen.
+    const crew = useCrewStore.getState().crew;
+    for (const role of CREW_ROLES) {
+      const member = crew[role];
+      const spawn = NPC_SPAWNS[role];
+      const firstName = member.name.replace(/^Dr\.\s*/, '').split(' ')[0];
+      this.createNPC(spawn.x, spawn.y, Phaser.Display.Color.HexStringToColor(member.color).color, firstName);
+    }
 
     // Input — WASD and arrows work simultaneously
     this.cursors = this.input.keyboard!.createCursorKeys();
@@ -70,12 +117,17 @@ export class GameScene extends Phaser.Scene {
       this.input.keyboard!.on('keydown-F2', () => this.toggleWalkableDebug());
     }
 
-    // Camera: whole ship visible, as in the reference
+    // Camera: zoomed in and centred on the player, stopping at the edges of the station map.
     const camera = this.cameras.main;
     camera.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-    // Fit the whole 1600×900 reference into the 1280×720 canvas (zoom 0.8)
-    camera.setZoom(Math.min(this.scale.width / WORLD_WIDTH, this.scale.height / WORLD_HEIGHT));
-    camera.centerOn(WORLD_WIDTH / 2, WORLD_HEIGHT / 2);
+    this.applyZoom();
+    camera.startFollow(this.player, true, FOLLOW_LERP, FOLLOW_LERP);
+    // Centre on the middle of the sprite, not on the feet.
+    camera.setFollowOffset(0, 16);
+    // The canvas follows its box on screen; keep the same view when it resizes.
+    this.scale.on(Phaser.Scale.Events.RESIZE, this.applyZoom, this);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scale.off(Phaser.Scale.Events.RESIZE, this.applyZoom, this));
+    this.events.once(Phaser.Scenes.Events.DESTROY, () => this.scale.off(Phaser.Scale.Events.RESIZE, this.applyZoom, this));
 
     this.updateRoom();
     this.emitPosition(true);
@@ -115,30 +167,64 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
-  /** TODO: replace with real asset — reference illustration used as the map base. */
+  /** Station illustration over a simple starfield (the map PNG has a transparent background). */
   private createShipBackground() {
-    this.add.image(0, 0, SHIP_BG_KEY).setOrigin(0, 0).setDepth(0);
-
-    // Cover the character painted into the reference with nearby floor
-    for (const patch of BAKED_CHARACTER_PATCHES) {
-      this.add
-        .image(-patch.dx, -patch.dy, SHIP_BG_KEY)
-        .setOrigin(0, 0)
-        .setCrop(patch.x + patch.dx, patch.y + patch.dy, patch.w, patch.h)
-        .setDepth(1);
+    // TODO: replace with real asset — ENV-001 star layer. Seeded so stars don't move between visits.
+    // Drawn ONCE into a texture: a live Graphics object is re-triangulated every frame,
+    // which cost ~6 ms per frame (and made the game lag while screen sharing).
+    if (!this.textures.exists(STARFIELD_KEY)) {
+      const rnd = new Phaser.Math.RandomDataGenerator(['aurora-stars']);
+      const g = this.make.graphics({}, false);
+      for (let i = 0; i < 260; i++) {
+        g.fillStyle(0xf0ece4, rnd.realInRange(0.25, 0.9));
+        g.fillRect(rnd.between(0, WORLD_WIDTH), rnd.between(0, WORLD_HEIGHT), rnd.pick([1, 1, 2]), rnd.pick([1, 1, 2]));
+      }
+      g.generateTexture(STARFIELD_KEY, WORLD_WIDTH, WORLD_HEIGHT);
+      g.destroy();
     }
+    this.add.image(0, 0, STARFIELD_KEY).setOrigin(0, 0).setDepth(0);
+    this.add.image(0, 0, SHIP_BG_KEY).setOrigin(0, 0).setDepth(1);
+  }
 
-    // Hide the HUD painted into the reference (the real HUD is React)
-    const masks = this.add.graphics().setDepth(2);
-    masks.fillStyle(SPACE_MASK_COLOR, 1);
-    for (const r of HUD_RECT_MASKS) masks.fillRect(r.x, r.y, r.w, r.h);
-    for (const c of HUD_CIRCLE_MASKS) masks.fillCircle(c.x, c.y, c.r);
+  /** Walk animations for a 4×4 sheet (rows: down, left, right, up). Frame 0 of each row = standing. */
+  private createWalkAnimations(key: string) {
+    SPRITE_DIRECTIONS.forEach((dir, row) => {
+      const animKey = `${key}-walk-${dir}`;
+      if (this.anims.exists(animKey)) return;
+      this.anims.create({
+        key: animKey,
+        frames: this.anims.generateFrameNumbers(key, { start: row * SPRITE_COLS, end: row * SPRITE_COLS + SPRITE_COLS - 1 }),
+        frameRate: 8,
+        repeat: -1,
+      });
+    });
   }
 
   private createPlayer() {
-    // TODO: replace with real asset — placeholder until the commander spritesheet exists
     this.player = this.add.container(PLAYER_SPAWN.x, PLAYER_SPAWN.y).setDepth(10);
 
+    // The player is the chosen crew's commander; use their spritesheet when one exists.
+    const crewId = useGameStore.getState().crewId;
+    const sprite = crewId ? CHARACTER_SPRITES[getTeam(crewId).commander.astronautId] : undefined;
+    if (sprite && this.textures.exists(sprite.key)) {
+      this.spriteKey = sprite.key;
+      this.createWalkAnimations(sprite.key);
+      this.playerSprite = this.add.sprite(0, 0, sprite.key, 0).setOrigin(0.5, SPRITE_ORIGIN_Y).setScale(SPRITE_SCALE);
+      this.player.add(this.playerSprite);
+    } else {
+      this.createPlaceholderPlayer();
+    }
+
+    this.physics.world.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    this.physics.world.enable(this.player);
+    this.playerBody = this.player.body as Phaser.Physics.Arcade.Body;
+    this.playerBody.setSize(FEET_HALF_W * 2, FEET_HALF_H * 2);
+    this.playerBody.setOffset(-FEET_HALF_W, -FEET_HALF_H);
+    this.playerBody.setCollideWorldBounds(true);
+  }
+
+  /** TODO: replace with real asset — circle + arrow for commanders without a spritesheet. */
+  private createPlaceholderPlayer() {
     const body = this.add.graphics();
     body.fillStyle(0x3b82f6, 1);
     body.fillCircle(0, -PLAYER_SIZE / 2, PLAYER_SIZE / 2);
@@ -151,13 +237,6 @@ export class GameScene extends Phaser.Scene {
     this.directionDot.fillCircle(0, -PLAYER_SIZE / 2 + 4, 4);
 
     this.player.add([body, this.directionDot]);
-
-    this.physics.world.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-    this.physics.world.enable(this.player);
-    this.playerBody = this.player.body as Phaser.Physics.Arcade.Body;
-    this.playerBody.setSize(FEET_HALF_W * 2, FEET_HALF_H * 2);
-    this.playerBody.setOffset(-FEET_HALF_W, -FEET_HALF_H);
-    this.playerBody.setCollideWorldBounds(true);
   }
 
   private createNPC(x: number, y: number, color: number, name: string) {
@@ -166,15 +245,21 @@ export class GameScene extends Phaser.Scene {
 
     const circle = this.add.graphics();
     circle.fillStyle(color, 1);
-    circle.fillCircle(0, -14, 14);
-    circle.lineStyle(2, 0xe2e8f0, 1);
-    circle.strokeCircle(0, -14, 14);
+    // Same footprint as the ~40 px astronaut sprite.
+    circle.fillCircle(0, -10, 10);
+    circle.lineStyle(1.5, 0xe2e8f0, 1);
+    circle.strokeCircle(0, -10, 10);
 
+    // Rendered at 4x so the name stays sharp under the zoomed pixel-art camera.
     const label = this.add
-      .text(0, -40, name, {
-        fontSize: '14px',
+      .text(0, -28, name, {
+        fontSize: '9px',
+        fontStyle: 'bold',
         color: '#f0ece4',
         fontFamily: 'Nunito, sans-serif',
+        stroke: '#0a0e27',
+        strokeThickness: 2,
+        resolution: 4,
       })
       .setOrigin(0.5);
 
@@ -277,6 +362,31 @@ export class GameScene extends Phaser.Scene {
     gameEvents.emit(EVENTS.PLAYER_MOVED, { x: this.player.x, y: this.player.y });
   }
 
+  private applyZoom() {
+    this.cameras.main.setZoom(Math.max(MIN_ZOOM, this.scale.height / VIEW_HEIGHT));
+  }
+
+  private canStand(x: number, y: number): boolean {
+    return isBoxWalkable(x, y, FEET_HALF_W, FEET_HALF_H);
+  }
+
+  /**
+   * When the next position is blocked, look up to CORNER_ASSIST px to either side
+   * (on `axis`) for a free spot and return a small move toward the closest one.
+   */
+  private cornerNudge(x: number, y: number, axis: 'x' | 'y', step: number): number {
+    for (let d = 1; d <= CORNER_ASSIST; d++) {
+      for (const sign of [1, -1]) {
+        const ox = axis === 'x' ? sign * d : 0;
+        const oy = axis === 'y' ? sign * d : 0;
+        if (this.canStand(x + ox, y + oy) && this.canStand(this.player.x + Math.sign(ox) * Math.min(step, d), this.player.y + Math.sign(oy) * Math.min(step, d))) {
+          return sign * Math.min(step, d);
+        }
+      }
+    }
+    return 0;
+  }
+
   update(_time: number, delta: number) {
     if (this.frozen) return;
 
@@ -304,18 +414,36 @@ export class GameScene extends Phaser.Scene {
     // player slides along walls. Position is set directly (the walkable map
     // is the collision source), so the physics body never pushes it off the floor.
     const dt = Math.min(delta, 50) / 1000;
-    const { x, y } = this.player;
-    const nextX = x + vx * dt;
-    if (vx !== 0 && isBoxWalkable(nextX, y, FEET_HALF_W, FEET_HALF_H)) this.player.x = nextX;
-    const nextY = y + vy * dt;
-    if (vy !== 0 && isBoxWalkable(this.player.x, nextY, FEET_HALF_W, FEET_HALF_H)) this.player.y = nextY;
+    const step = PLAYER_SPEED * dt;
+    const nextX = this.player.x + vx * dt;
+    if (vx !== 0) {
+      if (this.canStand(nextX, this.player.y)) this.player.x = nextX;
+      // Blocked on a corner: slide along the wall toward the nearby opening.
+      else if (vy === 0) this.player.y += this.cornerNudge(nextX, this.player.y, 'y', step);
+    }
+    const nextY = this.player.y + vy * dt;
+    if (vy !== 0) {
+      if (this.canStand(this.player.x, nextY)) this.player.y = nextY;
+      else if (vx === 0) this.player.x += this.cornerNudge(this.player.x, nextY, 'x', step);
+    }
 
     this.playerBody.setVelocity(0, 0);
 
-    // Point the direction indicator (0 rad = facing up)
-    if (vx !== 0 || vy !== 0) {
-      this.directionDot.setRotation(Math.atan2(vy, vx) + Math.PI / 2);
+    const moving = vx !== 0 || vy !== 0;
+    if (moving) {
+      // Horizontal wins on diagonals, like most top-down games.
+      this.facing = vx < 0 ? 'left' : vx > 0 ? 'right' : vy < 0 ? 'up' : 'down';
+      this.directionDot?.setRotation(Math.atan2(vy, vx) + Math.PI / 2);
       this.emitPosition();
+    }
+    if (this.playerSprite) {
+      if (moving) {
+        this.playerSprite.anims.play(`${this.spriteKey}-walk-${this.facing}`, true);
+      } else if (this.playerSprite.anims.isPlaying) {
+        // Stand still on the first frame of the current direction.
+        this.playerSprite.anims.stop();
+        this.playerSprite.setFrame(SPRITE_DIRECTIONS.indexOf(this.facing) * SPRITE_COLS);
+      }
     }
 
     this.updateRoom();

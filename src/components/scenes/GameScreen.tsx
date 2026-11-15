@@ -13,9 +13,16 @@ import { Hud } from '../hud/Hud';
 import { gameEvents, EVENTS } from '../../game/events';
 import { playAlertSound } from '../../utils/sounds';
 import type { RoomId } from '../../game/world/shipLayout';
+import { PauseMenu } from '../hud/PauseMenu';
 import './GameScreen.css';
 
-export function GameScreen() {
+interface GameScreenProps {
+  onMainMenu: () => void;
+  onOpenCredits: () => void;
+  creditsOpen: boolean;
+}
+
+export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScreenProps) {
   const day = useGameStore((s) => s.day);
   const phase = useGameStore((s) => s.phase);
   const nextPhase = useGameStore((s) => s.nextPhase);
@@ -78,6 +85,7 @@ export function GameScreen() {
       <div className="game-stage">
         <PhaserGame className="station-view" />
         <Hud />
+        <PauseMenu onMainMenu={onMainMenu} onOpenCredits={onOpenCredits} suspended={creditsOpen} />
 
         {phase === 'decision' && !missionOpen && currentMission && (
           <div className="game-hint-banner">

@@ -54,8 +54,8 @@
 }
 
 .hud-portrait__frame {
-  width: 76px;
-  height: 76px;
+  width: 88px;
+  height: 88px;
   padding: 4px;
   border-radius: 14px;
   background: var(--hud-metal);
@@ -64,6 +64,15 @@
     0 0 0 4px rgba(10, 14, 39, 0.9),
     0 0 14px rgba(245, 166, 35, 0.35),
     0 6px 14px rgba(0, 0, 0, 0.55);
+}
+
+.hud-portrait__frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+  border-radius: 10px;
 }
 
 .hud-portrait__frame svg {
@@ -83,7 +92,7 @@
   border-radius: 8px;
   background: var(--hud-bg-deep);
   border: 2px solid var(--hud-amber);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
@@ -98,7 +107,7 @@
 }
 
 .hud-status__name {
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 800;
   letter-spacing: 0.5px;
   text-shadow: 0 2px 3px rgba(0, 0, 0, 0.9);
@@ -117,8 +126,8 @@
   z-index: 1;
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   color: var(--bar-color);
   background: radial-gradient(circle at 35% 30%, #34405f, var(--hud-bg-deep));
@@ -129,8 +138,8 @@
 
 .hud-bar__track {
   position: relative;
-  width: 140px;
-  height: 16px;
+  width: 176px;
+  height: 22px;
   margin-left: -6px;
   border-radius: 0 9px 9px 0;
   background: rgba(6, 9, 24, 0.92);
@@ -167,7 +176,7 @@
   right: 6px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 800;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -206,14 +215,22 @@
 .hud-crew__avatar {
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 800;
   color: var(--hud-bg-deep);
   background: var(--crew-color);
   box-shadow: 0 0 0 2px var(--hud-bg-deep), 0 0 0 3px var(--crew-color);
+  overflow: hidden;
+}
+
+.hud-crew__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
 }
 
 .hud-crew__info {
@@ -223,15 +240,15 @@
 }
 
 .hud-crew__name {
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 700;
   line-height: 1.1;
 }
 
 .hud-crew__mini {
   display: block;
-  width: 44px;
-  height: 4px;
+  width: 56px;
+  height: 6px;
   border-radius: 2px;
   background: rgba(6, 9, 24, 0.9);
   overflow: hidden;
@@ -249,7 +266,7 @@
   right: var(--hud-edge);
   display: flex;
   align-items: flex-start;
-  max-width: 300px;
+  max-width: 360px;
 }
 
 .hud-objective__icon {
@@ -258,8 +275,8 @@
   display: grid;
   place-items: center;
   flex: none;
-  width: 34px;
-  height: 34px;
+  width: 40px;
+  height: 40px;
   margin-top: 6px;
   margin-right: -14px;
   color: var(--hud-amber);
@@ -275,7 +292,7 @@
 }
 
 .hud-objective__body {
-  min-width: 230px;
+  min-width: 260px;
   padding: 8px 14px 9px 24px;
   background: var(--hud-bg);
   border: 1px solid var(--hud-rim);
@@ -285,7 +302,7 @@
 }
 
 .hud-objective__title {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 800;
   letter-spacing: 0.5px;
   line-height: 1.2;
@@ -299,7 +316,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: 18px;
   line-height: 1.3;
 }
 
@@ -320,7 +337,7 @@
 
 .hud-objective__days-track {
   flex: 1;
-  height: 4px;
+  height: 6px;
   border-radius: 2px;
   background: rgba(6, 9, 24, 0.9);
   overflow: hidden;
@@ -334,7 +351,7 @@
 }
 
 .hud-objective__days-label {
-  font-size: 14px;
+  font-size: 16px;
   color: var(--hud-text-dim);
   font-variant-numeric: tabular-nums;
 }
@@ -350,8 +367,8 @@
 
 .hud-slot {
   position: relative;
-  width: 52px;
-  height: 52px;
+  width: 60px;
+  height: 60px;
   border-radius: 10px;
   background: radial-gradient(circle at 50% 30%, #26304d, #121933);
   border: 2px solid #3a4666;
@@ -386,12 +403,12 @@
   left: 50%;
   bottom: -11px;
   transform: translateX(-50%);
-  min-width: 20px;
+  min-width: 22px;
   padding: 0 5px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 800;
-  line-height: 18px;
+  line-height: 20px;
   color: var(--hud-text);
   background: var(--hud-bg-deep);
   border: 1px solid #3a4666;
@@ -407,8 +424,8 @@
 .hud-minimap {
   right: var(--hud-edge);
   bottom: var(--hud-edge);
-  width: 128px;
-  height: 128px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(20, 34, 66, 0.92), rgba(10, 14, 39, 0.95));
   box-shadow:
@@ -442,10 +459,10 @@
   transform: translateX(-50%);
   display: grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 800;
   background: var(--hud-bg-deep);
   border: 2px solid var(--hud-blue);
@@ -467,7 +484,7 @@
   gap: 6px;
   padding: 4px 12px 4px 8px;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 800;
   letter-spacing: 0.5px;
   background: var(--hud-bg);
@@ -483,7 +500,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--hud-text-dim);
   text-shadow: 0 1px 2px #000;
 }
@@ -492,9 +509,9 @@
   padding: 0 6px;
   border-radius: 5px;
   font-family: inherit;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 800;
-  line-height: 18px;
+  line-height: 20px;
   color: var(--hud-text);
   background: var(--hud-bg-deep);
   border: 1px solid #3a4666;
