@@ -10,6 +10,7 @@ import {
   WALKABLE_AREAS,
   isPointWalkable,
   type RoomId,
+  type WalkableArea,
 } from './stationLayout';
 
 export {
@@ -33,20 +34,53 @@ export type { RoomId, Rect, WalkableArea, Placement, PieceKey } from './stationL
 export const SPACE_BG_KEY = 'mars-backdrop';
 export const SPACE_BG_URL = '/assets/environments/mars-backdrop.jpg';
 
+/** Clear floor needed around a marker spot, so the player can stand next to the "!". */
+const MARKER_CLEARANCE = 14;
+
+/** Is there free floor in a small cross around (x, y)? */
+function isRoomy(x: number, y: number): boolean {
+  const d = MARKER_CLEARANCE;
+  return [
+    [0, 0],
+    [d, 0],
+    [-d, 0],
+    [0, d],
+    [0, -d],
+  ].every(([dx, dy]) => isPointWalkable(x + dx, y + dy));
+}
+
 /**
- * Mission marker spot per room: the middle of the room's biggest floor area whose
- * middle is free of furniture, so it always sits on walkable floor.
+ * Mission marker spot per room: inside the room's biggest floor area, the free spot
+ * (not on furniture) closest to its middle. Rooms with a big table or a toilet in the
+ * middle (Kitchen, Bathroom) get a spot beside it instead of the doorway.
  */
 export const ROOM_CENTERS = (() => {
-  const best = {} as Record<RoomId, { x: number; y: number; area: number }>;
+  const biggest = {} as Record<RoomId, WalkableArea>;
   for (const a of WALKABLE_AREAS) {
-    const x = a.x + a.w / 2;
-    const y = a.y + a.h / 2;
-    if (!isPointWalkable(x, y)) continue;
-    const area = a.w * a.h;
-    if (!best[a.room] || area > best[a.room].area) best[a.room] = { x, y, area };
+    if (!biggest[a.room] || a.w * a.h > biggest[a.room].w * biggest[a.room].h) biggest[a.room] = a;
   }
   const centers = {} as Record<RoomId, { x: number; y: number }>;
-  for (const room of Object.keys(best) as RoomId[]) centers[room] = { x: best[room].x, y: best[room].y };
+  for (const room of Object.keys(biggest) as RoomId[]) {
+    const a = biggest[room];
+    const mid = { x: a.x + a.w / 2, y: a.y + a.h / 2 };
+    const STEP = 6;
+    let found: { x: number; y: number } | null = null;
+    let bestDist = Infinity;
+    for (let y = a.y + STEP; y < a.y + a.h; y += STEP) {
+      for (let x = a.x + STEP; x < a.x + a.w; x += STEP) {
+        const dist = Math.hypot(x - mid.x, y - mid.y);
+        if (dist < bestDist && isRoomy(x, y)) {
+          bestDist = dist;
+          found = { x, y };
+        }
+      }
+    }
+    // Fallback: any walkable middle of the room's floor areas (thin corridors).
+    if (!found) {
+      const any = WALKABLE_AREAS.find((w) => w.room === room && isPointWalkable(w.x + w.w / 2, w.y + w.h / 2));
+      if (any) found = { x: any.x + any.w / 2, y: any.y + any.h / 2 };
+    }
+    if (found) centers[room] = found;
+  }
   return centers;
 })();

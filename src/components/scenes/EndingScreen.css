@@ -118,3 +118,52 @@
   outline: 3px solid #f5a623;
   outline-offset: 2px;
 }
+
+/* Game over (the station was lost): red accent, what went wrong, what to try next. */
+.ending-screen--lost {
+  background: radial-gradient(ellipse at 50% 30%, #2a1220 0%, #0a0e1a 70%);
+}
+
+.ending-gameover {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #ff8a7a;
+}
+
+.ending-lost {
+  width: 100%;
+  text-align: left;
+  padding: var(--space-4) var(--space-5);
+  background: rgba(231, 76, 60, 0.08);
+  border: 1px solid rgba(231, 76, 60, 0.35);
+  border-radius: 16px;
+}
+
+.ending-lost h2 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-base);
+  color: var(--text-primary);
+}
+
+.ending-lost ul {
+  margin: 0 0 var(--space-3);
+  padding-left: 1.2em;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.ending-tip {
+  margin: 0;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.ending-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: center;
+}

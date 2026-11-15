@@ -266,3 +266,109 @@
   0%, 50% { opacity: 1; }
   51%, 100% { opacity: 0; }
 }
+
+/* ---------- Crew assignment, durations and consequences ---------- */
+.mission-choice:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.mission-choice__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.choice-tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #b8c2d6;
+  border: 1px solid rgba(184, 194, 214, 0.4);
+}
+
+.choice-tag--warn {
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.5);
+}
+
+.choice-tag--bad {
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.6);
+}
+
+.mission-defer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 48px;
+  padding: 10px 16px;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  color: #e2e8f0;
+  background: transparent;
+  border: 1px dashed rgba(184, 194, 214, 0.5);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.mission-defer:hover {
+  border-color: #fbbf24;
+  transform: none;
+}
+
+.mission-defer__cost {
+  font-size: 14px;
+  font-weight: 400;
+  color: #fbbf24;
+}
+
+.mission-overlay__hint {
+  margin: 0;
+  font-size: 15px;
+  text-align: center;
+  color: #f87171;
+}
+
+.mission-outcome {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.mission-outcome--good {
+  color: #4ade80;
+}
+
+.mission-outcome--bad {
+  color: #f87171;
+}
+
+.mission-changes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.mission-changes .effect-badge {
+  font-size: 15px;
+}
+
+.mission-notes {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #e2e8f0;
+}
+
+.mission-notes__alert {
+  font-weight: 800;
+  color: #f87171;
+}

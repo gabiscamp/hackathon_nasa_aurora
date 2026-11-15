@@ -4,7 +4,7 @@
 
 ## Project Overview
 
-A 2D top-down space station exploration game for kids aged 7-12. The player walks through the Aurora Station, interacts with crew members, manages resources (health, energy, oxygen, food), and makes decisions during a 90-day Mars orbit mission. The game teaches space science concepts through narrative gameplay.
+A 2D top-down space station exploration game for kids aged 7-12. The player walks through the Aurora Station, interacts with crew members, manages resources (health, energy, oxygen, food), and makes decisions during a 45-day Mars orbit mission. The game teaches space science concepts through narrative gameplay.
 
 ## Tech Stack
 
