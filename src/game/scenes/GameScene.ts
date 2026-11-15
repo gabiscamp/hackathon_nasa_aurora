@@ -61,6 +61,7 @@ export class GameScene extends Phaser.Scene {
   private directionDot: Phaser.GameObjects.Graphics | null = null;
   private playerSprite: Phaser.GameObjects.Sprite | null = null;
   private spaceBackdrop: Phaser.GameObjects.Image | null = null;
+  private backdropFit = { w: 0, h: 0, zoom: 0 };
   private spriteKey = '';
   /** Set when the player uses the modular astronaut (body + head) instead of a full sheet. */
   private playerHead: HeadId | null = null;
@@ -215,8 +216,12 @@ export class GameScene extends Phaser.Scene {
     if (!this.spaceBackdrop) return;
     // Read the size from the scale manager: on RESIZE it is updated before the camera may be.
     const { width, height } = this.scale;
+    const zoom = this.cameras.main.zoom;
+    // Called every frame: only recompute when something changed (zoom tweens, resizes).
+    if (width === this.backdropFit.w && height === this.backdropFit.h && zoom === this.backdropFit.zoom) return;
+    this.backdropFit = { w: width, h: height, zoom };
     const cover = Math.max(width / this.spaceBackdrop.width, height / this.spaceBackdrop.height);
-    this.spaceBackdrop.setPosition(width / 2, height / 2).setScale(cover / this.cameras.main.zoom);
+    this.spaceBackdrop.setPosition(width / 2, height / 2).setScale(cover / zoom);
   }
 
   /** Walk animations for a 4×4 sheet (rows: down, left, right, up). Frame 0 of each row = standing. */
@@ -444,6 +449,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number) {
+    // The mission zoom (CAMERA_ZOOM_IN/OUT) tweens the zoom over several frames: keep the backdrop covering the screen.
+    this.fitBackdrop();
     if (this.frozen) return;
 
     const up = this.cursors.up.isDown || this.wasd.W.isDown;
