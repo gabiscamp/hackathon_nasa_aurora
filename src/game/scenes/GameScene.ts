@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_FONT } from '../../styles/theme';
+import { useSettingsStore } from '../../stores/useSettingsStore';
+import { speak } from '../../utils/speech';
 import { playFootstep } from '../../utils/sounds';
 
 /**
@@ -94,7 +96,6 @@ export class GameScene extends Phaser.Scene {
   private missionGlow: Phaser.GameObjects.Graphics | null = null;
   private frozen = false;
   private speechBubble: Phaser.GameObjects.Container | null = null;
-  private speechText: Phaser.GameObjects.Text | null = null;
   private speechTimer: Phaser.Time.TimerEvent | null = null;
 
   constructor() {
@@ -495,7 +496,7 @@ export class GameScene extends Phaser.Scene {
     bg.lineBetween(-bubbleW / 2, -6, -bubbleW / 2 - 10, 0);
     bg.lineBetween(-bubbleW / 2 - 10, 0, -bubbleW / 2, 6);
 
-    const textObj = this.add.text(0, 0, '', {
+    const textObj = smoothText(this.add.text(0, 0, '', {
       fontSize: '10px',
       color: '#1a1a2e',
       fontFamily: GAME_FONT,
@@ -503,11 +504,12 @@ export class GameScene extends Phaser.Scene {
       align: 'left',
       lineSpacing: 3,
       resolution: 3,
-    }).setOrigin(0.5);
+    }).setOrigin(0.5));
 
     container.add([bg, textObj]);
     this.speechBubble = container;
-    this.speechText = textObj;
+    // Options → Read text aloud also covers the speech bubble (it is canvas text, so L can't see it).
+    if (useSettingsStore.getState().readAloud) speak(fullText);
 
     // Type out the text character by character
     let charIndex = 0;
@@ -534,7 +536,6 @@ export class GameScene extends Phaser.Scene {
     if (this.speechBubble) {
       this.speechBubble.destroy();
       this.speechBubble = null;
-      this.speechText = null;
     }
     this.frozen = false;
   }

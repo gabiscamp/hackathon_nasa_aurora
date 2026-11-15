@@ -47,7 +47,7 @@ export function startAlertLoop() {
     alertAudio.volume = Math.min(1, 0.1 * vol());
     alertAudio.loop = true;
     alertAudio.currentTime = 0;
-    alertAudio.play().catch(() => {});
+    alertAudio.play().catch(() => playAlertFallback());
   } catch {
     // silently fail
   }
@@ -82,6 +82,7 @@ let lastStepTime = 0;
 const STEP_INTERVAL = 280;
 
 export function playFootstep() {
+  if (vol() === 0) return;
   const now = performance.now();
   if (now - lastStepTime < STEP_INTERVAL) return;
   lastStepTime = now;
@@ -101,7 +102,7 @@ export function playFootstep() {
   filter.frequency.value = 600 + Math.random() * 200;
 
   const gain = ctx.createGain();
-  gain.gain.value = 0.06 + Math.random() * 0.02;
+  gain.gain.value = (0.06 + Math.random() * 0.02) * vol();
 
   source.connect(filter);
   filter.connect(gain);

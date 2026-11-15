@@ -66,6 +66,8 @@ export function DaySkipOverlay({
     <div className="dayskip-overlay">
       <div className="dayskip-overlay__backdrop" />
       <div className="dayskip-hud">
+        {/* The bubble is drawn on the canvas; this copy lets "Read" (L) and screen readers hear it. */}
+        <p className="sr-only" data-read aria-live="polite">{text}</p>
         <span className="dayskip-hud__day">{dayLabel}</span>
         {bubbleDone && (
           <button className="mission-btn mission-btn--primary" onClick={handleContinue}>
