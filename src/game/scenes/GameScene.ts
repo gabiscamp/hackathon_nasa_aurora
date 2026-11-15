@@ -41,6 +41,7 @@ import {
   NPC_SPAWNS,
   ROOM_CENTERS,
   placedCenter,
+  pieceScale,
   isBoxWalkable,
   roomAt,
   type RoomId,
@@ -92,6 +93,7 @@ export class GameScene extends Phaser.Scene {
   private facing: SpriteDirection = 'down';
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<string, Phaser.Input.Keyboard.Key>;
+  private touchMovement = { x: 0, y: 0 };
   private walkableDebug: Phaser.GameObjects.Graphics | null = null;
   private currentRoom: RoomId | null = null;
   private lastPositionEmit = 0;
@@ -123,6 +125,7 @@ export class GameScene extends Phaser.Scene {
     // window while another is still open doesn't unfreeze the game; a new scene always starts at 0.
     let openWindows = 0;
     const onMenuOpened = () => {
+      this.touchMovement = { x: 0, y: 0 };
       openWindows += 1;
       if (!this.scene.isPaused()) this.scene.pause();
     };
@@ -188,8 +191,8 @@ export class GameScene extends Phaser.Scene {
     this.updateRoom();
     this.emitPosition(true);
 
-    this.input.keyboard!.on('keydown-E', () => {
-      if (this.frozen) return;
+    const onInteract = () => {
+      if (this.frozen || this.scene.isPaused()) return;
       if (this.isNearRobot()) {
         gameEvents.emit(EVENTS.ROBOT_INTERACT);
         return;
@@ -197,7 +200,19 @@ export class GameScene extends Phaser.Scene {
       if (this.isNearMarker()) {
         gameEvents.emit(EVENTS.MISSION_START);
       }
-    });
+    };
+    this.input.keyboard!.on('keydown-E', onInteract);
+    const onTouchMove = (movement: { x: number; y: number }) => {
+      this.touchMovement = movement;
+    };
+    gameEvents.on(EVENTS.TOUCH_MOVE, onTouchMove);
+    gameEvents.on(EVENTS.INTERACT, onInteract);
+    const removeTouchListeners = () => {
+      gameEvents.off(EVENTS.TOUCH_MOVE, onTouchMove);
+      gameEvents.off(EVENTS.INTERACT, onInteract);
+    };
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, removeTouchListeners);
+    this.events.once(Phaser.Scenes.Events.DESTROY, removeTouchListeners);
 
     // Mission events from React (MissionOverlay / GameScreen). Removed when the scene ends:
     // otherwise a destroyed scene from an earlier visit keeps reacting after "Continue mission".
@@ -261,7 +276,7 @@ export class GameScene extends Phaser.Scene {
       this.textures.get(key).setFilter(Phaser.Textures.FilterMode.LINEAR);
       const c = placedCenter(p);
       const piece = () =>
-        this.add.image(c.x, c.y, key).setScale(STATION_SCALE).setAngle(p.angle).setFlip(p.flipX, p.flipY);
+        this.add.image(c.x, c.y, key).setScale(STATION_SCALE * pieceScale(p.piece)).setAngle(p.angle).setFlip(p.flipX, p.flipY);
       // Pieces stack between the backdrop (0) and the debug overlay (5).
       piece().setDepth(1 + p.depth / 10);
 
@@ -319,7 +334,7 @@ export class GameScene extends Phaser.Scene {
       const c = placedCenter(p);
       const img = this.make
         .image({ x: c.x, y: c.y, key: stationTextureKey(p.piece) }, false)
-        .setScale(STATION_SCALE)
+        .setScale(STATION_SCALE * pieceScale(p.piece))
         .setAngle(p.angle)
         .setFlip(p.flipX, p.flipY);
       rt.draw(img);
@@ -764,10 +779,10 @@ export class GameScene extends Phaser.Scene {
     this.fitBackdrop();
     if (this.frozen) return;
 
-    const up = this.cursors.up.isDown || this.wasd.W.isDown;
-    const down = this.cursors.down.isDown || this.wasd.S.isDown;
-    const left = this.cursors.left.isDown || this.wasd.A.isDown;
-    const right = this.cursors.right.isDown || this.wasd.D.isDown;
+    const up = this.cursors.up.isDown || this.wasd.W.isDown || this.touchMovement.y < 0;
+    const down = this.cursors.down.isDown || this.wasd.S.isDown || this.touchMovement.y > 0;
+    const left = this.cursors.left.isDown || this.wasd.A.isDown || this.touchMovement.x < 0;
+    const right = this.cursors.right.isDown || this.wasd.D.isDown || this.touchMovement.x > 0;
 
     let vx = 0;
     let vy = 0;

@@ -36,7 +36,7 @@ export function DaySummary({ before, onNextDay }: { before: Resources; onNextDay
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        minWidth: '360px',
+        width: 'min(360px, calc(100% - 32px))',
         maxWidth: '480px',
         zIndex: 20,
         display: 'flex',

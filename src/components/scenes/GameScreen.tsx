@@ -157,7 +157,7 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
 
         {phase === 'decision' && !missionOpen && currentMission && (
           <div className={`game-hint-banner ${currentMission.severity === 'critical' ? 'game-hint-banner--critical' : ''}`} data-read>
-            <span>{currentMission.icon} {currentMission.severity === 'critical' ? 'EMERGENCY! ' : ''}Go to {ROOM_NAMES[currentMission.room as RoomId] ?? currentMission.room} and press <kbd>E</kbd> to investigate!</span>
+            <span>{currentMission.icon} {currentMission.severity === 'critical' ? 'EMERGENCY! ' : ''}Go to {ROOM_NAMES[currentMission.room as RoomId] ?? currentMission.room} and <span className="keyboard-instruction">press <kbd>E</kbd></span><span className="touch-instruction">tap Interact</span> to investigate!</span>
           </div>
         )}
 

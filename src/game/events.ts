@@ -4,6 +4,7 @@ export const gameEvents = new Phaser.Events.EventEmitter();
 
 export const EVENTS = {
   INTERACT: 'interact',
+  TOUCH_MOVE: 'touch-move',
   ENTER_ROOM: 'enter-room',
   DAY_CHANGE: 'day-change',
   CHOICE_MADE: 'choice-made',

@@ -23,6 +23,7 @@ export {
   PLAYER_SPAWN,
   NPC_SPAWNS,
   placedCenter,
+  pieceScale,
   isPointWalkable,
   isBoxWalkable,
   roomAt,

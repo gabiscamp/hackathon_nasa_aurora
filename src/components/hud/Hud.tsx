@@ -4,6 +4,7 @@ import { ObjectiveTracker } from './ObjectiveTracker';
 import { Minimap } from './Minimap';
 import { LocationHint } from './LocationHint';
 import { ShipMapOverlay } from './ShipMapOverlay';
+import { TouchControls } from './TouchControls';
 import './Hud.css';
 
 /** In-game HUD overlay, laid out like references/wireframe/spaceship-reference-02.png. */
@@ -34,6 +35,7 @@ export function Hud() {
       </div>
       <LocationHint />
       <Minimap onOpen={() => setMapOpen(true)} />
+      <TouchControls onOpenMap={() => setMapOpen(true)} />
       {/* The station image is AI-generated: team briefing rule = visible watermark while it is on screen. */}
       <span className="hud-ai-mark">AI-generated map</span>
       {mapOpen && <ShipMapOverlay onClose={closeMap} />}

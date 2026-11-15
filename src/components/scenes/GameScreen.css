@@ -105,6 +105,13 @@
   color: #f0ece4;
 }
 
+.touch-instruction { display: none; }
+@media (pointer: coarse) {
+  .keyboard-instruction { display: none; }
+  .touch-instruction { display: inline; }
+  .game-hint-banner { bottom: 168px; max-width: min(500px, calc(100% - 32px)); font-size: 16px; padding: 6px 10px; }
+}
+
 .game-hint-banner--critical {
   background: rgba(231, 76, 60, 0.2);
   border-color: rgba(231, 76, 60, 0.7);
@@ -139,4 +146,8 @@
     padding: 10px 14px;
     font-size: 18px;
   }
+}
+
+@media (max-width: 960px) and (pointer: coarse) {
+  .game-hint-banner { left: 12px; right: 12px; bottom: 168px; font-size: 15px; padding: 6px 10px; }
 }
