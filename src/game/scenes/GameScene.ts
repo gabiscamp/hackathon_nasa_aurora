@@ -25,6 +25,7 @@ import { useCrewStore } from '../../stores/useCrewStore';
 import { CREW_ROLES } from '../../data/crew';
 import { useGameStore } from '../../stores/useGameStore';
 import { useMissionStore } from '../../stores/useMissionStore';
+import { useExplorationStore } from '../../stores/useExplorationStore';
 import { getTeam, type HeadId } from '../../data/crews';
 import { ASTRO_ORIGIN_Y, astronautAnim, astronautTextureKey } from '../world/modularAstronaut';
 import {
@@ -53,6 +54,7 @@ import {
   type RoomId,
 } from '../world/shipLayout';
 import { stationTextureKey } from '../world/stationAssets';
+import { ROBOT_TEXTURE_KEY } from './BootScene';
 
 const PLAYER_SPEED = 160;
 const PLAYER_SIZE = 28;
@@ -79,6 +81,8 @@ const INTERACT_DISTANCE = 80;
 const OVERHEAD_DEPTH = 11;
 /** Extra zoom when the camera flies to a mission spot. */
 const MISSION_ZOOM = 1.4;
+const ROBOT_SCALE = 0.24;
+const ROBOT_INTERACT_DISTANCE = 110;
 
 export class GameScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Container;
@@ -104,8 +108,16 @@ export class GameScene extends Phaser.Scene {
   /** The marker the player opened last (the camera zooms on it). */
   private activeMarkerId: string | null = null;
   private frozen = false;
+  private robot: Phaser.GameObjects.Sprite | null = null;
+  private robotPatrol: Phaser.Tweens.Tween | null = null;
   private speechBubble: Phaser.GameObjects.Container | null = null;
   private speechTimer: Phaser.Time.TimerEvent | null = null;
+  /** Fires SPEECH_BUBBLE_DONE a moment after typing ends; cancelled when the bubble is skipped or hidden. */
+  private speechDoneTimer: Phaser.Time.TimerEvent | null = null;
+  /** Shows the whole bubble text at once (set while it is typing). */
+  private finishSpeech: (() => void) | null = null;
+  /** Window click listener that skips the typing; removed with the bubble. */
+  private speechSkipListener: ((e: MouseEvent) => void) | null = null;
 
   constructor() {
     super({ key: 'GameScene' });
@@ -151,6 +163,7 @@ export class GameScene extends Phaser.Scene {
       const head = heads[role];
       this.createNPC(spawn.x, spawn.y, Phaser.Display.Color.HexStringToColor(member.color).color, firstName, head);
     }
+    this.createRobot();
 
     // Input — WASD and arrows work simultaneously. Start clean: keys held while the
     // home screen was open (e.g. Enter on "Continue") must not stay stuck "down".
@@ -187,6 +200,10 @@ export class GameScene extends Phaser.Scene {
 
     this.input.keyboard!.on('keydown-E', () => {
       if (this.frozen) return;
+      if (this.isNearRobot()) {
+        gameEvents.emit(EVENTS.ROBOT_INTERACT);
+        return;
+      }
       const id = this.nearestMarker();
       if (id) {
         this.activeMarkerId = id;
@@ -225,6 +242,9 @@ export class GameScene extends Phaser.Scene {
       gameEvents.off('CAMERA_ZOOM_OUT', onZoomOut);
       gameEvents.off(EVENTS.SHOW_SPEECH_BUBBLE, onShowSpeech);
       gameEvents.off(EVENTS.HIDE_SPEECH_BUBBLE, onHideSpeech);
+      // A bubble still typing has a click listener on the window: drop it with the scene.
+      this.finishSpeech = null;
+      this.stopSpeechTyping();
     };
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, removeMissionListeners);
     this.events.once(Phaser.Scenes.Events.DESTROY, removeMissionListeners);
@@ -258,8 +278,36 @@ export class GameScene extends Phaser.Scene {
       for (const r of def.overhead) {
         // setCrop reads the rect in the flipped frame; convert from unflipped image px.
         const cropX = p.flipX ? def.width - r.x - r.w : r.x;
-        const cropY = p.flipY ? def.height - r.y - r.h : r.y;
-        piece().setCrop(cropX, cropY, r.w, r.h).setDepth(OVERHEAD_DEPTH + p.depth / 10);
+        const isNodeHatch = p.piece === 'node' && r.y === 262;
+        const cropY = isNodeHatch ? 240 : p.flipY ? def.height - r.y - r.h : r.y;
+        const cropHeight = isNodeHatch ? 110 : r.h;
+        const overlay = piece().setCrop(cropX, cropY, r.w, cropHeight).setDepth(OVERHEAD_DEPTH + p.depth / 10);
+        if (isNodeHatch) {
+          // Cover the marked passage from the upper grey strip down to the
+          // curved inner rim; leave the opening beneath the rim unobstructed.
+          const s = STATION_SCALE;
+          const shape = this.make.graphics({}, false);
+          shape.fillStyle(0xffffff);
+          shape.fillRect((p.x + 118) * s, (p.y + 262) * s, 145 * s, 88 * s);
+          shape.fillRect((p.x + 417) * s, (p.y + 262) * s, 133 * s, 88 * s);
+          shape.fillPoints([
+            { x: (p.x + 263) * s, y: (p.y + 240) * s },
+            { x: (p.x + 417) * s, y: (p.y + 240) * s },
+            { x: (p.x + 417) * s, y: (p.y + 337) * s },
+            { x: (p.x + 400) * s, y: (p.y + 323) * s },
+            { x: (p.x + 375) * s, y: (p.y + 315) * s },
+            { x: (p.x + 340) * s, y: (p.y + 312) * s },
+            { x: (p.x + 305) * s, y: (p.y + 315) * s },
+            { x: (p.x + 280) * s, y: (p.y + 323) * s },
+            { x: (p.x + 263) * s, y: (p.y + 337) * s },
+          ], true);
+          const mask = shape.createGeometryMask();
+          overlay.setMask(mask);
+          this.events.once(Phaser.Scenes.Events.DESTROY, () => {
+            mask.destroy();
+            shape.destroy();
+          });
+        }
       }
     }
     this.stationMask = this.createStationMask();
@@ -401,6 +449,80 @@ export class GameScene extends Phaser.Scene {
     npc.setData('name', name);
   }
 
+  /** AUR-1 roams the main pressurised corridor until it is deployed to Mars. */
+  private createRobot() {
+    if (!this.textures.exists(ROBOT_TEXTURE_KEY)) return;
+    // The main pressurised row is continuous, so these room centres form a safe patrol route.
+    // Starting on the bridge makes the robot visible early instead of hiding it at the far airlock.
+    const center = ROOM_CENTERS.bridge;
+    if (!this.anims.exists('robot-idle')) {
+      this.anims.create({
+        key: 'robot-idle',
+        frames: this.anims.generateFrameNumbers(ROBOT_TEXTURE_KEY, { start: 0, end: 7 }),
+        frameRate: 5,
+        repeat: -1,
+      });
+    }
+    this.robot = this.add
+      .sprite(center.x, center.y, ROBOT_TEXTURE_KEY, 0)
+      .setOrigin(0.5, 0.78)
+      .setScale(ROBOT_SCALE)
+      .setDepth(9)
+      .setInteractive({ useHandCursor: true });
+    this.robot.anims.play('robot-idle');
+    this.robot.on('pointerdown', () => {
+      if (useExplorationStore.getState().status === 'aboard') gameEvents.emit(EVENTS.ROBOT_INTERACT);
+    });
+
+    this.startRandomRobotPatrol();
+
+    const syncRobot = (status: 'aboard' | 'exploring') => {
+      const aboard = status === 'aboard';
+      this.robot?.setVisible(aboard).setActive(aboard);
+      if (aboard && this.robotPatrol) this.robotPatrol.resume();
+      else if (aboard) this.startRandomRobotPatrol();
+      else this.robotPatrol?.pause();
+    };
+    syncRobot(useExplorationStore.getState().status);
+    const unsubscribe = useExplorationStore.subscribe((state) => syncRobot(state.status));
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, unsubscribe);
+    this.events.once(Phaser.Scenes.Events.DESTROY, unsubscribe);
+  }
+
+  /** Picks another module on the connected main corridor, waits there, then chooses again. */
+  private startRandomRobotPatrol() {
+    if (!this.robot || useExplorationStore.getState().status !== 'aboard') return;
+    const route = [
+      ROOM_CENTERS.quarters,
+      ROOM_CENTERS.bridge,
+      ROOM_CENTERS.engineering,
+      ROOM_CENTERS.corridor,
+      ROOM_CENTERS.airlock,
+    ];
+    const candidates = route.filter((point) => Phaser.Math.Distance.Between(this.robot!.x, this.robot!.y, point.x, point.y) > 70);
+    const target = Phaser.Utils.Array.GetRandom(candidates);
+    const distance = Phaser.Math.Distance.Between(this.robot.x, this.robot.y, target.x, target.y);
+
+    this.robotPatrol = this.tweens.add({
+      targets: this.robot,
+      x: target.x,
+      y: target.y,
+      // About 35 world-pixels/second: deliberately slower than the player (160 px/s).
+      duration: Math.max(3000, distance * 28),
+      ease: 'Sine.easeInOut',
+      onUpdate: () => {
+        if (this.robot) gameEvents.emit(EVENTS.ROBOT_MOVED, { x: this.robot.x, y: this.robot.y });
+      },
+      onComplete: () => {
+        if (!this.robot) return;
+        gameEvents.emit(EVENTS.ROBOT_MOVED, { x: this.robot.x, y: this.robot.y });
+        this.robotPatrol = null;
+        // Long inspection stop so the player can walk up and interact with AUR-1.
+        this.time.delayedCall(Phaser.Math.Between(4000, 8000), () => this.startRandomRobotPatrol());
+      },
+    });
+  }
+
   /** Name tag rendered at 4x so it stays sharp under the zoomed pixel-art camera. */
   private npcLabel(name: string, y: number): Phaser.GameObjects.Text {
     return smoothText(this.add
@@ -526,16 +648,40 @@ export class GameScene extends Phaser.Scene {
     });
 
     // Emit done event when typing finishes
-    this.time.delayedCall(fullText.length * 30 + 200, () => {
+    this.speechDoneTimer = this.time.delayedCall(fullText.length * 30 + 200, () => this.finishSpeech?.());
+
+    // Whole text now, then "done" (once): from the timer above, or from a click anywhere.
+    this.finishSpeech = () => {
+      this.finishSpeech = null;
+      this.stopSpeechTyping();
+      textObj.setText(fullText);
       gameEvents.emit('SPEECH_BUBBLE_DONE');
-    });
+    };
+    // Click anywhere while it types → skip to the end (the bubble sits under a React overlay,
+    // so listen on the window). That click only finishes the text, like the React typewriter.
+    this.speechSkipListener = (e: MouseEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      this.finishSpeech?.();
+    };
+    window.addEventListener('click', this.speechSkipListener, true);
+  }
+
+  /** Stops the typing timers and the skip-on-click listener (the bubble itself stays). */
+  private stopSpeechTyping() {
+    this.speechTimer?.destroy();
+    this.speechTimer = null;
+    this.speechDoneTimer?.destroy();
+    this.speechDoneTimer = null;
+    if (this.speechSkipListener) {
+      window.removeEventListener('click', this.speechSkipListener, true);
+      this.speechSkipListener = null;
+    }
   }
 
   private hideSpeechBubble() {
-    if (this.speechTimer) {
-      this.speechTimer.destroy();
-      this.speechTimer = null;
-    }
+    this.finishSpeech = null;
+    this.stopSpeechTyping();
     if (this.speechBubble) {
       this.speechBubble.destroy();
       this.speechBubble = null;
@@ -555,6 +701,11 @@ export class GameScene extends Phaser.Scene {
       }
     }
     return best;
+  }
+
+  private isNearRobot(): boolean {
+    if (!this.robot?.visible || useExplorationStore.getState().status !== 'aboard') return false;
+    return Phaser.Math.Distance.Between(this.player.x, this.player.y, this.robot.x, this.robot.y) < ROBOT_INTERACT_DISTANCE;
   }
 
   private toggleWalkableDebug() {

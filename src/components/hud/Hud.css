@@ -489,6 +489,16 @@
   object-position: 50% 18%;
 }
 
+.ship-map__face canvas {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+}
+
+.ship-map__pin--robot .ship-map__face {
+  padding: 2px;
+}
+
 .ship-map__name {
   padding: 0 8px;
   border-radius: 6px;

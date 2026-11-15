@@ -20,6 +20,7 @@ import type { RoomId } from '../../game/world/shipLayout';
 import { ROOM_NAMES } from '../hud/LocationHint';
 import { PauseMenu } from '../hud/PauseMenu';
 import './GameScreen.css';
+import { ExplorationSystem } from '../exploration/ExplorationSystem';
 
 
 /** Missions that will open on `day` (preview for the "Begin Day" panel). */
@@ -157,6 +158,7 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
       <div className="game-stage">
         <PhaserGame className="station-view" />
         <Hud />
+        <ExplorationSystem />
         <PauseMenu onMainMenu={onMainMenu} onOpenCredits={onOpenCredits} suspended={creditsOpen} />
 
         {phase === 'decision' && !missionOpen && !skipInfo && openMissions.length > 0 && (

@@ -9,6 +9,7 @@ import { getTeam, type CrewTeam } from './data/crews';
 import { useMissionStore } from './stores/useMissionStore';
 import { checkpointDay, clearCheckpoint, restoreCheckpoint } from './engine/checkpoint';
 import { useDutyStore } from './stores/useDutyStore';
+import { useExplorationStore } from './stores/useExplorationStore';
 
 const TitleScreen = lazy(() => import('./components/scenes/TitleScreen').then(m => ({ default: m.TitleScreen })));
 const MissionBriefing = lazy(() => import('./components/scenes/MissionBriefing').then(m => ({ default: m.MissionBriefing })));
@@ -46,6 +47,7 @@ export default function App() {
   const selectTeam = useCrewStore((s) => s.selectTeam);
   const resetMissions = useMissionStore((s) => s.reset);
   const resetDuty = useDutyStore((s) => s.reset);
+  const resetExploration = useExplorationStore((s) => s.reset);
   const setScene = useGameStore((s) => s.setScene);
   const resetGame = useGameStore((s) => s.resetGame);
   // Ending screen reads all resources (mission system from main: 7 resources).
@@ -75,6 +77,7 @@ export default function App() {
     resetMissions();
     resetDuty();
     clearCheckpoint();
+    resetExploration();
     selectTeam(team.id);
     startMission(team.id, team.commander.name);
   };
@@ -90,6 +93,7 @@ export default function App() {
     resetCrew();
     resetMissions();
     resetDuty();
+    resetExploration();
   };
 
   return (

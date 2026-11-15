@@ -21,6 +21,11 @@ import { ROOM_NAMES } from "./LocationHint";
 import { MapIcon } from "./HudIcons";
 import { usePlayerPosition } from "./usePlayerPosition";
 import { useMissionTargets } from "./useMissionTarget";
+import { useRobotPosition } from "./useRobotPosition";
+import { useExplorationStore } from "../../stores/useExplorationStore";
+import { RobotPortrait } from "../exploration/RobotPortrait";
+
+const ROBOT_COLOR = "#9a5b32";
 
 /** Size of a placed piece in world px (after rotation). */
 function placedSize(p: Placement): { w: number; h: number } {
@@ -167,8 +172,10 @@ function StationDrawing({ view }: { view: Box }) {
  */
 export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
   const pos = usePlayerPosition();
+  const robotPos = useRobotPosition();
   const crew = useCrewStore((s) => s.crew);
   const targets = useMissionTargets();
+  const robotAboard = useExplorationStore((s) => s.status === "aboard");
   const crewId = useGameStore((s) => s.crewId);
   const commander = crewId ? getTeam(crewId).commander : null;
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -362,6 +369,20 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
                 </span>
               );
             })}
+
+            {robotAboard && (
+              <span
+                className="ship-map__pin ship-map__pin--robot"
+                style={{
+                  left: left(robotPos.x),
+                  top: top(robotPos.y - 20),
+                  ["--pin-color" as string]: ROBOT_COLOR,
+                }}
+              >
+                <span className="ship-map__face"><RobotPortrait size={44} /></span>
+                <span className="ship-map__name">AUR-1</span>
+              </span>
+            )}
 
             {targets.map((target) => (
               <span
