@@ -84,8 +84,7 @@
 }
 
 .crew-card__role,
-.crew-card__state,
-.crew-card__health {
+.crew-card__state {
   font-size: 15px;
   color: #b8c2d6;
 }

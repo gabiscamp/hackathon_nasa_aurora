@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { CAREER_LIMIT_MSV, MSV_PER_DOSE_POINT } from '../../data/difficulty';
 import type { Choice, CrewSlot, Mission } from '../../data/missions';
 import { getMission } from '../../data/missions';
 import { crewNeed, SPECIALIST_BONUS } from '../../engine/missionEngine';
@@ -156,8 +155,6 @@ export function CrewPicker({ mission, choice, day, lockedSlot, chanceFor, onBack
         <span className="crew-card__role">{slotTitle(slot)}</span>
         <span className="crew-card__state">{dutyText(d, day)}</span>
         <span className={`crew-card__tired crew-card__tired--${Math.min(d.fatigue, 4)}`}>{fatigueLabel(d.fatigue)}</span>
-        {r.health !== undefined && r.health < 100 && <span className="crew-card__health">Health {Math.round(r.health)}</span>}
-        {(d.dose ?? 0) > 0 && <span className="crew-card__health">Radiation {Math.round((d.dose ?? 0) * MSV_PER_DOSE_POINT)} / {CAREER_LIMIT_MSV} mSv</span>}
       </>
     );
   }
