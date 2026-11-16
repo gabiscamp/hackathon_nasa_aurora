@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useEffect, useState } from 'react';
 import { useGameStore } from '../../stores/useGameStore';
 import { useMissionStore } from '../../stores/useMissionStore';
@@ -54,21 +55,20 @@ export function ObjectiveTracker() {
   const pct = Math.min(100, (day / MISSION_DAYS) * 100);
 
   return (
-    <section className="hud-panel hud-objective" aria-label="Mission" data-read>
+    <section className="hud-panel hud-objective" aria-label={localize("Mission")} data-read>
       <div className="hud-objective__top">
-        <p className="hud-objective__title">{title}</p>
-        <span className="hud-objective__day">
-          Day {day}/{MISSION_DAYS}
+        <p className="hud-objective__title">{localize(title)}</p>
+        <span className="hud-objective__day">{localize(" Day ")}{localize(day)}/{localize(MISSION_DAYS)}
         </span>
       </div>
       <p className="hud-objective__task">
-        <span className="game-hint-desktop">{objective}</span>
-        <span className="game-hint-touch">{touchObjective}</span>
+        <span className="game-hint-desktop">{localize(objective)}</span>
+        <span className="game-hint-touch">{localize(touchObjective)}</span>
       </p>
       <span
         className="hud-objective__track"
         role="meter"
-        aria-label="Mission day"
+        aria-label={localize("Mission day")}
         aria-valuenow={day}
         aria-valuemin={1}
         aria-valuemax={MISSION_DAYS}

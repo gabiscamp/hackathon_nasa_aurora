@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useState, type ReactNode } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { RESOURCE_KEYS, SHOWN_RESOURCES, useResourceStore, type ResourceKey, type Resources } from '../../stores/useResourceStore';
@@ -33,19 +34,19 @@ function signed(n: number): string {
 
 function ChangeChips({ changes }: { changes: Changes }) {
   const shown = SHOWN_RESOURCES.filter((k) => round1(changes[k] ?? 0) !== 0);
-  if (shown.length === 0) return <span className="day-chip day-chip--none">No resources changed</span>;
+  if (shown.length === 0) return <span className="day-chip day-chip--none">{localize("No resources changed")}</span>;
   return (
     <>
-      {shown.map((k) => {
+      {localize(shown.map((k) => {
         const info = RESOURCE_INFO[k];
         const diff = changes[k] ?? 0;
         return (
           <span key={k} className={`day-chip ${isGood(k, diff) ? 'day-chip--good' : 'day-chip--bad'}`}>
-            <span className="day-chip__icon" style={{ color: info?.color }}>{info?.icon}</span>
-            {info?.name} <strong>{signed(diff)}</strong>
+            <span className="day-chip__icon" style={{ color: info?.color }}>{localize(info?.icon)}</span>
+            {localize(info?.name)} <strong>{localize(signed(diff))}</strong>
           </span>
         );
-      })}
+      }))}
     </>
   );
 }
@@ -114,81 +115,79 @@ export function DaySummary({ onNext }: { onNext: () => void }) {
 
   return (
     <div className="panel day-summary" role="dialog" aria-modal="true" aria-labelledby="day-summary-title" data-read data-voice-story>
-      <h2 id="day-summary-title" className="day-summary__title">Day {day} Complete</h2>
+      <h2 id="day-summary-title" className="day-summary__title">{localize("Day ")}{localize(day)}{localize(" Complete")}</h2>
 
       <section className="day-summary__section">
-        <h3 className="day-summary__heading">What happened</h3>
-        {entries.length === 0 ? (
-          <p className="day-summary__empty">Nothing changed the resources today.</p>
+        <h3 className="day-summary__heading">{localize("What happened")}</h3>
+        {localize(entries.length === 0 ? (
+          <p className="day-summary__empty">{localize("Nothing changed the resources today.")}</p>
         ) : (
           <ol className="day-summary__entries">
-            {entries.map((e) => (
+            {localize(entries.map((e) => (
               <li key={e.key} className={`day-entry day-entry--${e.kind}`}>
-                <span className="day-entry__kind">{e.label}</span>
-                <span className="day-entry__title">{e.title}</span>
-                {e.detail && <span className="day-entry__detail">{e.detail}</span>}
+                <span className="day-entry__kind">{localize(e.label)}</span>
+                <span className="day-entry__title">{localize(e.title)}</span>
+                {localize(e.detail && <span className="day-entry__detail">{localize(e.detail)}</span>)}
                 <span className="day-entry__chips">
                   <ChangeChips changes={e.changes} />
                 </span>
               </li>
-            ))}
+            )))}
           </ol>
-        )}
+        ))}
       </section>
 
       <section className="day-summary__section">
-        <h3 className="day-summary__heading">Station resources</h3>
+        <h3 className="day-summary__heading">{localize("Station resources")}</h3>
         <table className="day-table">
           <thead>
             <tr>
-              <th scope="col">Resource</th>
-              <th scope="col">Now</th>
-              <th scope="col">Today</th>
+              <th scope="col">{localize("Resource")}</th>
+              <th scope="col">{localize("Now")}</th>
+              <th scope="col">{localize("Today")}</th>
             </tr>
           </thead>
           <tbody>
-            {SHOWN_RESOURCES.map((k) => {
+            {localize(SHOWN_RESOURCES.map((k) => {
               const info = RESOURCE_INFO[k];
               const diff = round1(now[k] - start[k]);
               const tone = diff === 0 ? 'same' : isGood(k, diff) ? 'good' : 'bad';
               return (
                 <tr key={k} className={`day-table__row day-table__row--${tone}`}>
                   <th scope="row">
-                    <span className="day-table__icon" style={{ color: info?.color }}>{info?.icon}</span>
-                    {info?.name}
+                    <span className="day-table__icon" style={{ color: info?.color }}>{localize(info?.icon)}</span>
+                    {localize(info?.name)}
                   </th>
-                  <td className="day-table__now">{Math.round(now[k])}</td>
+                  <td className="day-table__now">{localize(Math.round(now[k]))}</td>
                   <td className="day-table__diff">
-                    {diff === 0 ? 'no change' : <>{diff > 0 ? '▲' : '▼'} {signed(diff)}</>}
+                    {localize(diff === 0 ? 'no change' : <>{localize(diff > 0 ? '▲' : '▼')} {localize(signed(diff))}</>)}
                   </td>
                 </tr>
               );
-            })}
+            }))}
           </tbody>
         </table>
       </section>
 
-      {conditions.length > 0 && (
+      {localize(conditions.length > 0 && (
         <section className="day-summary__section">
-          <h3 className="day-summary__heading">Problems still going on</h3>
+          <h3 className="day-summary__heading">{localize("Problems still going on")}</h3>
           <ul className="day-summary__problems">
-            {conditions.map((c) => (
+            {localize(conditions.map((c) => (
               <li key={c.id}>
-                {c.label}
-                {c.untilDay !== undefined ? ` (until Day ${c.untilDay})` : ''}
+                {localize(c.label)}
+                {localize(c.untilDay !== undefined ? ` (until Day ${c.untilDay})` : '')}
               </li>
-            ))}
+            )))}
           </ul>
         </section>
-      )}
+      ))}
 
       <section className="day-summary__section">
-        <CrewStatusList day={day + 1} title="Your crew tomorrow" />
+        <CrewStatusList day={day + 1} title={localize("Your crew tomorrow")} />
       </section>
 
-      <Button variant="primary" onClick={onNext} autoFocus>
-        Next Day
-      </Button>
+      <Button variant="primary" onClick={onNext} autoFocus>{localize(" Next Day ")}</Button>
     </div>
   );
 }

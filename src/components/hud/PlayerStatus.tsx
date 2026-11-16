@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useResourceStore } from '../../stores/useResourceStore';
 import { useMissionStore } from '../../stores/useMissionStore';
 import { PROTOCOLS } from '../../data/difficulty';
@@ -38,24 +39,24 @@ export function PlayerStatus() {
   const onNow = PROTOCOLS.filter((p) => protocols.includes(p.id));
 
   return (
-    <section className="hud-panel hud-status" aria-label="Station" data-read>
-      <h2 className="hud-group__label">Station</h2>
-      <HudBar icon={<FoodIcon />} label="Food" value={food} color="var(--hud-orange)" />
-      <HudBar icon={<WaterIcon />} label="Water" value={water} color="var(--hud-blue)" />
-      <HudBar icon={<OxygenIcon />} label="Oxygen" value={oxygen} color="var(--hud-green)" />
-      <HudBar icon={<RadiationIcon />} label="Radiation" value={radiation} color="var(--hud-yellow)" higherIsWorse />
-      <HudBar icon={<EnergyIcon />} label="Energy" value={energy} color="var(--hud-purple)" />
-      {alerts.length > 0 && (
+    <section className="hud-panel hud-status" aria-label={localize("Station")} data-read>
+      <h2 className="hud-group__label">{localize("Station")}</h2>
+      <HudBar icon={<FoodIcon />} label={localize("Food")} value={food} color="var(--hud-orange)" />
+      <HudBar icon={<WaterIcon />} label={localize("Water")} value={water} color="var(--hud-blue)" />
+      <HudBar icon={<OxygenIcon />} label={localize("Oxygen")} value={oxygen} color="var(--hud-green)" />
+      <HudBar icon={<RadiationIcon />} label={localize("Radiation")} value={radiation} color="var(--hud-yellow)" higherIsWorse />
+      <HudBar icon={<EnergyIcon />} label={localize("Energy")} value={energy} color="var(--hud-purple)" />
+      {localize(alerts.length > 0 && (
         <p className="hud-alert" role="status">
           <WarningIcon size={20} />
-          {alerts.join(' ')}
-        </p>
-      )}
-      {onNow.map((p) => (
-        <p key={p.id} className="hud-protocol">
-          {p.short}
+          {localize(alerts.join(' '))}
         </p>
       ))}
+      {localize(onNow.map((p) => (
+        <p key={p.id} className="hud-protocol">
+          {localize(p.short)}
+        </p>
+      )))}
     </section>
   );
 }

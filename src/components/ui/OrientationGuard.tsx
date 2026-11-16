@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useEffect, useState } from 'react';
 import './OrientationGuard.css';
 
@@ -57,8 +58,8 @@ export function OrientationGuard() {
       <div className="orientation-guard__phone" aria-hidden="true">
         <span />
       </div>
-      <h2>Rotate your phone</h2>
-      <p>Aurora Station works best horizontally. Turn your device to continue the mission.</p>
+      <h2>{localize("Rotate your phone")}</h2>
+      <p>{localize("Aurora Station works best horizontally. Turn your device to continue the mission.")}</p>
       <div className="orientation-guard__arrow" aria-hidden="true">↻</div>
     </div>
   );

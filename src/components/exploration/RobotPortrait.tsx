@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useEffect, useRef } from 'react';
 
 interface RobotPortraitProps {
@@ -41,7 +42,7 @@ export function RobotPortrait({ className, size = 72 }: RobotPortraitProps) {
       width={FRAME_WIDTH}
       height={FRAME_HEIGHT}
       style={{ width: size, height: size, objectFit: 'contain' }}
-      aria-label="Explorer robot"
+      aria-label={localize("Explorer robot")}
     />
   );
 }

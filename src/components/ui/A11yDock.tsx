@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useEffect, useRef, useState } from 'react';
 import { elementText, speak, speechSupported, toggleReadScreen } from '../../utils/speech';
 import { useSettingsStore } from '../../stores/useSettingsStore';
@@ -93,13 +94,13 @@ export function A11yDock() {
   const [optionsOpen, setOptionsOpen] = useState(false);
   return (
     <>
-      <nav className="a11y-dock" aria-label="Accessibility">
+      <nav className="a11y-dock" aria-label={localize("Accessibility")}>
         <button type="button" className="gm-menu-btn a11y-btn" onClick={() => setOptionsOpen(true)} aria-haspopup="dialog">
           <GearIcon />
-          <span className="a11y-btn__text">Settings</span>
+          <span className="a11y-btn__text">{localize("Settings")}</span>
         </button>
       </nav>
-      {optionsOpen && <OptionsDialog onClose={() => setOptionsOpen(false)} />}
+      {localize(optionsOpen && <OptionsDialog onClose={() => setOptionsOpen(false)} />)}
     </>
   );
 }

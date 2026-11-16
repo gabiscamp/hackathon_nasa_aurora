@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useNarrativeStore } from '../../stores/useNarrativeStore';
 import { TypeWriter } from '../ui/TypeWriter';
 import { Button } from '../ui/Button';
@@ -24,16 +25,12 @@ export function DialogueBox() {
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-md)' }}>
         <span style={{ fontSize: '2rem' }}>📡</span>
         <div style={{ flex: 1 }}>
-          <div id="mission-control-speaker" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 700, color: 'var(--accent-blue)', marginBottom: 'var(--space-xs)' }}>
-            Mission Control
-          </div>
-          <TypeWriter text={currentDialogue} speed={25} />
+          <div id="mission-control-speaker" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 700, color: 'var(--accent-blue)', marginBottom: 'var(--space-xs)' }}>{localize(" Mission Control ")}</div>
+          <TypeWriter text={localize(currentDialogue)} speed={25} />
         </div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button variant="ghost" size="sm" onClick={advance}>
-          Continue
-        </Button>
+        <Button variant="ghost" size="sm" onClick={advance}>{localize(" Continue ")}</Button>
       </div>
     </div>
   );

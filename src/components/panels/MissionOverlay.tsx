@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useState, useCallback } from 'react';
 import { useMissionStore } from '../../stores/useMissionStore';
 import { SHOWN_RESOURCES, useResourceStore, type ResourceKey } from '../../stores/useResourceStore';
@@ -59,20 +60,20 @@ function ResourceHints() {
   ];
 
   return (
-    <div className="resource-hints" aria-label="Current resources">
-      <span className="resource-hints__label">Current resources:</span>
+    <div className="resource-hints" aria-label={localize("Current resources")}>
+      <span className="resource-hints__label">{localize("Current resources:")}</span>
       <div className="resource-hints__list">
-        {resources.map((r) => {
+        {localize(resources.map((r) => {
           const info = RESOURCE_LABELS[r.key];
           const isLow = r.key === 'radiation' ? r.value > 60 : r.value < 30;
           return (
             <span key={r.key} className={`resource-chip ${isLow ? 'resource-chip--warning' : ''}`}>
-              <span aria-hidden="true">{info.icon}</span>
-              <span className="sr-only">{info.name}: </span> {Math.round(r.value)}
-              {isLow && <span className="sr-only">, warning</span>}
+              <span aria-hidden="true">{localize(info.icon)}</span>
+              <span className="sr-only">{localize(info.name)}: </span> {localize(Math.round(r.value))}
+              {localize(isLow && <span className="sr-only">{localize(", warning")}</span>)}
             </span>
           );
-        })}
+        }))}
       </div>
     </div>
   );
@@ -83,16 +84,16 @@ function Changes({ changes }: { changes: Partial<Record<ResourceKey, number>> })
   const entries = (Object.entries(changes) as [ResourceKey, number][]).filter(([k]) => SHOWN_RESOURCES.includes(k));
   if (entries.length === 0) return null;
   return (
-    <div className="mission-changes" aria-label="What changed">
-      {entries.map(([key, d]) => {
+    <div className="mission-changes" aria-label={localize("What changed")}>
+      {localize(entries.map(([key, d]) => {
         const good = key === 'radiation' ? d < 0 : d > 0;
         return (
           <span key={key} className={`effect-badge ${good ? 'effect-badge--positive' : 'effect-badge--negative'}`}>
-            {RESOURCE_LABELS[key].name} {d > 0 ? '+' : '−'}
-            {Math.abs(Math.round(d))}
+            {localize(RESOURCE_LABELS[key].name)} {localize(d > 0 ? '+' : '−')}
+            {localize(Math.abs(Math.round(d)))}
           </span>
         );
-      })}
+      }))}
     </div>
   );
 }
@@ -114,18 +115,18 @@ function ChoiceMeta({ choice, lockedReason, patientName, outside }: { choice: Ch
   const risk = sideRiskChance(choice.sideRisk);
   return (
     <span className="mission-choice__meta">
-      <span className="choice-tag">{people}</span>
-      {need.allowFewer && <span className="choice-tag">Can try with fewer (harder)</span>}
-      {need.best && <span className="choice-tag">Best: {need.best.map(slotTitle).join(' or ')}</span>}
-      {choice.time && <span className="choice-tag">{choice.time}</span>}
-      {(choice.busyDays ?? 0) > 0 && <span className="choice-tag choice-tag--warn">Busy {(choice.busyDays ?? 0) + 1} days</span>}
-      {choice.successRate !== undefined && !choice.noVerdict && (
-        <span className="choice-tag choice-tag--warn">Risky: {choice.successRate}% chance</span>
-      )}
-      {risk !== null && <span className="choice-tag choice-tag--warn">{risk}% risk: {choice.sideRisk!.effects.map((e) => e.resource).join(', ')}</span>}
-      {choice.temporary && <span className="choice-tag choice-tag--warn">Temporary fix</span>}
-      {choice.needsCandles && <span className="choice-tag">Uses {choice.needsCandles} oxygen candle{choice.needsCandles > 1 ? 's' : ''}</span>}
-      {lockedReason && <span className="choice-tag choice-tag--bad">{lockedReason}</span>}
+      <span className="choice-tag">{localize(people)}</span>
+      {localize(need.allowFewer && <span className="choice-tag">{localize("Can try with fewer (harder)")}</span>)}
+      {localize(need.best && <span className="choice-tag">{localize("Best: ")}{localize(need.best.map(slotTitle).join(' or '))}</span>)}
+      {localize(choice.time && <span className="choice-tag">{localize(choice.time)}</span>)}
+      {localize((choice.busyDays ?? 0) > 0 && <span className="choice-tag choice-tag--warn">{localize("Busy ")}{localize((choice.busyDays ?? 0) + 1)}{localize(" days")}</span>)}
+      {localize(choice.successRate !== undefined && !choice.noVerdict && (
+        <span className="choice-tag choice-tag--warn">{localize("Risky: ")}{localize(choice.successRate)}{localize("% chance")}</span>
+      ))}
+      {localize(risk !== null && <span className="choice-tag choice-tag--warn">{localize(risk)}{localize("% risk: ")}{localize(choice.sideRisk!.effects.map((e) => e.resource).join(', '))}</span>)}
+      {localize(choice.temporary && <span className="choice-tag choice-tag--warn">{localize("Temporary fix")}</span>)}
+      {localize(choice.needsCandles && <span className="choice-tag">{localize("Uses ")}{localize(choice.needsCandles)}{localize(" oxygen candle")}{localize(choice.needsCandles > 1 ? 's' : '')}</span>)}
+      {localize(lockedReason && <span className="choice-tag choice-tag--bad">{localize(lockedReason)}</span>)}
     </span>
   );
 }
@@ -225,55 +226,47 @@ export function MissionOverlay({ onComplete }: MissionOverlayProps) {
     <div className="mission-overlay">
       <div className="mission-overlay__backdrop" />
 
-      <div className="mission-overlay__panel" role="dialog" aria-modal="true" aria-label={mission.title}>
+      <div className="mission-overlay__panel" role="dialog" aria-modal="true" aria-label={localize(mission.title)}>
         <div className="mission-overlay__header">
-          <span className="mission-overlay__icon">{mission.icon}</span>
-          <h2 className="mission-overlay__title">{mission.title}</h2>
+          <span className="mission-overlay__icon">{localize(mission.icon)}</span>
+          <h2 className="mission-overlay__title">{localize(mission.title)}</h2>
         </div>
 
-        <div className="mission-overlay__source">
-          Based on: {mission.nasaSource}
-          {mission.nasaYear ? ` (${mission.nasaYear})` : ''}
+        <div className="mission-overlay__source">{localize(" Based on: ")}{localize(mission.nasaSource)}
+          {localize(mission.nasaYear ? ` (${mission.nasaYear})` : '')}
         </div>
 
-        {deferred && (
+        {localize(deferred && (
           <div className="mission-overlay__body" data-voice-story>
-            <div className="mission-overlay__terminal">
-              You decided to deal with it tomorrow. {mission.defer ? fill(mission.defer.text) : ''}
+            <div className="mission-overlay__terminal">{localize(" You decided to deal with it tomorrow. ")}{localize(mission.defer ? fill(mission.defer.text) : '')}
             </div>
             <Changes changes={deferred} />
-            <button className="mission-btn mission-btn--primary" onClick={onComplete} autoFocus>
-              Back to the station
-            </button>
+            <button className="mission-btn mission-btn--primary" onClick={onComplete} autoFocus>{localize(" Back to the station ")}</button>
           </div>
-        )}
+        ))}
 
-        {!deferred && phase === 'intro' && (
+        {localize(!deferred && phase === 'intro' && (
           <div className="mission-overlay__body">
             <div className="mission-overlay__terminal">
               <TypeWriter
-                text={description}
-                spokenText={`${mission.title}. Based on ${mission.nasaSource}${mission.nasaYear ? `, ${mission.nasaYear}` : ''}. ${description}`}
+                text={localize(description)}
+                spokenText={localize(`${mission.title}. Based on ${mission.nasaSource}${mission.nasaYear ? `, ${mission.nasaYear}` : ''}. ${description}`)}
                 speed={25}
                 onComplete={handleIntroComplete}
               />
             </div>
-            {introReady && (
-              <button className="mission-btn mission-btn--primary" onClick={() => setPhase('choices')} autoFocus>
-                What do we do, Commander?
-              </button>
-            )}
+            {localize(introReady && (
+              <button className="mission-btn mission-btn--primary" onClick={() => setPhase('choices')} autoFocus>{localize(" What do we do, Commander? ")}</button>
+            ))}
           </div>
-        )}
+        ))}
 
-        {!deferred && phase === 'choices' && (
+        {localize(!deferred && phase === 'choices' && (
           <div className="mission-overlay__body" data-voice-options>
             <ResourceHints />
-            <p className="mission-overlay__prompt">
-              Think carefully: every choice has a cost. {freeCount} of your crew {freeCount === 1 ? 'is' : 'are'} free right now.
-            </p>
+            <p className="mission-overlay__prompt">{localize(" Think carefully: every choice has a cost. ")}{localize(freeCount)}{localize(" of your crew ")}{localize(freeCount === 1 ? 'is' : 'are')}{localize(" free right now. ")}</p>
             <div className="mission-overlay__choices">
-              {choices.map(({ c, state }, index) => (
+              {localize(choices.map(({ c, state }, index) => (
                 <button
                   key={c.id}
                   className="mission-choice"
@@ -281,25 +274,23 @@ export function MissionOverlay({ onComplete }: MissionOverlayProps) {
                   onClick={() => pickChoice(c)}
                   autoFocus={index === choices.findIndex(({ state: optionState }) => !optionState.lockedReason)}
                 >
-                  <span className="mission-choice__icon">{c.icon}</span>
+                  <span className="mission-choice__icon">{localize(c.icon)}</span>
                   <span className="mission-choice__content">
-                    <span className="mission-choice__label">{fill(c.label)}</span>
+                    <span className="mission-choice__label">{localize(fill(c.label))}</span>
                     <ChoiceMeta choice={c} lockedReason={state.lockedReason} patientName={patientName} outside={!!outside} />
                   </span>
                 </button>
-              ))}
+              )))}
             </div>
-            {mission.defer && (
-              <button className="mission-defer" onClick={handleDefer}>
-                Deal with it tomorrow
-                <span className="mission-defer__cost">{fill(mission.defer.text)}</span>
+            {localize(mission.defer && (
+              <button className="mission-defer" onClick={handleDefer}>{localize(" Deal with it tomorrow ")}<span className="mission-defer__cost">{localize(fill(mission.defer.text))}</span>
               </button>
-            )}
-            {mission.defer === false && <p className="mission-overlay__hint">There is no time to wait: you must act now.</p>}
+            ))}
+            {localize(mission.defer === false && <p className="mission-overlay__hint">{localize("There is no time to wait: you must act now.")}</p>)}
           </div>
-        )}
+        ))}
 
-        {!deferred && phase === 'crew' && choice && (
+        {localize(!deferred && phase === 'crew' && choice && (
           <CrewPicker
             mission={mission}
             choice={choice}
@@ -309,49 +300,47 @@ export function MissionOverlay({ onComplete }: MissionOverlayProps) {
             onBack={() => setPhase('choices')}
             onSend={(slots) => finish(choice, slots)}
           />
-        )}
+        ))}
 
-        {!deferred && phase === 'result' && result && (
+        {localize(!deferred && phase === 'result' && result && (
           <div className="mission-overlay__body" data-voice-story>
-            {choice && choice.successRate !== undefined && !result.noVerdict && (
+            {localize(choice && choice.successRate !== undefined && !result.noVerdict && (
               <p className={`mission-outcome ${result.success ? 'mission-outcome--good' : 'mission-outcome--bad'}`}>
-                {result.success ? 'It worked!' : 'It did not work.'}
+                {localize(result.success ? 'It worked!' : 'It did not work.')}
               </p>
-            )}
+            ))}
             <div className="mission-overlay__terminal">
-              <TypeWriter text={result.narrative} automaticNarration={false} speed={20} onComplete={handleResultComplete} />
+              <TypeWriter text={localize(result.narrative)} automaticNarration={false} speed={20} onComplete={handleResultComplete} />
             </div>
             <Changes changes={result.changes} />
-            {result.notes.length > 0 && (
+            {localize(result.notes.length > 0 && (
               <ul className="mission-notes">
-                {result.notes.map((n) => (
+                {localize(result.notes.map((n) => (
                   <li key={n} className={n.startsWith('NEW PROBLEM') ? 'mission-notes__alert' : ''}>
-                    {n}
+                    {localize(n)}
                   </li>
-                ))}
+                )))}
               </ul>
-            )}
-            {resultReady && (
+            ))}
+            {localize(resultReady && (
               <button className="mission-btn mission-btn--primary" onClick={afterResult} autoFocus>
-                {result.retry ? 'Choose another way' : 'Did you know?'}
+                {localize(result.retry ? 'Choose another way' : 'Did you know?')}
               </button>
-            )}
+            ))}
           </div>
-        )}
+        ))}
 
-        {!deferred && phase === 'popup' && (
+        {localize(!deferred && phase === 'popup' && (
           <div className="mission-overlay__body" data-voice-story>
-            <div className="mission-overlay__nasa-badge">{mission.factKind ? FACT_BADGE[mission.factKind] : '🚀 REAL NASA FACT'}</div>
+            <div className="mission-overlay__nasa-badge">{localize(mission.factKind ? FACT_BADGE[mission.factKind] : '🚀 REAL NASA FACT')}</div>
             <div className="mission-overlay__terminal mission-overlay__terminal--nasa">
-              <TypeWriter text={mission.popup} automaticNarration={false} speed={15} onComplete={handlePopupComplete} />
+              <TypeWriter text={localize(mission.popup)} automaticNarration={false} speed={15} onComplete={handlePopupComplete} />
             </div>
-            {popupReady && (
-              <button className="mission-btn mission-btn--primary" onClick={onComplete} autoFocus>
-                Continue Mission
-              </button>
-            )}
+            {localize(popupReady && (
+              <button className="mission-btn mission-btn--primary" onClick={onComplete} autoFocus>{localize(" Continue Mission ")}</button>
+            ))}
           </div>
-        )}
+        ))}
       </div>
     </div>
   );

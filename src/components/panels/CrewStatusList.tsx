@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useDutyStore, availability, fatigueLabel } from '../../stores/useDutyStore';
 import { ROOM_NAMES } from '../hud/LocationHint';
 import type { RoomId } from '../../game/world/shipLayout';
@@ -38,25 +39,25 @@ export function CrewStatusList({ day, title }: { day: number; title?: string }) 
   const duty = useDutyStore((s) => s.crew);
 
   return (
-    <section className="crew-status" aria-label={title ?? 'Crew'}>
-      {title && <h3 className="crew-status__title">{title}</h3>}
+    <section className="crew-status" aria-label={localize(title ?? 'Crew')}>
+      {localize(title && <h3 className="crew-status__title">{localize(title)}</h3>)}
       <ul className="crew-status__list">
-        {roster.map((r) => {
+        {localize(roster.map((r) => {
           const d = duty[r.slot];
           const state = availability(d, day);
           return (
             <li key={r.slot} className={`crew-status__row crew-status__row--${state}`}>
               <span className="crew-status__face" style={{ borderColor: r.color }}>
-                {r.photo ? <img src={r.photo} alt="" /> : r.firstName.charAt(0)}
+                {localize(r.photo ? <img src={r.photo} alt={localize("")} /> : r.firstName.charAt(0))}
               </span>
               <span className="crew-status__who">
-                <strong>{r.firstName}</strong> <span className="crew-status__role">{r.roleLabel}</span>
+                <strong>{localize(r.firstName)}</strong> <span className="crew-status__role">{localize(r.roleLabel)}</span>
               </span>
-              <span className="crew-status__what">{dutyText(d, day)}</span>
-              <span className={`crew-status__tired crew-status__tired--${Math.min(d.fatigue, 4)}`}>{fatigueLabel(d.fatigue)}</span>
+              <span className="crew-status__what">{localize(dutyText(d, day))}</span>
+              <span className={`crew-status__tired crew-status__tired--${Math.min(d.fatigue, 4)}`}>{localize(fatigueLabel(d.fatigue))}</span>
             </li>
           );
-        })}
+        }))}
       </ul>
     </section>
   );

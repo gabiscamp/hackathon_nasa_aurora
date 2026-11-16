@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { type ButtonHTMLAttributes } from 'react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -26,8 +27,8 @@ export function Button({
       className={`btn btn-${size} ${VARIANTS[variant]} ${className}`}
       {...props}
     >
-      {icon && <span className="btn-icon">{icon}</span>}
-      {children}
+      {localize(icon && <span className="btn-icon">{localize(icon)}</span>)}
+      {localize(children)}
     </button>
   );
 }

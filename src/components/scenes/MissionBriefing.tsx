@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { ScreenNav } from '../ui/ScreenNav';
 import { commanderLabel } from '../../data/crew';
@@ -13,6 +14,7 @@ import greenhouseUrl from '../../assets/station/greenhouse.png';
 import nodeUrl from '../../assets/station/node.png';
 import './MissionBriefing.css';
 import { speak, stopSpeaking, speechSupported, useSpeaking } from '../../utils/speech';
+import { useLanguage } from '../../i18n/language';
 
 // Seconds in the supplied MP3. Keep its opening intact; fade out before 49 s.
 const SCENES = [
@@ -41,6 +43,7 @@ const DESCRIPTIONS = [
 ];
 
 export function MissionBriefing({ playerName, onContinue, onBack }: { playerName: string; onContinue: () => void; onBack: () => void }) {
+  const language = useLanguage((s) => s.language);
   const [started, setStarted] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -89,7 +92,7 @@ export function MissionBriefing({ playerName, onContinue, onBack }: { playerName
     if (!started || !playing || !narrated) return;
     speak(`${DESCRIPTIONS[index]} ${SCENES[index].text.replace('{commander}', commanderLabel(playerName))}`);
     return () => stopSpeaking();
-  }, [index, started, playing, narrated, playerName]);
+  }, [index, started, playing, narrated, playerName, language]);
   useEffect(() => {
     if (!speaking && waitingForVoice.current && playing) {
       waitingForVoice.current = false;
@@ -125,66 +128,66 @@ export function MissionBriefing({ playerName, onContinue, onBack }: { playerName
     const audio = audioRef.current;
     return () => { audio?.pause(); stopSpeaking(); };
   }, []);
-  const words = scene.text.replace('{commander}', commanderLabel(playerName)).split(' ');
+  const words = localize(scene.text.replace('{commander}', commanderLabel(playerName))).split(' ');
 
   return <div className={`intro-film${time >= FADE_START ? ' intro-film--ending' : ''}${!playing ? ' intro-film--paused' : ''}`}>
     <audio ref={audioRef} src="/assets/cutscene/trailer-music.mp3" preload="auto" onEnded={finish} onError={() => { setError('Soundtrack unavailable. Retry or skip the introduction.'); setPlaying(false); }} />
-    <ScreenNav backLabel="Main menu" onBack={onBack} skipLabel="Skip introduction" onSkip={finish} />
-    {!started ? <div className="intro-start">
-      <p>AURORA STATION</p><h1>Are you ready to leave Earth?</h1>
-      <p>A cinematic journey · 49 seconds</p>
-      <p className="intro-accessibility-note">Prefer listening? Start with English narration, scene descriptions and music at 10%. Scenes wait for the voice.</p>
-      {speechSupported && <button type="button" onClick={() => {
+    <ScreenNav backLabel={localize("Main menu")} onBack={onBack} skipLabel={localize("Skip introduction")} onSkip={finish} />
+    {localize(!started ? <div className="intro-start">
+      <p>{localize("AURORA STATION")}</p><h1>{localize("Are you ready to leave Earth?")}</h1>
+      <p>{localize("A cinematic journey · 49 seconds")}</p>
+      <p className="intro-accessibility-note">{localize("Prefer listening? Start with narration in your language, scene descriptions and music at 10%. Scenes wait for the voice.")}</p>
+      {localize(speechSupported && <button type="button" onClick={() => {
         setMusicLevel(10);
         useSettingsStore.getState().set({ readAloud: true });
         play();
-      }}>Start with narration · Music 10%</button>}
-      {!speechSupported && <p>Your browser does not support built-in narration. Full captions are available to screen readers.</p>}
-      <button type="button" onClick={play}>Start introduction</button>
-      {error && <p role="alert">{error}</p>}
+      }}>{localize("Start with narration · Music 10%")}</button>)}
+      {localize(!speechSupported && <p>{localize("Your browser does not support built-in narration. Full captions are available to screen readers.")}</p>)}
+      <button type="button" onClick={play}>{localize("Start introduction")}</button>
+      {localize(error && <p role="alert">{localize(error)}</p>)}
     </div> : <>
       <main key={index} className={`intro-scene intro-scene--${scene.kind}`} style={{ filter: `brightness(${cutOpacity})` }}>
         <div className="intro-visual" aria-hidden="true">
-          {(scene.kind === 'base' || scene.kind === 'launch') && <>
+          {localize((scene.kind === 'base' || scene.kind === 'launch') && <>
             <LaunchBase />
-            <div className="intro-rocket"><LaunchRocket />{scene.kind === 'launch' && <span className="intro-flame" />}</div>
-            {scene.kind === 'base' && <IntroCrew heads={team.heads} />}
-            {scene.kind === 'launch' && <div className="intro-smoke" />}
-          </>}
-          {scene.kind === 'cockpit' && <div className="intro-cockpit-tableau"><img src="/assets/cutscene/cockpit.png" alt="" /><IntroCrew heads={team.heads} seated /></div>}
-          {scene.kind === 'orbit' && <><img className="intro-background" src="/assets/environments/mars-backdrop.jpg" alt="" /><IntroStation /></>}
-          {scene.kind === 'mission' && <div className="intro-responsibilities">
-            <div><img src={greenhouseUrl} alt="" /><span>Keep your crew healthy</span></div>
-            <div><img src={nodeUrl} alt="" /><span>Protect life support</span></div>
-            <div><img src={labUrl} alt="" /><span>Explore & discover</span></div>
-          </div>}
+            <div className="intro-rocket"><LaunchRocket />{localize(scene.kind === 'launch' && <span className="intro-flame" />)}</div>
+            {localize(scene.kind === 'base' && <IntroCrew heads={team.heads} />)}
+            {localize(scene.kind === 'launch' && <div className="intro-smoke" />)}
+          </>)}
+          {localize(scene.kind === 'cockpit' && <div className="intro-cockpit-tableau"><img src="/assets/cutscene/cockpit.png" alt={localize("")} /><IntroCrew heads={team.heads} seated /></div>)}
+          {localize(scene.kind === 'orbit' && <><img className="intro-background" src="/assets/environments/mars-backdrop.jpg" alt={localize("")} /><IntroStation /></>)}
+          {localize(scene.kind === 'mission' && <div className="intro-responsibilities">
+            <div><img src={greenhouseUrl} alt={localize("")} /><span>{localize("Keep your crew healthy")}</span></div>
+            <div><img src={nodeUrl} alt={localize("")} /><span>{localize("Protect life support")}</span></div>
+            <div><img src={labUrl} alt={localize("")} /><span>{localize("Explore & discover")}</span></div>
+          </div>)}
         </div>
         <section className="intro-caption">
-          <p className="intro-chapter">{scene.title}</p>
-          <p className="intro-text intro-timed-text" aria-label={words.join(' ')} data-read>
-            {words.map((word, i) => <span key={i} aria-hidden="true" style={{ '--word-delay': `${i * .09}s` } as CSSProperties}>{word} </span>)}
+          <p className="intro-chapter">{localize(scene.title)}</p>
+          <p className="intro-text intro-timed-text" aria-label={localize(words.join(' '))} data-read>
+            {localize(words.map((word, i) => <span key={i} aria-hidden="true" style={{ '--word-delay': `${i * .09}s` } as CSSProperties}>{localize(word)} </span>))}
           </p>
         </section>
-        {scene.kind !== 'suspense' && scene.kind !== 'travel' && scene.kind !== 'command' && <small className="intro-ai-credit">AI-generated scenery · Fictional mission</small>}
+        {localize(scene.kind !== 'suspense' && scene.kind !== 'travel' && scene.kind !== 'command' && <small className="intro-ai-credit">{localize("AI-generated scenery · Fictional mission")}</small>)}
       </main>
       <div className="intro-playback">
-        <button type="button" onClick={() => { if (playing) { audioRef.current?.pause(); setPlaying(false); } else play(); }}>{playing ? 'Pause' : 'Resume'}</button>
-        <button type="button" aria-pressed={!muted} onClick={() => setMuted((m) => !m)}>{muted ? 'Sound: off' : 'Sound: on'}</button>
-        <label className="intro-music-volume">Music {narrated ? Math.min(musicLevel, 10) : musicLevel}%
-          <input type="range" min="0" max="100" step="5" value={narrated ? Math.min(musicLevel, 10) : musicLevel} aria-label="Music volume. At 10 percent or below, English narration turns on." onChange={(event) => {
+        <button type="button" onClick={() => { if (playing) { audioRef.current?.pause(); setPlaying(false); } else play(); }}>{localize(playing ? 'Pause' : 'Resume')}</button>
+        <button type="button" aria-pressed={!muted} onClick={() => setMuted((m) => !m)}>{localize(muted ? 'Sound: off' : 'Sound: on')}</button>
+        <label className="intro-music-volume">{localize("Music ")}{localize(narrated ? Math.min(musicLevel, 10) : musicLevel)}%
+          <input type="range" min="0" max="100" step="5" value={narrated ? Math.min(musicLevel, 10) : musicLevel} aria-label={localize("Music volume. At 10 percent or below, narration in your language turns on.")} onChange={(event) => {
             const nextLevel = Number(event.target.value);
             setMusicLevel(nextLevel);
             if (speechSupported) useSettingsStore.getState().set({ readAloud: nextLevel <= 10 });
           }} />
         </label>
-        {speechSupported && <button type="button" aria-pressed={readAloud} onClick={() => {
+        {localize(speechSupported && <button type="button" aria-pressed={readAloud} onClick={() => {
           if (readAloud) stopSpeaking();
           else setMusicLevel(10);
           useSettingsStore.getState().set({ readAloud: !readAloud });
-        }}>{readAloud ? 'Narration: on' : 'Narration: off'}</button>}
+        }}>{localize(readAloud ? 'Narration: on' : 'Narration: off')}</button>)}
       </div>
-      {error && <p className="intro-error" role="alert">{error}</p>}
-    </>}
+      {localize(error && <p className="intro-error" role="alert">{localize(error)}</p>)}
+    </>)}
     <div className="intro-blackout" aria-hidden="true" />
   </div>;
 }

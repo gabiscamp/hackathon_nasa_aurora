@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { gameEvents, EVENTS } from '../../game/events';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -99,23 +100,23 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
           >
             <path d="M4 7h16M4 12h16M4 17h16" />
           </svg>
-          <span className="gm-action-label">Menu</span>
-          <kbd className="gm-kbd">Esc</kbd>
+          <span className="gm-action-label">{localize("Menu")}</span>
+          <kbd className="gm-kbd">{localize("Esc")}</kbd>
         </button>
         <button type="button" className="gm-menu-btn" onClick={() => openMenu('help')} aria-haspopup="dialog">
           <span className="gm-help-badge" aria-hidden="true">
             ?
           </span>
-          <span className="gm-action-label">Help</span>
-          <kbd className="gm-kbd">H</kbd>
+          <span className="gm-action-label">{localize("Help")}</span>
+          <kbd className="gm-kbd">{localize("H")}</kbd>
         </button>
-        <button type="button" className="gm-menu-btn a11y-btn" onClick={() => openMenu('options')} aria-haspopup="dialog" aria-label="Settings">
+        <button type="button" className="gm-menu-btn a11y-btn" onClick={() => openMenu('options')} aria-haspopup="dialog" aria-label={localize("Settings")}>
           <GearIcon />
-          <span className="gm-action-label">Settings</span>
+          <span className="gm-action-label">{localize("Settings")}</span>
         </button>
       </div>
 
-      {open && (
+      {localize(open && (
         <div
           className="gm-backdrop"
           role="dialog"
@@ -126,43 +127,39 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
           }}
         >
           <div className={`gm-card ${view === 'help' ? 'gm-card--help' : view === 'options' ? 'gm-card--options' : 'gm-card--pause'}`}>
-            {view === 'menu' ? (
+            {localize(view === 'menu' ? (
               <>
                 <h2 id="gm-pause-title" className="gm-title gm-title--icon">
-                  <MenuIcon name="pause" />
-                  Game paused
-                </h2>
-                <p className="gm-text">The station is waiting for you, Commander.</p>
+                  <MenuIcon name="pause" />{localize(" Game paused ")}</h2>
+                <p className="gm-text">{localize("The station is waiting for you, Commander.")}</p>
                 <div className="gm-list">
                   <button ref={resumeRef} type="button" className="gm-btn gm-btn--primary gm-btn--wide gm-btn--resume" onClick={closeMenu}>
                     <span className="gm-btn__icon"><MenuIcon name="play" /></span>
-                    <span className="gm-btn__copy"><span>Back to the game</span><small>Continue your mission</small></span>
-                    <kbd className="gm-kbd">Esc</kbd>
+                    <span className="gm-btn__copy"><span>{localize("Back to the game")}</span><small>{localize("Continue your mission")}</small></span>
+                    <kbd className="gm-kbd">{localize("Esc")}</kbd>
                   </button>
                   <button type="button" className="gm-btn gm-btn--wide" onClick={() => setView('help')}>
                     <span className="gm-btn__icon"><MenuIcon name="book" /></span>
-                    <span className="gm-btn__copy"><span>How to play</span><small>Controls and mission guide</small></span>
+                    <span className="gm-btn__copy"><span>{localize("How to play")}</span><small>{localize("Controls and mission guide")}</small></span>
                   </button>
                   <button type="button" className="gm-btn gm-btn--wide" onClick={() => setView('options')}>
                     <span className="gm-btn__icon"><MenuIcon name="accessibility" /></span>
-                    <span className="gm-btn__copy"><span>Settings</span><small>Text, voice and sound</small></span>
+                    <span className="gm-btn__copy"><span>{localize("Settings")}</span><small>{localize("Text, voice and sound")}</small></span>
                   </button>
                   <button type="button" className="gm-btn gm-btn--wide" onClick={onOpenCredits}>
                     <span className="gm-btn__icon"><MenuIcon name="credits" /></span>
-                    <span className="gm-btn__copy"><span>Credits</span><small>Team and NASA sources</small></span>
+                    <span className="gm-btn__copy"><span>{localize("Credits")}</span><small>{localize("Team and NASA sources")}</small></span>
                   </button>
                   <button type="button" className="gm-btn gm-btn--wide gm-btn--leave" onClick={() => setConfirmHome(true)}>
                     <span className="gm-btn__icon"><MenuIcon name="home" /></span>
-                    <span className="gm-btn__copy"><span>Main menu</span><small>Your mission stays saved</small></span>
+                    <span className="gm-btn__copy"><span>{localize("Main menu")}</span><small>{localize("Your mission stays saved")}</small></span>
                   </button>
                 </div>
               </>
             ) : view === 'options' ? (
               <>
                 <h2 id="gm-pause-title" className="gm-title gm-title--icon">
-                  <MenuIcon name="settings" />
-                  Settings
-                </h2>
+                  <MenuIcon name="settings" />{localize(" Settings ")}</h2>
                 <OptionsPanel />
                 <button
                   ref={resumeRef}
@@ -171,15 +168,13 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
                   onClick={direct ? closeMenu : () => setView('menu')}
                 >
                   <MenuIcon name={direct ? 'play' : 'back'} />
-                  {direct ? 'Back to the game' : 'Back'} <kbd className="gm-kbd">Esc</kbd>
+                  {localize(direct ? 'Back to the game' : 'Back')} <kbd className="gm-kbd">{localize("Esc")}</kbd>
                 </button>
               </>
             ) : (
               <>
                 <h2 id="gm-pause-title" className="gm-title gm-title--icon">
-                  <MenuIcon name="book" />
-                  How to play
-                </h2>
+                  <MenuIcon name="book" />{localize(" How to play ")}</h2>
                 <HowToPlay />
                 <button
                   ref={resumeRef}
@@ -188,26 +183,26 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
                   onClick={direct ? closeMenu : () => setView('menu')}
                 >
                   <MenuIcon name={direct ? 'play' : 'back'} />
-                  {direct ? 'Back to the game' : 'Back'} <kbd className="gm-kbd">Esc</kbd>
+                  {localize(direct ? 'Back to the game' : 'Back')} <kbd className="gm-kbd">{localize("Esc")}</kbd>
                 </button>
               </>
-            )}
+            ))}
           </div>
         </div>
-      )}
+      ))}
 
-      {confirmHome && (
+      {localize(confirmHome && (
         <ConfirmDialog
-          title="Go to the main menu?"
-          message="Your mission is saved. You can continue it from the main menu."
-          confirmLabel="Go to main menu"
+          title={localize("Go to the main menu?")}
+          message={localize("Your mission is saved. You can continue it from the main menu.")}
+          confirmLabel={localize("Go to main menu")}
           onCancel={() => setConfirmHome(false)}
           onConfirm={() => {
             closeMenu();
             onMainMenu();
           }}
         />
-      )}
+      ))}
     </>
   );
 }

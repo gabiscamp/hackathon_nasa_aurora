@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useEffect, useId, useRef } from 'react';
 import './GameMenus.css';
 import { useSettingsStore, VOLUME_LEVELS, type TextSize, type TextSpeed } from '../../stores/useSettingsStore';
@@ -29,16 +30,16 @@ function Segmented<T extends string | number | boolean>({
   const name = useId();
   return (
     <fieldset className="opt-row">
-      <legend className="opt-row__title"><MenuIcon name={icon} size={18} /> <span>{title}</span></legend>
-      {hint && <p className="opt-row__hint">{hint}</p>}
+      <legend className="opt-row__title"><MenuIcon name={icon} size={18} /> <span>{localize(title)}</span></legend>
+      {localize(hint && <p className="opt-row__hint">{localize(hint)}</p>)}
       <div className="opt-seg">
-        {choices.map((c) => (
+        {localize(choices.map((c) => (
           <label key={String(c.value)} className={`opt-seg__item ${c.value === value ? 'is-on' : ''}`}>
             <input type="radio" name={name} checked={c.value === value} onChange={() => onChange(c.value)} />
-            <span>{c.label}</span>
+            <span>{localize(c.label)}</span>
             <span className="opt-seg__check"><MenuIcon name="check" size={16} /></span>
           </label>
-        ))}
+        )))}
       </div>
     </fieldset>
   );
@@ -68,21 +69,21 @@ export function OptionsPanel() {
   return (
     <div className="opt-panel">
       <section className="opt-section" aria-labelledby="opt-accessibility-title">
-        <h3 className="opt-section__title" id="opt-accessibility-title"><MenuIcon name="accessibility" /> <span>Accessibility</span></h3>
-        <Segmented icon="text" title="Text size" choices={SIZES} value={textSize} onChange={(v) => set({ textSize: v })} />
+        <h3 className="opt-section__title" id="opt-accessibility-title"><MenuIcon name="accessibility" /> <span>{localize("Accessibility")}</span></h3>
+        <Segmented icon="text" title={localize("Text size")} choices={SIZES} value={textSize} onChange={(v) => set({ textSize: v })} />
         <Segmented
           icon="speed"
-          title="Text speed"
+          title={localize("Text speed")}
           hint="How fast the messages appear."
           choices={SPEEDS}
           value={textSpeed}
           onChange={(v) => set({ textSpeed: v })}
         />
-        {speechSupported && (
+        {localize(speechSupported && (
           <>
             <Segmented
               icon="narration"
-              title="Automatic narration"
+              title={localize("Automatic narration")}
               hint="A voice reads new mission messages as they appear."
               choices={ON_OFF}
               value={readAloud}
@@ -94,19 +95,19 @@ export function OptionsPanel() {
             <button type="button" className="opt-read-btn" onClick={toggleReadScreen}>
               <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" />
-                {speaking ? <path d="M16 9l5 6M21 9l-5 6" /> : <path d="M15.5 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" />}
+                {localize(speaking ? <path d="M16 9l5 6M21 9l-5 6" /> : <path d="M15.5 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" />)}
               </svg>
-              {speaking ? 'Stop reading' : 'Read this screen'}
-              <kbd className="gm-kbd">L</kbd>
+              {localize(speaking ? 'Stop reading' : 'Read this screen')}
+              <kbd className="gm-kbd">{localize("L")}</kbd>
             </button>
           </>
-        )}
+        ))}
       </section>
       <section className="opt-section" aria-labelledby="opt-audio-title">
-        <h3 className="opt-section__title" id="opt-audio-title"><MenuIcon name="audio" /> <span>Audio</span></h3>
+        <h3 className="opt-section__title" id="opt-audio-title"><MenuIcon name="audio" /> <span>{localize("Audio")}</span></h3>
         <Segmented
           icon="volume"
-          title="Master volume"
+          title={localize("Master volume")}
           choices={VOLUME_LEVELS}
           value={volume}
           onChange={(v) => {
@@ -116,7 +117,7 @@ export function OptionsPanel() {
         />
         <Segmented
           icon="music"
-          title="Background music"
+          title={localize("Background music")}
           hint="A calm station ambience."
           choices={VOLUME_LEVELS}
           value={musicVolume}
@@ -124,7 +125,7 @@ export function OptionsPanel() {
         />
         <Segmented
           icon="effects"
-          title="World sounds"
+          title={localize("World sounds")}
           hint="Footsteps, robot and mission alerts."
           choices={VOLUME_LEVELS}
           value={effectsVolume}
@@ -135,7 +136,7 @@ export function OptionsPanel() {
         />
         <Segmented
           icon="ui"
-          title="Interface sounds"
+          title={localize("Interface sounds")}
           hint="Choices and message ticks."
           choices={VOLUME_LEVELS}
           value={uiVolume}
@@ -145,7 +146,7 @@ export function OptionsPanel() {
           }}
         />
       </section>
-      <p className="opt-note">Your choices are saved on this computer.</p>
+      <p className="opt-note">{localize("Your choices are saved on this computer.")}</p>
     </div>
   );
 }
@@ -177,12 +178,10 @@ export function OptionsDialog({ onClose }: { onClose: () => void }) {
     >
       <div className="gm-card gm-card--options">
         <h2 id="opt-title" className="gm-title gm-title--icon">
-          <MenuIcon name="settings" />
-          Settings
-        </h2>
+          <MenuIcon name="settings" />{localize(" Settings ")}</h2>
         <OptionsPanel />
         <button ref={doneRef} type="button" className="gm-btn gm-btn--primary gm-btn--wide" onClick={onClose}>
-          <MenuIcon name="check" /> Done <kbd className="gm-kbd">Esc</kbd>
+          <MenuIcon name="check" />{localize(" Done ")}<kbd className="gm-kbd">{localize("Esc")}</kbd>
         </button>
       </div>
     </div>

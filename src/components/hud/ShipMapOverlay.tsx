@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
 import { gameEvents, EVENTS } from "../../game/events";
@@ -142,9 +143,9 @@ function StationDrawing({ view }: { view: Box }) {
     <svg
       viewBox={`${view.x} ${view.y} ${view.w} ${view.h}`}
       role="img"
-      aria-label="Top view of the whole station"
+      aria-label={localize("Top view of the whole station")}
     >
-      {[...PLACEMENTS]
+      {localize([...PLACEMENTS]
         .sort((a, b) => a.depth - b.depth)
         .map((p, i) => {
           const c = placedCenter(p);
@@ -161,7 +162,7 @@ function StationDrawing({ view }: { view: Box }) {
               transform={`translate(${c.x} ${c.y}) rotate(${p.angle}) scale(${p.flipX ? -1 : 1} ${p.flipY ? -1 : 1})`}
             />
           );
-        })}
+        }))}
     </svg>
   );
 }
@@ -276,23 +277,21 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
         className="ship-map"
         role="dialog"
         aria-modal="true"
-        aria-label="Ship map"
+        aria-label={localize("Ship map")}
         onClick={onClose}
       >
         <div className="ship-map__card" onClick={(e) => e.stopPropagation()}>
           <header className="ship-map__head">
             <h2 className="ship-map__title">
-              <MapIcon size={24} />
-              Ship map
-            </h2>
-            <div className="ship-map__zoom" role="group" aria-label="Map zoom">
+              <MapIcon size={24} />{localize(" Ship map ")}</h2>
+            <div className="ship-map__zoom" role="group" aria-label={localize("Map zoom")}>
               <button
                 type="button"
                 className="ship-map__zoom-btn"
                 onClick={() => zoomBy(1 / BUTTON_ZOOM_STEP)}
                 disabled={camera.zoom <= MIN_ZOOM}
-                aria-label="Zoom out (minus key)"
-                title="Zoom out (−)"
+                aria-label={localize("Zoom out (minus key)")}
+                title={localize("Zoom out (−)")}
               >
                 −
               </button>
@@ -301,8 +300,8 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
                 className="ship-map__zoom-btn"
                 onClick={() => zoomBy(BUTTON_ZOOM_STEP)}
                 disabled={camera.zoom >= MAX_ZOOM}
-                aria-label="Zoom in (plus key)"
-                title="Zoom in (+)"
+                aria-label={localize("Zoom in (plus key)")}
+                title={localize("Zoom in (+)")}
               >
                 +
               </button>
@@ -310,9 +309,8 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
                 type="button"
                 className="ship-map__zoom-btn ship-map__zoom-btn--wide"
                 onClick={showWholeStation}
-                title="See the whole station (0)"
-              >
-                Whole station <kbd>0</kbd>
+                title={localize("See the whole station (0)")}
+              >{localize(" Whole station ")}<kbd>0</kbd>
               </button>
             </div>
             <button
@@ -320,8 +318,7 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
               type="button"
               className="ship-map__close"
               onClick={onClose}
-            >
-              Close <kbd>M</kbd>
+            >{localize(" Close ")}<kbd>{localize("M")}</kbd>
             </button>
           </header>
 
@@ -334,23 +331,23 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
             onPointerCancel={endDrag}
           >
             <StationDrawing view={view} />
-            <span className="ship-map__watermark">AI-generated map</span>
+            <span className="ship-map__watermark">{localize("AI-generated map")}</span>
             <span className="ship-map__hint" aria-hidden="true">
-              {showNames ? "Scroll to zoom · Drag to move" : "Zoom in to see the room names"}
+              {localize(showNames ? "Scroll to zoom · Drag to move" : "Zoom in to see the room names")}
             </span>
 
-            {showNames &&
+            {localize(showNames &&
               ROOM_LABELS.filter((r) => !targets.some((t) => t.room === r.room)).map((r, i) => (
                 <span
                   key={i}
                   className="ship-map__room"
                   style={{ left: left(r.x), top: top(r.y), maxWidth: `${(r.width / view.w) * 100}%` }}
                 >
-                  {ROOM_NAMES[r.room]}
+                  {localize(ROOM_NAMES[r.room])}
                 </span>
-              ))}
+              )))}
 
-            {CREW_ROLES.map((role) => {
+            {localize(CREW_ROLES.map((role) => {
               const m = crew[role];
               const spot = crewPositions[role];
               return spot.visible ? (
@@ -364,16 +361,16 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
                   }}
                 >
                   <span className="ship-map__face">
-                    {m.photo ? <img src={m.photo} alt="" /> : m.name.charAt(0)}
+                    {localize(m.photo ? <img src={m.photo} alt={localize("")} /> : m.name.charAt(0))}
                   </span>
                   <span className="ship-map__name">
-                    {m.name.replace("Dr. ", "").split(" ")[0]}
+                    {localize(m.name.replace("Dr. ", "").split(" ")[0])}
                   </span>
                 </span>
               ) : null;
-            })}
+            }))}
 
-            {robotAboard && (
+            {localize(robotAboard && (
               <span
                 className="ship-map__pin ship-map__pin--robot"
                 style={{
@@ -383,11 +380,11 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
                 }}
               >
                 <span className="ship-map__face"><RobotPortrait size={44} /></span>
-                <span className="ship-map__name">AUR-1</span>
+                <span className="ship-map__name">{localize("AUR-1")}</span>
               </span>
-            )}
+            ))}
 
-            {targets.map((target) => (
+            {localize(targets.map((target) => (
               <span
                 key={target.id}
                 className="ship-map__pin ship-map__pin--mission"
@@ -399,10 +396,10 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
               >
                 <span className="ship-map__face" aria-hidden="true">!</span>
                 <span className="ship-map__name">
-                  {target.title}: {ROOM_NAMES[target.room]}
+                  {localize(target.title)}: {localize(ROOM_NAMES[target.room])}
                 </span>
               </span>
-            ))}
+            )))}
 
             <span
               className="ship-map__pin ship-map__pin--you"
@@ -413,13 +410,13 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
               }}
             >
               <span className="ship-map__face">
-                {commander?.photo ? (
-                  <img src={commander.photo} alt="" />
+                {localize(commander?.photo ? (
+                  <img src={commander.photo} alt={localize("")} />
                 ) : (
                   "You"
-                )}
+                ))}
               </span>
-              <span className="ship-map__name">You</span>
+              <span className="ship-map__name">{localize("You")}</span>
             </span>
           </div>
         </div>

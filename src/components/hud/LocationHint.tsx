@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useEffect, useState } from 'react';
 import { gameEvents, EVENTS } from '../../game/events';
 import type { RoomId } from '../../game/world/shipLayout';
@@ -52,15 +53,12 @@ export function LocationHint() {
     <div className="hud-location" data-read>
       <div className="hud-location__room" key={room} role="status" aria-live="polite" aria-atomic="true">
         <PinIcon size={16} />
-        <span className="sr-only">Current location: </span>{ROOM_NAMES[room]}
+        <span className="sr-only">{localize("Current location: ")}</span>{localize(ROOM_NAMES[room])}
       </div>
-      {showKeys && (
+      {localize(showKeys && (
         <div className="hud-location__keys">
-          <kbd>WASD</kbd> Move
-          <kbd>E</kbd> Interact
-          <kbd>M</kbd> Map
-        </div>
-      )}
+          <kbd>{localize("WASD")}</kbd>{localize(" Move ")}<kbd>{localize("E")}</kbd>{localize(" Interact ")}<kbd>{localize("M")}</kbd>{localize(" Map ")}</div>
+      ))}
     </div>
   );
 }

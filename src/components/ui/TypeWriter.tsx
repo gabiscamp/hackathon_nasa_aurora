@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { playKeyTick } from '../../utils/sounds';
 import { speak, stopSpeaking } from '../../utils/speech';
@@ -127,9 +128,9 @@ export function TypeWriter({
       role="status"
       aria-live="polite"
     >
-      <span className="sr-only">{text}</span>
-      <span aria-hidden="true">{displayed}</span>
-      {!done && <span className="typewriter-cursor" aria-hidden="true">▌</span>}
+      <span className="sr-only">{localize(text)}</span>
+      <span aria-hidden="true">{localize(displayed)}</span>
+      {localize(!done && <span className="typewriter-cursor" aria-hidden="true">▌</span>)}
     </span>
   );
 }

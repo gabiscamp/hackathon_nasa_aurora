@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { LANGUAGE_LOCALES, useLanguage } from '../i18n/language';
+import { t } from '../i18n/translate';
 
 /**
  * "Read aloud" with the browser's own voices (Web Speech API): no server, no audio files.
@@ -10,9 +12,11 @@ export const speechSupported = typeof window !== 'undefined' && 'speechSynthesis
 /** true while a voice is talking (drives the Read / Stop button). */
 export const useSpeaking = create<{ speaking: boolean }>(() => ({ speaking: false }));
 
-function englishVoice(): SpeechSynthesisVoice | undefined {
+function selectedVoice(): SpeechSynthesisVoice | undefined {
   const voices = window.speechSynthesis.getVoices();
-  return voices.find((v) => v.lang === 'en-US' && v.localService) ?? voices.find((v) => v.lang.startsWith('en'));
+  const language = useLanguage.getState().language;
+  const locale = LANGUAGE_LOCALES[language];
+  return voices.find((v) => v.lang === locale && v.localService) ?? voices.find((v) => v.lang === locale) ?? voices.find((v) => v.lang.startsWith(language));
 }
 
 // Each call gets an id so an old utterance ending does not flip the state of a newer one.
@@ -24,14 +28,14 @@ export function speak(text: string): void {
   const synth = window.speechSynthesis;
   synth.cancel();
   const id = ++runId;
-  const sentences = text
+  const sentences = t(text)
     .split(/(?<=[.!?])\s+/)
     .map((s) => s.trim())
     .filter(Boolean);
-  const voice = englishVoice();
+  const voice = selectedVoice();
   sentences.forEach((sentence, i) => {
     const u = new SpeechSynthesisUtterance(sentence);
-    u.lang = 'en-US';
+    u.lang = LANGUAGE_LOCALES[useLanguage.getState().language];
     u.rate = 0.9;
     if (voice) u.voice = voice;
     if (i === sentences.length - 1) {

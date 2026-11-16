@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useEffect, useRef, type PointerEvent as ReactPointerEvent } from 'react';
 import { gameEvents, EVENTS, type TouchMovePayload } from '../../game/events';
 import { MapIcon } from './HudIcons';
@@ -48,24 +49,24 @@ export function MobileControls() {
     <button
       type="button"
       className={`mobile-control mobile-control--${direction}`}
-      aria-label={label}
+      aria-label={localize(label)}
       onPointerDown={press(direction)}
       onPointerUp={release}
       onPointerCancel={release}
       onLostPointerCapture={release}
     >
-      <span aria-hidden="true">{arrow}</span>
+      <span aria-hidden="true">{localize(arrow)}</span>
     </button>
   );
 
   return (
-    <div className="mobile-controls" aria-label="Touch game controls">
-      <div className="mobile-dpad" aria-label="Move astronaut">
-        {directionButton('up', 'Move up', '▲')}
-        {directionButton('left', 'Move left', '◀')}
+    <div className="mobile-controls" aria-label={localize("Touch game controls")}>
+      <div className="mobile-dpad" aria-label={localize("Move astronaut")}>
+        {localize(directionButton('up', 'Move up', '▲'))}
+        {localize(directionButton('left', 'Move left', '◀'))}
         <span className="mobile-dpad__center" aria-hidden="true" />
-        {directionButton('right', 'Move right', '▶')}
-        {directionButton('down', 'Move down', '▼')}
+        {localize(directionButton('right', 'Move right', '▶'))}
+        {localize(directionButton('down', 'Move down', '▼'))}
       </div>
 
       <div className="mobile-actions">
@@ -73,10 +74,10 @@ export function MobileControls() {
           type="button"
           className="mobile-action mobile-action--map"
           onClick={() => gameEvents.emit(EVENTS.OPEN_MAP)}
-          aria-label="Open station map"
+          aria-label={localize("Open station map")}
         >
           <MapIcon size={22} />
-          <span>Map</span>
+          <span>{localize("Map")}</span>
         </button>
         <button
           type="button"
@@ -85,10 +86,10 @@ export function MobileControls() {
             event.preventDefault();
             gameEvents.emit(EVENTS.TOUCH_INTERACT);
           }}
-          aria-label="Interact with nearby mission or robot"
+          aria-label={localize("Interact with nearby mission or robot")}
         >
           <strong>!</strong>
-          <span>Use</span>
+          <span>{localize("Use")}</span>
         </button>
       </div>
     </div>
