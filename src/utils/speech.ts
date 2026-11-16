@@ -50,17 +50,74 @@ export function stopSpeaking(): void {
   useSpeaking.setState({ speaking: false });
 }
 
-/** Things a voice should skip: key caps, icons, hidden helpers. */
-const SKIP = 'button kbd, svg, [aria-hidden="true"], .typewriter-cursor, [data-read-skip]';
-const BLOCKS = 'p, h1, h2, h3, h4, li, button, label, legend, section, header, footer, [role="meter"], .crew-tab__name';
+const BLOCKS = new Set([
+  'ADDRESS', 'ARTICLE', 'ASIDE', 'BUTTON', 'DD', 'DIV', 'DL', 'DT', 'FIELDSET',
+  'FOOTER', 'FORM', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'HEADER', 'LABEL',
+  'LEGEND', 'LI', 'MAIN', 'NAV', 'OL', 'P', 'SECTION', 'TABLE', 'TD', 'TH', 'TR', 'UL',
+]);
 
-/** Visible text of an element, with a pause between blocks. */
-function textOf(el: Element): string {
-  const clone = el.cloneNode(true) as Element;
-  clone.querySelectorAll(SKIP).forEach((n) => n.remove());
-  clone.querySelectorAll('*').forEach((n) => n.append(' '));
-  clone.querySelectorAll(BLOCKS).forEach((n) => n.append('. '));
-  return (clone.textContent ?? '')
+/** Whether this branch is actually available to sighted and assistive users. */
+function hidden(el: Element): boolean {
+  if (el.matches('[hidden], [aria-hidden="true"], [inert], script, style, template, svg:not([role="img"]):not([aria-label]), button kbd, .typewriter-cursor, [data-read-skip]')) {
+    return true;
+  }
+  const style = window.getComputedStyle(el);
+  return style.display === 'none' || style.visibility === 'hidden' || style.visibility === 'collapse';
+}
+
+function controlText(el: Element): string | null {
+  const label = el.getAttribute('aria-label')?.trim();
+  const role = el.getAttribute('role');
+
+  if (role === 'meter' || role === 'progressbar') {
+    const value = el.getAttribute('aria-valuetext') ?? el.getAttribute('aria-valuenow');
+    const max = el.getAttribute('aria-valuemax');
+    return [label, value && max ? `${value} out of ${max}` : value].filter(Boolean).join(', ');
+  }
+  if (el instanceof HTMLInputElement) {
+    const name = label ?? el.labels?.[0]?.textContent?.trim() ?? '';
+    if (el.type === 'radio' || el.type === 'checkbox') return `${name}, ${el.checked ? 'selected' : 'not selected'}`;
+    return `${name} ${el.value}`.trim();
+  }
+  if (el instanceof HTMLLabelElement && el.control instanceof HTMLInputElement) {
+    const input = el.control;
+    const name = input.getAttribute('aria-label')?.trim() ?? el.textContent?.trim() ?? '';
+    if (input.type === 'radio' || input.type === 'checkbox') return `${name}, ${input.checked ? 'selected' : 'not selected'}`;
+  }
+  if (label && (el.matches('button, img') || role === 'img')) return label;
+  return null;
+}
+
+/** Accessible text of a visible element, with natural pauses between UI blocks. */
+function rawText(el: Element): string {
+  if (hidden(el)) return '';
+  const canonical = el.getAttribute('data-read-text');
+  if (canonical !== null) return canonical;
+
+  const control = controlText(el);
+  if (control !== null) return `${control}. `;
+
+  const prefix = el.getAttribute('aria-label')?.trim();
+  let result = prefix && el.matches('section, nav, fieldset, [role="group"]') ? `${prefix}. ` : '';
+  for (const node of el.childNodes) {
+    if (node.nodeType === Node.TEXT_NODE) result += `${node.textContent ?? ''} `;
+    else if (node instanceof Element) result += rawText(node);
+  }
+  const states: string[] = [];
+  const checked = el.getAttribute('aria-checked');
+  const selected = el.getAttribute('aria-selected');
+  const pressed = el.getAttribute('aria-pressed');
+  if (checked !== null) states.push(checked === 'true' ? 'selected' : 'not selected');
+  if (selected !== null) states.push(selected === 'true' ? 'selected' : 'not selected');
+  if (pressed !== null) states.push(pressed === 'true' ? 'pressed' : 'not pressed');
+  if (el.hasAttribute('disabled') || el.getAttribute('aria-disabled') === 'true') states.push('unavailable');
+  if (states.length) result += `, ${states.join(', ')}. `;
+  if (BLOCKS.has(el.tagName) || el.matches('[role="status"], [role="alert"], [role="option"], [role="tab"]')) result += '. ';
+  return result;
+}
+
+export function elementText(el: Element): string {
+  return rawText(el)
     .replace(/\p{Extended_Pictographic}️?/gu, '')
     .replace(/(\d+)\s*\/\s*(\d+)/g, '$1 of $2')
     .replace(/\s+/g, ' ')
@@ -72,16 +129,16 @@ function textOf(el: Element): string {
 
 /**
  * What "Read this screen" says: the open window if there is one (mission, menu, help…),
- * otherwise the parts marked data-read (the game HUD), otherwise the whole page.
+ * otherwise the complete visible main area. Canvas-only speech has a hidden DOM copy.
  */
 export function screenText(): string {
   const dialogs = [...document.querySelectorAll('[role="dialog"], [role="alertdialog"]')];
-  const top = dialogs[dialogs.length - 1];
-  if (top) return textOf(top);
-  const marked = [...document.querySelectorAll('[data-read]')];
-  if (marked.length) return marked.map(textOf).join(' ');
+  const top = dialogs.filter((dialog) => !hidden(dialog)).at(-1);
+  if (top) return elementText(top);
   const main = document.querySelector('main');
-  return main ? textOf(main) : '';
+  if (main) return elementText(main);
+  const marked = [...document.querySelectorAll('[data-read]')].filter((el) => !hidden(el));
+  return marked.map(elementText).join(' ');
 }
 
 /** Read / stop toggle used by the Read buttons and the L key. */

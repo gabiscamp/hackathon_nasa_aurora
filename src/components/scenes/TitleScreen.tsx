@@ -87,7 +87,7 @@ export function TitleScreen({ onStart, onOpenCredits, savedMission, onContinueMi
         </button>
       </nav>
 
-      <main className="title-content">
+      <main className="title-content" data-voice-story data-voice-options>
         <header className="title-header">
           <p className="title-badge">NASA Space Apps Challenge 2026</p>
           <h1 className="title-name">

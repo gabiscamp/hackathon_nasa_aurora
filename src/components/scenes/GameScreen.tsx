@@ -15,7 +15,7 @@ import { PhaserGame } from '../../game/PhaserGame';
 import { Hud } from '../hud/Hud';
 import { gameEvents, EVENTS } from '../../game/events';
 import { markerSpecs } from '../../game/missionMarkers';
-import { startAlertLoop, stopAlertLoop } from '../../utils/sounds';
+import { playDayComplete, playDayStart, playMissionOpen, startAlertLoop, stopAlertLoop } from '../../utils/sounds';
 import type { RoomId } from '../../game/world/shipLayout';
 import { ROOM_NAMES } from '../hud/LocationHint';
 import { PauseMenu } from '../hud/PauseMenu';
@@ -86,7 +86,10 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
 
   // Every problem solved or left for tomorrow: the day ends.
   useEffect(() => {
-    if (phase === 'decision' && openEvents.length === 0 && !missionOpen && !skipInfo) setPhase('summary');
+    if (phase === 'decision' && openEvents.length === 0 && !missionOpen && !skipInfo) {
+      playDayComplete();
+      setPhase('summary');
+    }
   }, [phase, openEvents, missionOpen, skipInfo, setPhase]);
 
   useEffect(() => {
@@ -94,6 +97,7 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
       const mission = id ? getMission(id) : undefined;
       if (!mission) return;
       stopAlertLoop();
+      playMissionOpen();
       setMission(mission);
       setMissionOpen(true);
       gameEvents.emit('CAMERA_ZOOM_IN');
@@ -116,6 +120,7 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
       useGameStore.getState().setScene('ending');
       return;
     }
+    playDayStart();
     setDay(target);
     openDay(target);
     setSkipInfo({ daysSkipped: skip, targetDay: target, act: getAct(target).act });
@@ -180,7 +185,7 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
         )}
 
         {phase === 'decision' && !missionOpen && !skipInfo && news.length > 0 && newsSeenDay !== day && (
-          <section className="game-news" role="status" aria-label="Station news" data-read>
+          <section className="game-news" role="status" aria-label="Station news" data-read data-voice-story>
             <h2 className="game-news__title">Station news</h2>
             <ul>
               {news.map((n) => (
@@ -210,8 +215,8 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
 
       {phase === 'briefing' && !skipInfo && (
         <div className="game-overlay">
-          <div className="panel day-briefing">
-            <h2 style={{ fontSize: 'var(--font-size-xl)' }}>Day {briefingDay}</h2>
+          <div className="panel day-briefing" role="dialog" aria-modal="true" aria-labelledby="day-briefing-title" data-voice-story>
+            <h2 id="day-briefing-title" style={{ fontSize: 'var(--font-size-xl)' }}>Day {briefingDay}</h2>
             <p style={{ color: 'var(--accent-amber)' }}>{actLabel}</p>
             {incomingTitles(briefingDay).map((t) => (
               <p key={t} style={{ color: 'var(--text-secondary)', margin: 0 }}>
@@ -219,7 +224,7 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
               </p>
             ))}
             <CrewStatusList day={briefingDay} title="Your crew today" />
-            <Button variant="primary" icon="▶️" onClick={handleBeginDay}>
+            <Button variant="primary" icon="▶️" onClick={handleBeginDay} autoFocus>
               Begin Day
             </Button>
           </div>
@@ -234,10 +239,10 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
 
       {phase === 'result' && !currentMission && (
         <div className="game-overlay">
-          <div className="panel day-briefing">
-            <h2>Quiet Day</h2>
+          <div className="panel day-briefing" role="dialog" aria-modal="true" aria-labelledby="quiet-day-title" data-voice-story>
+            <h2 id="quiet-day-title">Quiet Day</h2>
             <p style={{ color: 'var(--text-secondary)' }}>No events today. Resources ticked down as usual.</p>
-            <Button variant="primary" onClick={() => setPhase('summary')}>
+            <Button variant="primary" onClick={() => setPhase('summary')} autoFocus>
               Continue to Summary
             </Button>
           </div>

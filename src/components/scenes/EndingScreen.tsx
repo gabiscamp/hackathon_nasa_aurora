@@ -66,7 +66,7 @@ export function EndingScreen({ playerName, resources, onReplay, onOpenCredits, r
 
   return (
     <main className={`ending-screen ${lost ? 'ending-screen--lost' : ''}`}>
-      <div className="ending-container animate-fadeIn" data-read>
+      <div className="ending-container animate-fadeIn" data-read data-voice-story>
         <div className="ending-icon" aria-hidden="true">{ENDING_ICONS[endingType]}</div>
         {lost && <p className="ending-gameover">Game over</p>}
         <h1 className="ending-title">{title}</h1>

@@ -107,6 +107,7 @@ npm run lint       # oxlint
 | Shared game state (saved in the browser) | [Zustand](https://zustand.docs.pmnd.rs) |
 | Build and styles | [Vite](https://vite.dev), [Tailwind CSS 4](https://tailwindcss.com) |
 | Read aloud | Browser Web Speech API (no server, no audio files) |
+| Music and sound | Procedural Web Audio synthesis plus the project's original legacy alert MP3 |
 
 Phaser draws the station; React draws everything on top of it. They talk through a small event bus, and Zustand keeps the data both sides need.
 
@@ -131,13 +132,14 @@ We follow the Space Apps rules on AI and declare it here and in the game's Credi
 - **Station map:** made with an AI image tool (ChatGPT, by OpenAI). We started from a floor plan of the International Space Station and guided the tool step by step. In the game it always shows an **"AI-generated map"** mark.
 - **Characters:** our team drew the astronauts by hand in Aseprite. We also tried ChatGPT to clean up the character art.
 
-<!-- TODO(team): confirm the origin of the Mars backdrop (public/assets/environments/mars-backdrop.jpg) and of public/sounds/alert.mp3. If either was AI-generated, add it to the list above and to the Credits screen. -->
+<!-- TODO(team): confirm the origin of the Mars backdrop (public/assets/environments/mars-backdrop.jpg). If it was AI-generated, add it to the list above and to the Credits screen. -->
 
 ## Credits
 
 - **Data:** NASA DONKI (Space Weather Database) via api.nasa.gov.
 - **Astronaut photos:** official NASA portraits, public domain, via Wikimedia Commons. The full list is in the game's Credits screen.
 - **Font:** [Lexend](https://fonts.google.com/specimen/Lexend) (SIL Open Font License).
+- **Audio:** procedural synthesis released under [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/), except for the restored legacy alert MP3, whose external origin is unknown. Full list: [docs/AUDIO_SOURCES.md](docs/AUDIO_SOURCES.md).
 
 <!-- TODO(team): add the team members' names (no photos of members under 18) and a license. -->
 

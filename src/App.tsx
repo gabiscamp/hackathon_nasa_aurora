@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { A11yDock, useReadShortcut } from './components/ui/A11yDock';
+import { A11yDock, useAutomaticOptionReader, useReadShortcut } from './components/ui/A11yDock';
 import { OrientationGuard } from './components/ui/OrientationGuard';
 import { useShallow } from 'zustand/react/shallow';
 import { useGameStore } from './stores/useGameStore';
@@ -11,6 +11,8 @@ import { useMissionStore } from './stores/useMissionStore';
 import { checkpointDay, clearCheckpoint, restoreCheckpoint } from './engine/checkpoint';
 import { useDutyStore } from './stores/useDutyStore';
 import { useExplorationStore } from './stores/useExplorationStore';
+import { gameEvents, EVENTS } from './game/events';
+import { playRobotGreeting, setMusicMood, startBackgroundMusic, stopBackgroundMusic } from './utils/sounds';
 
 const TitleScreen = lazy(() => import('./components/scenes/TitleScreen').then(m => ({ default: m.TitleScreen })));
 const MissionBriefing = lazy(() => import('./components/scenes/MissionBriefing').then(m => ({ default: m.MissionBriefing })));
@@ -37,6 +39,7 @@ function LoadingScreen() {
 
 export default function App() {
   useReadShortcut();
+  useAutomaticOptionReader();
   const scene = useGameStore((s) => s.scene);
   const playerName = useGameStore((s) => s.playerName);
   const crewId = useGameStore((s) => s.crewId);
@@ -67,6 +70,41 @@ export default function App() {
   const resetCrew = useCrewStore((s) => s.reset);
   const loadSpaceWeather = useSpaceWeatherStore((s) => s.load);
   const [showCredits, setShowCredits] = useState(false);
+
+  // This is a single-page game: move assistive-technology focus when a whole scene changes,
+  // just as a browser would focus the new page after normal navigation.
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      const heading = document.querySelector<HTMLElement>(
+        '[role="dialog"] h1, [role="dialog"] h2, [role="alertdialog"] h1, [role="alertdialog"] h2, main h1, main h2',
+      );
+      if (!heading) return;
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [scene]);
+
+  // Web Audio may remain suspended until the first click/key press; starting here makes the
+  // original ambient pad follow the whole experience as soon as the browser allows it.
+  useEffect(() => {
+    startBackgroundMusic();
+    return stopBackgroundMusic;
+  }, []);
+
+  // The transmission and crew introduction act as the opening cutscene. Gameplay keeps the
+  // same D-minor tonal centre but drops the fuller chord for a calmer, suspended ambience.
+  useEffect(() => {
+    setMusicMood(scene === 'briefing' || scene === 'crew-intro' ? 'cinematic' : 'ambient');
+  }, [scene]);
+
+  useEffect(() => {
+    const onRobotInteract = () => playRobotGreeting();
+    gameEvents.on(EVENTS.ROBOT_INTERACT, onRobotInteract);
+    return () => {
+      gameEvents.off(EVENTS.ROBOT_INTERACT, onRobotInteract);
+    };
+  }, []);
 
   // Ask NASA DONKI for space weather once at start; falls back to saved data if offline.
   useEffect(() => {

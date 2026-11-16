@@ -11,6 +11,9 @@ export function DialogueBox() {
   return (
     <div
       className="panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="mission-control-speaker"
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -21,7 +24,7 @@ export function DialogueBox() {
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-md)' }}>
         <span style={{ fontSize: '2rem' }}>📡</span>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 'var(--font-size-sm)', fontWeight: 700, color: 'var(--accent-blue)', marginBottom: 'var(--space-xs)' }}>
+          <div id="mission-control-speaker" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 700, color: 'var(--accent-blue)', marginBottom: 'var(--space-xs)' }}>
             Mission Control
           </div>
           <TypeWriter text={currentDialogue} speed={25} />

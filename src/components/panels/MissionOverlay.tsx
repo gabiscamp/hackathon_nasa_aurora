@@ -16,7 +16,7 @@ import {
   type MissionResult,
 } from '../../engine/missionEngine';
 import { TypeWriter } from '../ui/TypeWriter';
-import { playChoiceSound } from '../../utils/sounds';
+import { playChoiceSound, playMissionResult } from '../../utils/sounds';
 import type { Choice, CrewSlot } from '../../data/missions';
 import { CrewPicker, slotTitle } from './CrewPicker';
 import { useCrewRoster } from './useCrewRoster';
@@ -59,7 +59,7 @@ function ResourceHints() {
   ];
 
   return (
-    <div className="resource-hints" data-read-skip>
+    <div className="resource-hints" aria-label="Current resources">
       <span className="resource-hints__label">Current resources:</span>
       <div className="resource-hints__list">
         {resources.map((r) => {
@@ -67,7 +67,9 @@ function ResourceHints() {
           const isLow = r.key === 'radiation' ? r.value > 60 : r.value < 30;
           return (
             <span key={r.key} className={`resource-chip ${isLow ? 'resource-chip--warning' : ''}`}>
-              {info.icon} {Math.round(r.value)}
+              <span aria-hidden="true">{info.icon}</span>
+              <span className="sr-only">{info.name}: </span> {Math.round(r.value)}
+              {isLow && <span className="sr-only">, warning</span>}
             </span>
           );
         })}
@@ -193,6 +195,7 @@ export function MissionOverlay({ onComplete }: MissionOverlayProps) {
   const finish = (c: Choice, slots: CrewSlot[]) => {
     const all = outside && !slots.includes(outside) ? [outside, ...slots] : slots;
     const res = sendCrew(mission, c, all, day, playerName);
+    playMissionResult(res.success);
     setResult(res);
     setResultReady(false);
     setPhase('result');
@@ -234,7 +237,7 @@ export function MissionOverlay({ onComplete }: MissionOverlayProps) {
         </div>
 
         {deferred && (
-          <div className="mission-overlay__body">
+          <div className="mission-overlay__body" data-voice-story>
             <div className="mission-overlay__terminal">
               You decided to deal with it tomorrow. {mission.defer ? fill(mission.defer.text) : ''}
             </div>
@@ -248,7 +251,12 @@ export function MissionOverlay({ onComplete }: MissionOverlayProps) {
         {!deferred && phase === 'intro' && (
           <div className="mission-overlay__body">
             <div className="mission-overlay__terminal">
-              <TypeWriter text={description} speed={25} onComplete={handleIntroComplete} />
+              <TypeWriter
+                text={description}
+                spokenText={`${mission.title}. Based on ${mission.nasaSource}${mission.nasaYear ? `, ${mission.nasaYear}` : ''}. ${description}`}
+                speed={25}
+                onComplete={handleIntroComplete}
+              />
             </div>
             {introReady && (
               <button className="mission-btn mission-btn--primary" onClick={() => setPhase('choices')} autoFocus>
@@ -259,18 +267,19 @@ export function MissionOverlay({ onComplete }: MissionOverlayProps) {
         )}
 
         {!deferred && phase === 'choices' && (
-          <div className="mission-overlay__body">
+          <div className="mission-overlay__body" data-voice-options>
             <ResourceHints />
             <p className="mission-overlay__prompt">
               Think carefully: every choice has a cost. {freeCount} of your crew {freeCount === 1 ? 'is' : 'are'} free right now.
             </p>
             <div className="mission-overlay__choices">
-              {choices.map(({ c, state }) => (
+              {choices.map(({ c, state }, index) => (
                 <button
                   key={c.id}
                   className="mission-choice"
                   disabled={!!state.lockedReason}
                   onClick={() => pickChoice(c)}
+                  autoFocus={index === choices.findIndex(({ state: optionState }) => !optionState.lockedReason)}
                 >
                   <span className="mission-choice__icon">{c.icon}</span>
                   <span className="mission-choice__content">
@@ -303,14 +312,14 @@ export function MissionOverlay({ onComplete }: MissionOverlayProps) {
         )}
 
         {!deferred && phase === 'result' && result && (
-          <div className="mission-overlay__body">
+          <div className="mission-overlay__body" data-voice-story>
             {choice && choice.successRate !== undefined && !result.noVerdict && (
               <p className={`mission-outcome ${result.success ? 'mission-outcome--good' : 'mission-outcome--bad'}`}>
                 {result.success ? 'It worked!' : 'It did not work.'}
               </p>
             )}
             <div className="mission-overlay__terminal">
-              <TypeWriter text={result.narrative} speed={20} onComplete={handleResultComplete} />
+              <TypeWriter text={result.narrative} automaticNarration={false} speed={20} onComplete={handleResultComplete} />
             </div>
             <Changes changes={result.changes} />
             {result.notes.length > 0 && (
@@ -331,10 +340,10 @@ export function MissionOverlay({ onComplete }: MissionOverlayProps) {
         )}
 
         {!deferred && phase === 'popup' && (
-          <div className="mission-overlay__body">
+          <div className="mission-overlay__body" data-voice-story>
             <div className="mission-overlay__nasa-badge">{mission.factKind ? FACT_BADGE[mission.factKind] : '🚀 REAL NASA FACT'}</div>
             <div className="mission-overlay__terminal mission-overlay__terminal--nasa">
-              <TypeWriter text={mission.popup} speed={15} onComplete={handlePopupComplete} />
+              <TypeWriter text={mission.popup} automaticNarration={false} speed={15} onComplete={handlePopupComplete} />
             </div>
             {popupReady && (
               <button className="mission-btn mission-btn--primary" onClick={onComplete} autoFocus>

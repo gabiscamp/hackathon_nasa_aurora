@@ -5,6 +5,7 @@ import { useExplorationStore } from '../../stores/useExplorationStore';
 import { useResourceStore } from '../../stores/useResourceStore';
 import { useGameStore } from '../../stores/useGameStore';
 import { missionLastDay } from '../../engine/missionEngine';
+import { playExplorationLaunch, playExplorationReturn, playMedalSound } from '../../utils/sounds';
 import { RobotPortrait } from './RobotPortrait';
 import './ExplorationSystem.css';
 
@@ -93,10 +94,15 @@ export function ExplorationSystem() {
 
   useEffect(() => {
     if (lastOutcome && !worldPausedByExploration.current) {
+      playExplorationReturn(lastOutcome.succeeded);
       worldPausedByExploration.current = true;
       gameEvents.emit(EVENTS.MENU_OPENED);
     }
   }, [lastOutcome]);
+
+  useEffect(() => {
+    if (celebrationPending) playMedalSound();
+  }, [celebrationPending]);
 
   const unlockedReports = useMemo(
     () => EXPLORATION_REPORTS.filter((report) => unlockedIds.includes(report.id)),
@@ -114,6 +120,7 @@ export function ExplorationSystem() {
   const launch = (mission: ExplorationOption) => {
     if (water < mission.cost.water || energy < mission.cost.energy) return;
     setDetailsOpen(false);
+    playExplorationLaunch();
     applyDelta({ water: -mission.cost.water, energy: -mission.cost.energy });
     startExploration(mission, day);
     if (worldPausedByExploration.current) {
@@ -185,10 +192,10 @@ export function ExplorationSystem() {
 
       {menuOpen && (
         <div className="exploration-layer" role="dialog" aria-modal="true" aria-labelledby="exploration-title">
-          <section className="exploration-menu">
+          <section className="exploration-menu" data-voice-options>
             <header>
               <div><span className="exploration-eyebrow">Robot AUR-1</span><h2 id="exploration-title">Exploration missions</h2></div>
-              <button className="exploration-close" type="button" onClick={closeMenu} aria-label="Close">×</button>
+              <button className="exploration-close" type="button" onClick={closeMenu} aria-label="Close" autoFocus>×</button>
             </header>
             <div className="exploration-balance">Water {Math.round(water)} · Energy {Math.round(energy)} · Minerals {minerals} · Reports {unlockedIds.length}/10</div>
             <div className="exploration-options">
@@ -212,19 +219,19 @@ export function ExplorationSystem() {
 
       {detailsOpen && active && (
         <div className="exploration-layer" role="dialog" aria-modal="true" aria-labelledby="active-title">
-          <section className="exploration-summary">
+          <section className="exploration-summary" data-voice-story>
             <RobotPortrait size={96} />
             <div><span className="exploration-eyebrow">MISSION IN PROGRESS</span><h2 id="active-title">{active.mission.title}</h2></div>
             <MissionDetails mission={active.mission} />
             <p className="exploration-countdown">Back on Day {active.returnDay}: {formatDays(Math.max(0, active.returnDay - day))} left</p>
-            <button type="button" onClick={closeDetails}>Back to the game</button>
+            <button type="button" onClick={closeDetails} autoFocus>Back to the game</button>
           </section>
         </div>
       )}
 
       {lastOutcome && !celebrationPending && (
         <div className="exploration-layer" role="dialog" aria-modal="true" aria-labelledby="reward-title">
-          <section className={`exploration-reward ${lastOutcome.succeeded ? 'is-success' : 'is-failure'}`}>
+          <section className={`exploration-reward ${lastOutcome.succeeded ? 'is-success' : 'is-failure'}`} data-voice-story>
             <span className="exploration-eyebrow">THE ROBOT IS BACK</span>
             <h2 id="reward-title">{lastOutcome.succeeded ? 'Exploration done!' : 'No samples this time'}</h2>
             {lastOutcome.report ? (
@@ -238,20 +245,20 @@ export function ExplorationSystem() {
             )}
             {lastOutcome.succeeded && <p className="exploration-gains">+{lastOutcome.mission.reward.minerals} minerals · +{lastOutcome.mission.reward.water} water · +{lastOutcome.mission.reward.energy} energy</p>}
             {lastOutcome.wasGuaranteed && <small>This one was sure to work, after the bad luck before.</small>}
-            <button type="button" onClick={closeOutcome}>Continue</button>
+            <button type="button" onClick={closeOutcome} autoFocus>Continue</button>
           </section>
         </div>
       )}
 
       {celebrationPending && (
         <div className="exploration-layer medal-layer" role="dialog" aria-modal="true" aria-labelledby="medal-title">
-          <section className="medal-celebration">
+          <section className="medal-celebration" data-voice-story>
             <div className="medal-rays" />
             <div className="medal-icon" aria-hidden="true">★</div>
             <span className="exploration-eyebrow">COLLECTION COMPLETE · {unlockedReports.length}/10</span>
             <h2 id="medal-title">Explorer Medal</h2>
             <p>You collected all ten Mars reports. The crew now has a complete science map of the area!</p>
-            <button type="button" onClick={receiveMedal}>Get the medal</button>
+            <button type="button" onClick={receiveMedal} autoFocus>Get the medal</button>
           </section>
         </div>
       )}

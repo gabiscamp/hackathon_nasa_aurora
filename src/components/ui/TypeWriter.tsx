@@ -5,6 +5,10 @@ import { textSpeedFactor, useSettingsStore } from '../../stores/useSettingsStore
 
 interface TypeWriterProps {
   text: string;
+  /** Optional fuller narration when nearby context is not part of the animated text. */
+  spokenText?: string;
+  /** False when a parent story block narrates this text together with its other details. */
+  automaticNarration?: boolean;
   speed?: number;
   onComplete?: () => void;
   className?: string;
@@ -13,12 +17,21 @@ interface TypeWriterProps {
 
 /**
  * Letter-by-letter text. Follows the player's Options: slower, all at once, and read aloud.
- * While it is typing, a click anywhere on the page shows the whole text at once. That click
- * only finishes the text (it doesn't also press what is under the pointer), so a hurried
- * click can't pick a choice by accident. Navigation buttons (inside <nav> or [data-typing-pass])
- * are not held back: "Skip", "Main menu", "Read" and "Options" work with one click.
+ * While it is typing, a click anywhere on the page or Enter shows the whole text at once.
+ * That input only finishes the text (it doesn't also press what is under the pointer or
+ * focused), so a hurried input can't pick a choice by accident. Navigation buttons (inside
+ * <nav> or [data-typing-pass]) are not held back: Skip, Main menu and accessibility controls
+ * still work with one click.
  */
-export function TypeWriter({ text, speed = 30, onComplete, className = '', sound = true }: TypeWriterProps) {
+export function TypeWriter({
+  text,
+  spokenText,
+  automaticNarration = true,
+  speed = 30,
+  onComplete,
+  className = '',
+  sound = true,
+}: TypeWriterProps) {
   const textSpeed = useSettingsStore((s) => s.textSpeed);
   const readAloud = useSettingsStore((s) => s.readAloud);
   const instant = textSpeed === 'instant';
@@ -87,20 +100,36 @@ export function TypeWriter({ text, speed = 30, onComplete, className = '', sound
       e.preventDefault();
       finish();
     };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter') return;
+      e.stopPropagation();
+      e.preventDefault();
+      finish();
+    };
     window.addEventListener('click', onClick, true);
-    return () => window.removeEventListener('click', onClick, true);
+    window.addEventListener('keydown', onKeyDown, true);
+    return () => {
+      window.removeEventListener('click', onClick, true);
+      window.removeEventListener('keydown', onKeyDown, true);
+    };
   }, [done, finish]);
 
   useEffect(() => {
-    if (!readAloud) return;
-    speak(text);
+    if (!readAloud || !automaticNarration) return;
+    speak(spokenText ?? text);
     return () => stopSpeaking();
-  }, [text, readAloud]);
+  }, [text, spokenText, automaticNarration, readAloud]);
 
   return (
-    <span className={`typewriter ${done ? 'typewriter-done' : ''} ${className}`}>
-      {displayed}
-      {!done && <span className="typewriter-cursor">▌</span>}
+    <span
+      className={`typewriter ${done ? 'typewriter-done' : ''} ${className}`}
+      data-read-text={text}
+      role="status"
+      aria-live="polite"
+    >
+      <span className="sr-only">{text}</span>
+      <span aria-hidden="true">{displayed}</span>
+      {!done && <span className="typewriter-cursor" aria-hidden="true">▌</span>}
     </span>
   );
 }

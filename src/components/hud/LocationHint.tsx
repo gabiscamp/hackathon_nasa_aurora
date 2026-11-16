@@ -49,10 +49,10 @@ export function LocationHint() {
   }, []);
 
   return (
-    <div className="hud-location">
-      <div className="hud-location__room" key={room}>
+    <div className="hud-location" data-read>
+      <div className="hud-location__room" key={room} role="status" aria-live="polite" aria-atomic="true">
         <PinIcon size={16} />
-        {ROOM_NAMES[room]}
+        <span className="sr-only">Current location: </span>{ROOM_NAMES[room]}
       </div>
       {showKeys && (
         <div className="hud-location__keys">

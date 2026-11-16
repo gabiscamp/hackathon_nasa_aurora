@@ -62,7 +62,7 @@ const ON_OFF: readonly Choice<boolean>[] = [
 
 /** Central Settings panel: accessibility, narration and audio in one place. */
 export function OptionsPanel() {
-  const { textSize, textSpeed, readAloud, volume, set } = useSettingsStore();
+  const { textSize, textSpeed, readAloud, volume, musicVolume, effectsVolume, uiVolume, set } = useSettingsStore();
   const speaking = useSpeaking((s) => s.speaking);
 
   return (
@@ -111,6 +111,36 @@ export function OptionsPanel() {
           value={volume}
           onChange={(v) => {
             set({ volume: v });
+            playChoiceSound();
+          }}
+        />
+        <Segmented
+          icon="music"
+          title="Background music"
+          hint="A calm station ambience."
+          choices={VOLUME_LEVELS}
+          value={musicVolume}
+          onChange={(v) => set({ musicVolume: v })}
+        />
+        <Segmented
+          icon="effects"
+          title="World sounds"
+          hint="Footsteps, robot and mission alerts."
+          choices={VOLUME_LEVELS}
+          value={effectsVolume}
+          onChange={(v) => {
+            set({ effectsVolume: v });
+            playChoiceSound('effects');
+          }}
+        />
+        <Segmented
+          icon="ui"
+          title="Interface sounds"
+          hint="Choices and message ticks."
+          choices={VOLUME_LEVELS}
+          value={uiVolume}
+          onChange={(v) => {
+            set({ uiVolume: v });
             playChoiceSound();
           }}
         />

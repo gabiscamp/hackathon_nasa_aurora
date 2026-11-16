@@ -4,6 +4,7 @@ import { RESOURCE_KEYS, SHOWN_RESOURCES, useResourceStore, type ResourceKey, typ
 import { useMissionStore, type DecisionRecord } from '../../stores/useMissionStore';
 import { useGameStore } from '../../stores/useGameStore';
 import { getMission } from '../../data/missions';
+import { CrewStatusList } from '../panels/CrewStatusList';
 import { Button } from '../ui/Button';
 import { EnergyIcon, FoodIcon, OxygenIcon, RadiationIcon, WaterIcon } from '../hud/HudIcons';
 import './DaySummary.css';
@@ -112,7 +113,7 @@ export function DaySummary({ onNext }: { onNext: () => void }) {
   }
 
   return (
-    <div className="panel day-summary" role="dialog" aria-modal="true" aria-labelledby="day-summary-title" data-read>
+    <div className="panel day-summary" role="dialog" aria-modal="true" aria-labelledby="day-summary-title" data-read data-voice-story>
       <h2 id="day-summary-title" className="day-summary__title">Day {day} Complete</h2>
 
       <section className="day-summary__section">
@@ -181,7 +182,11 @@ export function DaySummary({ onNext }: { onNext: () => void }) {
         </section>
       )}
 
-      <Button variant="primary" onClick={onNext}>
+      <section className="day-summary__section">
+        <CrewStatusList day={day + 1} title="Your crew tomorrow" />
+      </section>
+
+      <Button variant="primary" onClick={onNext} autoFocus>
         Next Day
       </Button>
     </div>

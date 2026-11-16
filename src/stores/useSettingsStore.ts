@@ -4,12 +4,12 @@ import { persist } from 'zustand/middleware';
 export type TextSize = 'normal' | 'big';
 export type TextSpeed = 'slow' | 'normal' | 'instant';
 
-/** Sound levels a kid can pick; 1 = the game's original loudness. */
+/** Gentle, capped sound levels. No option amplifies a sound above its designed loudness. */
 export const VOLUME_LEVELS: readonly { label: string; value: number }[] = [
   { label: 'Off', value: 0 },
-  { label: 'Low', value: 0.5 },
-  { label: 'Normal', value: 1 },
-  { label: 'High', value: 1.6 },
+  { label: 'Low', value: 0.35 },
+  { label: 'Normal', value: 0.7 },
+  { label: 'Full', value: 1 },
 ];
 
 interface SettingsState {
@@ -17,7 +17,11 @@ interface SettingsState {
   textSpeed: TextSpeed;
   /** A voice reads mission and dialogue text (browser speech, no internet needed). */
   readAloud: boolean;
+  /** Master volume, multiplied by each category below. */
   volume: number;
+  musicVolume: number;
+  effectsVolume: number;
+  uiVolume: number;
   set: (patch: Partial<Omit<SettingsState, 'set'>>) => void;
 }
 
@@ -28,10 +32,28 @@ export const useSettingsStore = create<SettingsState>()(
       textSize: 'normal',
       textSpeed: 'normal',
       readAloud: false,
-      volume: 1,
+      volume: 0.7,
+      musicVolume: 0.7,
+      effectsVolume: 0.7,
+      uiVolume: 0.35,
       set: (patch) => set(patch),
     }),
-    { name: 'aurora-settings', version: 1 },
+    {
+      name: 'aurora-settings',
+      version: 3,
+      migrate: (persistedState) => {
+        const saved = persistedState as Partial<SettingsState>;
+        return {
+          ...saved,
+          // The old menu allowed 160%; keep existing players at the new safe maximum.
+          volume: Math.min(1, saved.volume ?? 0.7),
+          // Version 2 shipped music on Low and UI on a value not represented in the menu.
+          musicVolume: saved.musicVolume === undefined || saved.musicVolume === 0.35 ? 0.7 : saved.musicVolume,
+          effectsVolume: saved.effectsVolume ?? 0.7,
+          uiVolume: saved.uiVolume === undefined || saved.uiVolume === 0.5 ? 0.35 : saved.uiVolume,
+        };
+      },
+    },
   ),
 );
 

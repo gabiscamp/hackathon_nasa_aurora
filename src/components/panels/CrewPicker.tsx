@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Choice, CrewSlot, Mission } from '../../data/missions';
 import { getMission } from '../../data/missions';
 import { crewNeed, SPECIALIST_BONUS } from '../../engine/missionEngine';
@@ -41,6 +41,11 @@ export function CrewPicker({ mission, choice, day, lockedSlot, chanceFor, onBack
   const need = crewNeed(choice);
   const max = Math.max(need.max ?? need.min, need.min, 1);
   const [picked, setPicked] = useState<CrewSlot[]>([]);
+  const listRef = useRef<HTMLUListElement>(null);
+
+  useEffect(() => {
+    listRef.current?.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus({ preventScroll: true });
+  }, []);
 
   const toggle = (slot: CrewSlot) =>
     setPicked((p) => (p.includes(slot) ? p.filter((s) => s !== slot) : p.length >= max ? [...p.slice(1), slot] : [...p, slot]));
@@ -54,7 +59,7 @@ export function CrewPicker({ mission, choice, day, lockedSlot, chanceFor, onBack
   ).length;
 
   return (
-    <div className="mission-overlay__body crew-picker">
+    <div className="mission-overlay__body crew-picker" data-voice-options>
       <p className="mission-overlay__prompt">
         Who goes? <strong>{choice.label}</strong> needs {need.min === 0 ? `up to ${max}` : need.min}
         {need.max && need.max > need.min ? `–${need.max}` : ''} {max === 1 ? 'person' : 'people'}
@@ -67,7 +72,7 @@ export function CrewPicker({ mission, choice, day, lockedSlot, chanceFor, onBack
         </p>
       )}
 
-      <ul className="crew-picker__list" aria-label={`Crew for ${mission.title}`}>
+      <ul ref={listRef} className="crew-picker__list" aria-label={`Crew for ${mission.title}`}>
         {lockedSlot && (
           <li>
             <div className="crew-card crew-card--locked">

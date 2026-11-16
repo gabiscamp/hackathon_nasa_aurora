@@ -56,7 +56,7 @@ export function CrewIntro({ playerName, onContinue, onBack }: CrewIntroProps) {
         onSkip={allSeen ? undefined : onContinue}
       />
 
-      <main className="crew-container">
+      <main className="crew-container" data-voice-story data-voice-options>
         <header className="crew-header">
           <h1 className="crew-title">Meet your crew</h1>
           <p className="crew-subtitle">Tap each astronaut to learn about them, {commanderLabel(playerName)}.</p>
@@ -110,6 +110,7 @@ export function CrewIntro({ playerName, onContinue, onBack }: CrewIntroProps) {
           role="tabpanel"
           aria-labelledby={`crew-tab-${index}`}
           className="crew-profile"
+          data-voice-story
           key={current.role}
           style={{ ['--role-color' as string]: current.color }}
         >

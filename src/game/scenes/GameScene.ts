@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { GAME_FONT } from '../../styles/theme';
 import { useSettingsStore } from '../../stores/useSettingsStore';
 import { speak } from '../../utils/speech';
-import { playFootstep } from '../../utils/sounds';
+import { playFootstep, playRobotStep } from '../../utils/sounds';
 
 /**
  * The game uses pixelArt (nearest-neighbour) for sprites. Text scaled that way gets jagged
@@ -667,7 +667,12 @@ export class GameScene extends Phaser.Scene {
       duration: Math.max(3000, distance * 28),
       ease: 'Sine.easeInOut',
       onUpdate: () => {
-        if (this.robot) gameEvents.emit(EVENTS.ROBOT_MOVED, { x: this.robot.x, y: this.robot.y });
+        if (this.robot) {
+          gameEvents.emit(EVENTS.ROBOT_MOVED, { x: this.robot.x, y: this.robot.y });
+          const distance = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.robot.x, this.robot.y);
+          // Wider audible radius; attenuation in sounds.ts still keeps distant wheels subtle.
+          playRobotStep(1 - distance / 700);
+        }
       },
       onComplete: () => {
         if (!this.robot) return;
@@ -957,6 +962,8 @@ export class GameScene extends Phaser.Scene {
     // is the collision source), so the physics body never pushes it off the floor.
     const dt = Math.min(delta, 50) / 1000;
     const step = PLAYER_SPEED * dt;
+    const previousX = this.player.x;
+    const previousY = this.player.y;
     const nextX = this.player.x + vx * dt;
     if (vx !== 0) {
       if (this.canStand(nextX, this.player.y)) this.player.x = nextX;
@@ -971,7 +978,8 @@ export class GameScene extends Phaser.Scene {
 
     this.playerBody.setVelocity(0, 0);
 
-    const moving = vx !== 0 || vy !== 0;
+    // Held keys against a wall are not movement and must not produce endless footsteps.
+    const moving = this.player.x !== previousX || this.player.y !== previousY;
     if (moving) {
       this.facing = vx < 0 ? 'left' : vx > 0 ? 'right' : vy < 0 ? 'up' : 'down';
       this.directionDot?.setRotation(Math.atan2(vy, vx) + Math.PI / 2);
