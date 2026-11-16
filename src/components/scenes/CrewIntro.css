@@ -515,3 +515,95 @@
     grid-area: profile;
   }
 }
+
+/* Phone landscape: roster and profile share the screen instead of forming a long page. */
+@media (max-height: 520px) and (orientation: landscape) {
+  .crew-screen {
+    height: 100dvh;
+    min-height: 0;
+    padding: 54px max(10px, env(safe-area-inset-right)) 8px max(10px, env(safe-area-inset-left));
+    overflow: hidden;
+  }
+
+  .crew-container {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: minmax(220px, 0.72fr) minmax(0, 1.28fr);
+    grid-template-areas:
+      'header profile'
+      'roster profile'
+      'footer profile';
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 7px 10px;
+    overflow: hidden;
+  }
+
+  .crew-header { grid-area: header; gap: 1px; }
+  .crew-title { font-size: 18px; }
+  .crew-subtitle { display: none; }
+  .crew-progress { margin: 0; padding: 1px 8px; font-size: 11px; }
+
+  .crew-roster {
+    grid-area: roster;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    gap: 5px;
+  }
+
+  .crew-tab {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    column-gap: 7px;
+    padding: 5px;
+    border-width: 2px;
+    border-radius: 10px;
+    text-align: left;
+  }
+
+  .crew-photo--tab { grid-row: 1 / 3; width: 40px; height: 40px; border-width: 2px; }
+  .crew-photo__badge { width: 18px; height: 18px; }
+  .crew-tab__name { margin: 0; font-size: 13px; }
+  .crew-tab__role { font-size: 9px; text-align: left; }
+  .crew-tab__seen { display: none; }
+
+  .crew-profile {
+    grid-area: profile;
+    grid-template-columns: 108px minmax(0, 1fr);
+    align-items: start;
+    gap: 10px;
+    min-height: 0;
+    padding: 9px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .crew-profile__media { gap: 6px; }
+  .crew-photo--hero { max-height: 128px; aspect-ratio: 1 / 1; }
+  .crew-profile__role-chip { gap: 4px; padding: 3px 7px; font-size: 10px; }
+  .crew-profile__body { gap: 5px; min-height: 0; overflow-y: auto; padding-right: 3px; }
+  .crew-profile__you { font-size: 9px; }
+  .crew-profile__name { font-size: 18px; }
+  .crew-profile__specialty { margin-top: 1px; font-size: 12px; }
+  .crew-profile__desc,
+  .crew-profile__strengths { font-size: 12px; line-height: 1.3; }
+  .crew-profile__quote { display: none; }
+  .crew-skills__title { margin-bottom: 4px; font-size: 10px; }
+  .crew-skills__list { gap: 4px; }
+  .crew-skill { grid-template-columns: minmax(70px, 120px) 1fr 34px; gap: 5px; }
+  .crew-skill__label,
+  .crew-skill__value { font-size: 11px; }
+  .crew-skill__track { height: 8px; }
+  .crew-keys { display: none; }
+
+  .crew-footer {
+    grid-area: footer;
+    padding: 0;
+    background: transparent;
+    border: 0;
+  }
+
+  .crew-footer__text { display: none; }
+  .crew-footer__btn { width: 100%; min-height: 44px; padding: 4px 8px; font-size: 13px; border-radius: 10px; }
+}

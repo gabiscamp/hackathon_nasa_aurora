@@ -110,3 +110,30 @@
     display: none;
   }
 }
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .briefing-screen {
+    height: 100dvh;
+    min-height: 0;
+    padding: 54px max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left));
+    overflow: hidden;
+  }
+
+  .briefing-container {
+    max-width: 620px;
+    height: 100%;
+    justify-content: center;
+    gap: 7px;
+  }
+
+  .briefing-radio { flex-direction: row; gap: 8px; }
+  .briefing-radio-icon { width: 28px; height: 28px; }
+  .briefing-radio-label { font-size: 12px; }
+  .briefing-radio-static { width: 90px; }
+  .briefing-message-box { min-height: 72px; padding: 10px 16px; border-radius: 12px; }
+  .briefing-text { font-size: 16px; line-height: 1.35; }
+  .briefing-dots { gap: 5px; }
+  .briefing-dot { width: 8px; height: 8px; border-width: 1px; }
+  .briefing-next { min-width: 190px; min-height: 44px; margin: 0; font-size: 15px; }
+  .briefing-next .gm-kbd { display: none; }
+}

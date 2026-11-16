@@ -292,3 +292,27 @@ html[data-text-size='big'] .hud {
 html[data-text-size='big'] :is(.mission-overlay__panel, .briefing-message-box, .crew-profile, .game-hint-banner, .gm-card, .credits-panel, .panel) {
   zoom: 1.15;
 }
+
+/* Phones play in landscape. Keep the document fixed and let the few long panels own their scroll. */
+@media (max-height: 520px) and (orientation: landscape) and (pointer: coarse) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* Large text must enlarge the words, not the whole interface beyond the viewport. */
+  html[data-text-size='big'] .hud {
+    --hud-scale: 1;
+  }
+
+  html[data-text-size='big'] :is(.mission-overlay__panel, .briefing-message-box, .crew-profile, .game-hint-banner, .gm-card, .credits-panel, .panel) {
+    zoom: 1;
+  }
+
+  html[data-text-size='big'] :is(.gm-title, .briefing-text, .crew-profile__desc, .crew-profile__strengths, .mission-overlay__panel p) {
+    font-size: 18px;
+  }
+}

@@ -671,6 +671,22 @@
   }
 }
 
+/* 1024–1180px screens should keep more of the station visible around the HUD. */
+@media (min-width: 961px) and (max-width: 1180px) {
+  .hud {
+    --hud-scale: 1;
+    --hud-edge: 12px;
+  }
+
+  .hud-status {
+    width: 340px;
+  }
+
+  .hud-objective {
+    width: 330px;
+  }
+}
+
 /* ---------- Compact landscape: keep controls in four safe zones around the game world. ---------- */
 @media (max-width: 960px) {
   .hud {
@@ -798,4 +814,53 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
   }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .hud > .hud-top {
+    grid-template-columns: minmax(220px, 0.82fr) minmax(300px, 1.18fr);
+    gap: 5px;
+  }
+
+  .hud-objective { padding: 5px 8px; gap: 3px; }
+  .hud-objective__title { font-size: 15px; }
+  .hud-objective__task { font-size: 13px; line-height: 1.2; }
+  .hud-objective__day { font-size: 12px; }
+
+  .hud-status {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 4px;
+    padding: 5px 7px;
+  }
+
+  .hud-bar { min-height: 30px; row-gap: 2px; }
+  .hud-bar__badge { width: 16px; height: 16px; }
+  .hud-bar__badge svg { width: 15px; height: 15px; }
+  .hud-bar__value { font-size: 13px; }
+  .hud-bar__value small { font-size: 8px; }
+  .hud-bar__track { min-width: 28px; height: 5px; }
+
+  .hud-alert,
+  .hud-protocol {
+    grid-column: 1 / -1;
+    max-height: 30px;
+    margin: 0;
+    padding: 3px 6px;
+    overflow: hidden;
+    font-size: 11px;
+    line-height: 1.15;
+  }
+
+  .hud-ai-mark { display: none; }
+
+  .hud > .ship-map { padding: 5px; }
+  .ship-map__card { width: 100%; height: 100%; gap: 5px; padding: 7px; }
+  .ship-map__head { gap: 5px; }
+  .ship-map__title { font-size: 17px; }
+  .ship-map__zoom { gap: 4px; }
+  .ship-map__zoom-btn,
+  .ship-map__close { min-width: 44px; min-height: 44px; padding: 3px 8px; font-size: 16px; }
+  .ship-map__zoom-btn kbd,
+  .ship-map__close kbd { display: none; }
+  .ship-map__frame { flex: 1; min-height: 0; aspect-ratio: auto; }
 }
