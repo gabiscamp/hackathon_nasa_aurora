@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef } from 'react';
 import './GameMenus.css';
 import { useSettingsStore, VOLUME_LEVELS, type TextSize, type TextSpeed } from '../../stores/useSettingsStore';
-import { speak, speechSupported } from '../../utils/speech';
+import { speak, speechSupported, toggleReadScreen, useSpeaking } from '../../utils/speech';
 import { playChoiceSound } from '../../utils/sounds';
 
 interface Choice<T> {
@@ -56,41 +56,58 @@ const ON_OFF: readonly Choice<boolean>[] = [
   { label: 'On', value: true },
 ];
 
-/** Options: text size, text speed, read aloud and sound. Used by the pause menu and the title screen. */
+/** Central Settings panel: accessibility, narration and audio in one place. */
 export function OptionsPanel() {
   const { textSize, textSpeed, readAloud, volume, set } = useSettingsStore();
+  const speaking = useSpeaking((s) => s.speaking);
 
   return (
     <div className="opt-panel">
-      <Segmented title="Text size" choices={SIZES} value={textSize} onChange={(v) => set({ textSize: v })} />
-      <Segmented
-        title="Text speed"
-        hint="How fast the messages appear."
-        choices={SPEEDS}
-        value={textSpeed}
-        onChange={(v) => set({ textSpeed: v })}
-      />
-      {speechSupported && (
+      <section className="opt-section" aria-labelledby="opt-accessibility-title">
+        <h3 className="opt-section__title" id="opt-accessibility-title">Accessibility</h3>
+        <Segmented title="Text size" choices={SIZES} value={textSize} onChange={(v) => set({ textSize: v })} />
         <Segmented
-          title="Read text aloud"
-          hint="A voice reads the messages as they appear. Press L (or Read) to hear any screen."
-          choices={ON_OFF}
-          value={readAloud}
+          title="Text speed"
+          hint="How fast the messages appear."
+          choices={SPEEDS}
+          value={textSpeed}
+          onChange={(v) => set({ textSpeed: v })}
+        />
+        {speechSupported && (
+          <>
+            <Segmented
+              title="Automatic narration"
+              hint="A voice reads new mission messages as they appear."
+              choices={ON_OFF}
+              value={readAloud}
+              onChange={(v) => {
+                set({ readAloud: v });
+                if (v) speak('I will read the messages for you.');
+              }}
+            />
+            <button type="button" className="opt-read-btn" onClick={toggleReadScreen}>
+              <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" />
+                {speaking ? <path d="M16 9l5 6M21 9l-5 6" /> : <path d="M15.5 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" />}
+              </svg>
+              {speaking ? 'Stop reading' : 'Read this screen'}
+              <kbd className="gm-kbd">L</kbd>
+            </button>
+          </>
+        )}
+      </section>
+      <section className="opt-section" aria-labelledby="opt-audio-title">
+        <h3 className="opt-section__title" id="opt-audio-title">Audio</h3>
+        <Segmented
+          title="Sound volume"
+          choices={VOLUME_LEVELS}
+          value={volume}
           onChange={(v) => {
-            set({ readAloud: v });
-            if (v) speak('I will read the messages for you.');
+            set({ volume: v });
+            playChoiceSound();
           }}
         />
-      )}
-      <Segmented
-        title="Sound"
-        choices={VOLUME_LEVELS}
-        value={volume}
-        onChange={(v) => {
-          set({ volume: v });
-          playChoiceSound();
-        }}
-      />
+      </section>
       <p className="opt-note">Your choices are saved on this computer.</p>
     </div>
   );
@@ -115,7 +132,7 @@ export function OptionsDialog({ onClose }: { onClose: () => void }) {
     <div className="gm-backdrop gm-backdrop--top" role="dialog" aria-modal="true" aria-labelledby="opt-title">
       <div className="gm-card gm-card--options">
         <h2 id="opt-title" className="gm-title">
-          Options
+          Settings
         </h2>
         <OptionsPanel />
         <button ref={doneRef} type="button" className="gm-btn gm-btn--primary gm-btn--wide" onClick={onClose}>

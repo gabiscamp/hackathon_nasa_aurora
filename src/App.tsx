@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { A11yDock, useReadShortcut } from './components/ui/A11yDock';
+import { OrientationGuard } from './components/ui/OrientationGuard';
 import { useShallow } from 'zustand/react/shallow';
 import { useGameStore } from './stores/useGameStore';
 import { useResourceStore } from './stores/useResourceStore';
@@ -7,6 +8,8 @@ import { useCrewStore } from './stores/useCrewStore';
 import { useSpaceWeatherStore } from './stores/useSpaceWeatherStore';
 import { getTeam, type CrewTeam } from './data/crews';
 import { useMissionStore } from './stores/useMissionStore';
+import { checkpointDay, clearCheckpoint, restoreCheckpoint } from './engine/checkpoint';
+import { useDutyStore } from './stores/useDutyStore';
 import { useExplorationStore } from './stores/useExplorationStore';
 
 const TitleScreen = lazy(() => import('./components/scenes/TitleScreen').then(m => ({ default: m.TitleScreen })));
@@ -44,6 +47,7 @@ export default function App() {
   const resumeMission = useGameStore((s) => s.resumeMission);
   const selectTeam = useCrewStore((s) => s.selectTeam);
   const resetMissions = useMissionStore((s) => s.reset);
+  const resetDuty = useDutyStore((s) => s.reset);
   const resetExploration = useExplorationStore((s) => s.reset);
   const setScene = useGameStore((s) => s.setScene);
   const resetGame = useGameStore((s) => s.resetGame);
@@ -72,6 +76,8 @@ export default function App() {
   const handleStart = (team: CrewTeam) => {
     resetResources();
     resetMissions();
+    resetDuty();
+    clearCheckpoint();
     resetExploration();
     selectTeam(team.id);
     startMission(team.id, team.commander.name);
@@ -82,16 +88,19 @@ export default function App() {
     crewId && resumeScene ? { commanderName: getTeam(crewId).commander.name, day } : null;
 
   const handleReplay = () => {
+    clearCheckpoint();
     resetGame();
     resetResources();
     resetCrew();
     resetMissions();
+    resetDuty();
     resetExploration();
   };
 
   return (
     <Suspense fallback={<LoadingScreen />}>
-      {/* Read + Options on the story screens (title and game have their own buttons). */}
+      <OrientationGuard />
+      {/* Settings on story screens (title and game have their own entry points). */}
       {(scene === 'briefing' || scene === 'crew-intro' || scene === 'ending') && <A11yDock />}
       {scene === 'title' && <TitleScreen
           onStart={handleStart}
@@ -110,9 +119,19 @@ export default function App() {
         <GameScreen onMainMenu={goHome} onOpenCredits={() => setShowCredits(true)} creditsOpen={showCredits} />
       )}
       {scene === 'ending' && (
-        <EndingScreen playerName={playerName} resources={resources} onReplay={handleReplay} onOpenCredits={() => setShowCredits(true)} />
+        <EndingScreen
+          playerName={playerName}
+          resources={resources}
+          onReplay={handleReplay}
+          onOpenCredits={() => setShowCredits(true)}
+          retryDay={checkpointDay()}
+          onRetry={restoreCheckpoint}
+        />
       )}
-      {showCredits && <CreditsScreen onClose={() => setShowCredits(false)} />}
+      {/* Own boundary: loading the credits must never hide (and restart) the game behind them. */}
+      <Suspense fallback={null}>
+        {showCredits && <CreditsScreen onClose={() => setShowCredits(false)} />}
+      </Suspense>
     </Suspense>
   );
 }

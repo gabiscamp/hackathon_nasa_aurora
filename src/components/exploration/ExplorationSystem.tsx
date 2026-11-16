@@ -4,6 +4,7 @@ import { EVENTS, gameEvents } from '../../game/events';
 import { useExplorationStore } from '../../stores/useExplorationStore';
 import { useResourceStore } from '../../stores/useResourceStore';
 import { useGameStore } from '../../stores/useGameStore';
+import { missionLastDay } from '../../engine/missionEngine';
 import { RobotPortrait } from './RobotPortrait';
 import './ExplorationSystem.css';
 
@@ -12,7 +13,7 @@ function missionDays(mission: ExplorationOption): number {
 }
 
 function formatDays(days: number): string {
-  return `${days} ${days === 1 ? 'dia' : 'dias'}`;
+  return `${days} ${days === 1 ? 'day' : 'days'}`;
 }
 
 function MissionDetails({ mission }: { mission: ExplorationOption }) {
@@ -22,10 +23,10 @@ function MissionDetails({ mission }: { mission: ExplorationOption }) {
       <h3>{mission.title}</h3>
       <p>{mission.description}</p>
       <dl className="exploration-stats">
-        <div><dt>Duração</dt><dd>{formatDays(missionDays(mission))}</dd></div>
-        <div><dt>Sucesso</dt><dd>{Math.round(mission.successChance * 100)}%</dd></div>
-        <div><dt>Custo</dt><dd>{mission.cost.energy} energia · {mission.cost.water} água</dd></div>
-        <div><dt>Retorno</dt><dd>até {mission.reward.minerals} minérios</dd></div>
+        <div><dt>Time</dt><dd>{formatDays(missionDays(mission))}</dd></div>
+        <div><dt>Success</dt><dd>{Math.round(mission.successChance * 100)}%</dd></div>
+        <div><dt>Cost</dt><dd>{mission.cost.energy} energy · {mission.cost.water} water</dd></div>
+        <div><dt>Reward</dt><dd>up to {mission.reward.minerals} minerals</dd></div>
       </dl>
     </>
   );
@@ -57,6 +58,8 @@ export function ExplorationSystem() {
   useEffect(() => {
     const onRobotInteract = () => {
       if (useExplorationStore.getState().status !== 'aboard') return;
+      // Never on top of another window (a mission, the pause menu, the map, the day summary).
+      if (document.querySelector('[role="dialog"], [role="alertdialog"]')) return;
       openMissionMenu();
       if (!worldPausedByExploration.current) {
         worldPausedByExploration.current = true;
@@ -161,20 +164,20 @@ export function ExplorationSystem() {
           className="robot-dock-button"
           type="button"
           onClick={() => gameEvents.emit(EVENTS.ROBOT_INTERACT)}
-          aria-label="Abrir missões do robô AUR-1"
+          aria-label="Open the AUR-1 robot missions (R)"
         >
           <span className="robot-dock-button__dot" aria-hidden="true" />
-          <span><strong>AUR-1</strong><small>Missões do robô</small></span>
+          <span><strong>AUR-1</strong><small>Robot missions</small></span>
           <kbd>R</kbd>
         </button>
       )}
 
       {active && (
-        <button className="robot-widget" type="button" onClick={openDetails} aria-label="Abrir detalhes da exploração">
+        <button className="robot-widget" type="button" onClick={openDetails} aria-label="Open the exploration details">
           <RobotPortrait size={64} />
           <span>
-            <strong>Explorando Marte</strong>
-            <small>Retorna no Dia {active.returnDay} · faltam {formatDays(Math.max(0, active.returnDay - day))}</small>
+            <strong>Exploring Mars</strong>
+            <small>Back on Day {active.returnDay} · {formatDays(Math.max(0, active.returnDay - day))} left</small>
           </span>
           <b>{unlockedIds.length}/10</b>
         </button>
@@ -184,20 +187,20 @@ export function ExplorationSystem() {
         <div className="exploration-layer" role="dialog" aria-modal="true" aria-labelledby="exploration-title">
           <section className="exploration-menu">
             <header>
-              <div><span className="exploration-eyebrow">Unidade AUR-1</span><h2 id="exploration-title">Missões de exploração</h2></div>
-              <button className="exploration-close" type="button" onClick={closeMenu} aria-label="Fechar">×</button>
+              <div><span className="exploration-eyebrow">Robot AUR-1</span><h2 id="exploration-title">Exploration missions</h2></div>
+              <button className="exploration-close" type="button" onClick={closeMenu} aria-label="Close">×</button>
             </header>
-            <div className="exploration-balance">Água {Math.round(water)} · Energia {Math.round(energy)} · Minérios {minerals} · Relatórios {unlockedIds.length}/10</div>
+            <div className="exploration-balance">Water {Math.round(water)} · Energy {Math.round(energy)} · Minerals {minerals} · Reports {unlockedIds.length}/10</div>
             <div className="exploration-options">
               {options.map((mission) => {
                 const affordable = water >= mission.cost.water && energy >= mission.cost.energy;
-                const returnsInTime = day + missionDays(mission) <= 90;
+                const returnsInTime = day + missionDays(mission) <= missionLastDay();
                 return (
                   <article className={`exploration-option exploration-option--${mission.risk}`} key={mission.id}>
-                    <span className="exploration-number">OPÇÃO {mission.optionNumber}</span>
+                    <span className="exploration-number">OPTION {mission.optionNumber}</span>
                     <MissionDetails mission={mission} />
                     <button type="button" disabled={!affordable || !returnsInTime} onClick={() => launch(mission)}>
-                      {!returnsInTime ? 'Não retorna antes do fim' : affordable ? 'Enviar robô' : 'Recursos insuficientes'}
+                      {!returnsInTime ? 'Would come back too late' : affordable ? 'Send the robot' : 'Not enough water or energy'}
                     </button>
                   </article>
                 );
@@ -211,10 +214,10 @@ export function ExplorationSystem() {
         <div className="exploration-layer" role="dialog" aria-modal="true" aria-labelledby="active-title">
           <section className="exploration-summary">
             <RobotPortrait size={96} />
-            <div><span className="exploration-eyebrow">MISSÃO EM ANDAMENTO</span><h2 id="active-title">{active.mission.title}</h2></div>
+            <div><span className="exploration-eyebrow">MISSION IN PROGRESS</span><h2 id="active-title">{active.mission.title}</h2></div>
             <MissionDetails mission={active.mission} />
-            <p className="exploration-countdown">Retorno no Dia {active.returnDay} — faltam {formatDays(Math.max(0, active.returnDay - day))}</p>
-            <button type="button" onClick={closeDetails}>Voltar ao jogo</button>
+            <p className="exploration-countdown">Back on Day {active.returnDay}: {formatDays(Math.max(0, active.returnDay - day))} left</p>
+            <button type="button" onClick={closeDetails}>Back to the game</button>
           </section>
         </div>
       )}
@@ -222,20 +225,20 @@ export function ExplorationSystem() {
       {lastOutcome && !celebrationPending && (
         <div className="exploration-layer" role="dialog" aria-modal="true" aria-labelledby="reward-title">
           <section className={`exploration-reward ${lastOutcome.succeeded ? 'is-success' : 'is-failure'}`}>
-            <span className="exploration-eyebrow">ROBÔ DE VOLTA À NAVE</span>
-            <h2 id="reward-title">{lastOutcome.succeeded ? 'Exploração concluída!' : 'Missão sem coleta'}</h2>
+            <span className="exploration-eyebrow">THE ROBOT IS BACK</span>
+            <h2 id="reward-title">{lastOutcome.succeeded ? 'Exploration done!' : 'No samples this time'}</h2>
             {lastOutcome.report ? (
               <div className="report-card">
-                <span>NOVO RELATÓRIO · {unlockedIds.length}/10</span>
+                <span>NEW REPORT · {unlockedIds.length}/10</span>
                 <h3>{lastOutcome.report.title}</h3>
                 <p>{lastOutcome.report.narrative}</p>
               </div>
             ) : (
-              <p>O terreno impediu a coleta. A telemetria foi preservada e a proteção contra azar aumentou.</p>
+              <p>The ground was too rough to collect anything. The robot kept its data, and the next mission will be easier.</p>
             )}
-            {lastOutcome.succeeded && <p className="exploration-gains">+{lastOutcome.mission.reward.minerals} minérios · +{lastOutcome.mission.reward.water} água · +{lastOutcome.mission.reward.energy} energia</p>}
-            {lastOutcome.wasGuaranteed && <small>Sucesso garantido pela proteção de telemetria.</small>}
-            <button type="button" onClick={closeOutcome}>Continuar</button>
+            {lastOutcome.succeeded && <p className="exploration-gains">+{lastOutcome.mission.reward.minerals} minerals · +{lastOutcome.mission.reward.water} water · +{lastOutcome.mission.reward.energy} energy</p>}
+            {lastOutcome.wasGuaranteed && <small>This one was sure to work, after the bad luck before.</small>}
+            <button type="button" onClick={closeOutcome}>Continue</button>
           </section>
         </div>
       )}
@@ -245,10 +248,10 @@ export function ExplorationSystem() {
           <section className="medal-celebration">
             <div className="medal-rays" />
             <div className="medal-icon" aria-hidden="true">★</div>
-            <span className="exploration-eyebrow">COLEÇÃO COMPLETA · {unlockedReports.length}/10</span>
-            <h2 id="medal-title">Medalha de Explorador</h2>
-            <p>Você reuniu os dez registros de Marte. A tripulação agora possui um atlas científico completo da região.</p>
-            <button type="button" onClick={receiveMedal}>Receber medalha</button>
+            <span className="exploration-eyebrow">COLLECTION COMPLETE · {unlockedReports.length}/10</span>
+            <h2 id="medal-title">Explorer Medal</h2>
+            <p>You collected all ten Mars reports. The crew now has a complete science map of the area!</p>
+            <button type="button" onClick={receiveMedal}>Get the medal</button>
           </section>
         </div>
       )}

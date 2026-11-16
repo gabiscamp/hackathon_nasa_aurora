@@ -15,31 +15,31 @@ const BARS: { icon: ReactNode; name: string; color: string; text: string }[] = [
     icon: <FoodIcon size={22} />,
     name: 'Food',
     color: '#fb923c',
-    text: 'Meals for the crew. It goes down a little every day.',
+    text: 'Meals for the crew. It goes down every day. Below 20, everyone eats half portions and gets tired faster.',
   },
   {
     icon: <WaterIcon size={22} />,
     name: 'Water',
     color: '#4dc9f6',
-    text: 'For drinking and washing. It goes down every day too.',
+    text: 'For drinking and washing. Below 30, the crew must save water (no showers!).',
   },
   {
     icon: <OxygenIcon size={22} />,
     name: 'Oxygen',
     color: '#2ecc71',
-    text: 'The air the crew breathes. The machines need energy to make it.',
+    text: 'The air the crew breathes. The machines need energy to make it. At 0, the station is lost!',
   },
   {
     icon: <RadiationIcon size={22} />,
     name: 'Radiation',
     color: '#facc15',
-    text: 'Invisible energy from the Sun and space. Too much makes astronauts sick. Keep this bar LOW!',
+    text: 'Invisible energy from the Sun and space. Too much makes astronauts sick. Keep this bar LOW! At 100, everyone must leave.',
   },
   {
     icon: <EnergyIcon size={22} />,
     name: 'Energy',
     color: '#9b6cf2',
-    text: 'Power from the solar panels. It runs every machine on the station.',
+    text: 'Power from the solar panels. It runs every machine. At 0, the air and water machines stop!',
   },
 ];
 
@@ -50,7 +50,7 @@ export function HowToPlay() {
       <div className="gm-help__col">
         <section>
           <h3>Your goal</h3>
-          <p>Keep the station and the crew safe for 90 days near Mars.</p>
+          <p>Keep the station and the crew safe for 45 days near Mars.</p>
         </section>
 
         <section>
@@ -64,6 +64,15 @@ export function HowToPlay() {
             </li>
             <li>Choose what the crew should do. Every choice changes the station bars.</li>
           </ol>
+        </section>
+
+        <section>
+          <h3>How you can lose</h3>
+          <p>
+            If <strong>oxygen</strong> reaches 0 or <strong>radiation</strong> reaches 100, the
+            station is lost and the crew escapes in the capsule. One bad bar pulls the others down: no energy stops the
+            air, and no air, water or food makes the crew sick a little more every day.
+          </p>
         </section>
 
         <section>

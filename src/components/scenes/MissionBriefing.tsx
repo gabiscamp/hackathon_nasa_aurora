@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { ScreenNav } from '../ui/ScreenNav';
 import { commanderLabel } from '../../data/crew';
+import { MISSION_DAYS } from '../../data/missionLength';
 import { getTeam } from '../../data/crews';
 import { useGameStore } from '../../stores/useGameStore';
 import { useSettingsStore } from '../../stores/useSettingsStore';
@@ -21,7 +22,7 @@ const SCENES = [
   { at: 16.6, kind: 'launch', title: '3… 2… 1… Liftoff!', text: 'Your journey to the Red Planet begins.' },
   { at: 24.6, kind: 'cockpit', title: 'Leaving Earth · Crew aboard', text: 'Earth grows smaller. Your team is all you have.' },
   { at: 28.6, kind: 'travel', title: 'Across the silence', text: 'Six to nine months of travel… far from home.' },
-  { at: 32.6, kind: 'orbit', title: 'Much later · Mars orbit', text: '{commander}, welcome to Aurora Station. Your assignment: 45 days.' },
+  { at: 32.6, kind: 'orbit', title: 'Much later · Mars orbit', text: `{commander}, welcome to Aurora Station. Your assignment: ${MISSION_DAYS} days.` },
   { at: 36.6, kind: 'mission', title: 'The mission', text: 'Protect your crew. Manage food, water, energy and oxygen. Explore Mars. Every decision matters.' },
   { at: 44.6, kind: 'command', title: 'Mission Control · Signing off', text: 'You are in command now… Meet your crew.' },
 ] as const;

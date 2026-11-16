@@ -8,13 +8,23 @@ import { playFootstep } from '../../utils/sounds';
  * The game uses pixelArt (nearest-neighbour) for sprites. Text scaled that way gets jagged
  * edges that read like serifs, so text textures use smooth (linear) filtering: Lexend stays clean.
  */
+interface MarkerParts {
+  container: Phaser.GameObjects.Container;
+  glow: Phaser.GameObjects.Graphics;
+  x: number;
+  y: number;
+}
+
 function smoothText(t: Phaser.GameObjects.Text): Phaser.GameObjects.Text {
   t.texture.setFilter(Phaser.Textures.FilterMode.LINEAR);
   return t;
 }
-import { gameEvents, EVENTS } from '../events';
+import { gameEvents, EVENTS, type MissionMarkerSpec } from '../events';
+import { markerSpecs } from '../missionMarkers';
 import { useCrewStore } from '../../stores/useCrewStore';
-import { CREW_ROLES } from '../../data/crew';
+import { CREW_ROLES, type CrewRole } from '../../data/crew';
+import { availability, useDutyStore } from '../../stores/useDutyStore';
+import { findPath, nudged, randomFloorPoint, type Point } from '../world/crewPaths';
 import { useGameStore } from '../../stores/useGameStore';
 import { useMissionStore } from '../../stores/useMissionStore';
 import { useExplorationStore } from '../../stores/useExplorationStore';
@@ -75,7 +85,36 @@ const OVERHEAD_DEPTH = 11;
 /** Extra zoom when the camera flies to a mission spot. */
 const MISSION_ZOOM = 1.4;
 const ROBOT_SCALE = 0.24;
-const ROBOT_INTERACT_DISTANCE = 110;
+/** Smaller than INTERACT_DISTANCE: AUR-1 wanders the station and must be walked right up to
+ *  (R and a click on it open its panel from anywhere). */
+const ROBOT_INTERACT_DISTANCE = 55;
+/** Crew walking speed in world px/s (the player walks at 160). */
+const CREW_SPEED = 55;
+/** Pause between two strolls of a free crew member (ms). */
+const CREW_STROLL_PAUSE: [number, number] = [2500, 7000];
+/** Where each one stands in a room, so two crew members sent to the same room don't overlap. */
+const CREW_OFFSETS: Record<CrewRole, Point> = {
+  engineer: { x: -16, y: 4 },
+  medic: { x: 16, y: 4 },
+  scientist: { x: 0, y: 16 },
+};
+
+type CrewGoal = { mode: 'work' | 'rest'; room: RoomId } | { mode: 'stroll' } | { mode: 'away' };
+
+/** A crew member walking around the station by themselves. */
+interface CrewWalker {
+  role: CrewRole;
+  node: Phaser.GameObjects.Container;
+  sprite: Phaser.GameObjects.Sprite | null;
+  head: HeadId | null;
+  path: Point[];
+  facing: 'down' | 'up' | 'left' | 'right';
+  /** Mode + room it is heading to; a new goal (new job, sick, free) re-routes it. */
+  goalKey: string;
+  stroll: boolean;
+  /** Free crew: when the next stroll starts (null = not planned yet). */
+  nextStrollAt: number | null;
+}
 
 export class GameScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Container;
@@ -97,10 +136,13 @@ export class GameScene extends Phaser.Scene {
   private walkableDebug: Phaser.GameObjects.Graphics | null = null;
   private currentRoom: RoomId | null = null;
   private lastPositionEmit = 0;
-  private missionMarker: Phaser.GameObjects.Container | null = null;
-  private missionGlow: Phaser.GameObjects.Graphics | null = null;
+  /** One "!" per open problem (several can be open at once). Keyed by mission id. */
+  private missionMarkers = new Map<string, MarkerParts>();
+  /** The marker the player opened last (the camera zooms on it). */
+  private activeMarkerId: string | null = null;
   private frozen = false;
   private robot: Phaser.GameObjects.Sprite | null = null;
+  private crewWalkers: CrewWalker[] = [];
   private robotPatrol: Phaser.Tweens.Tween | null = null;
   private speechBubble: Phaser.GameObjects.Container | null = null;
   private speechTimer: Phaser.Time.TimerEvent | null = null;
@@ -154,8 +196,9 @@ export class GameScene extends Phaser.Scene {
       const spawn = NPC_SPAWNS[role];
       const firstName = member.name.replace(/^Dr\.\s*/, '').split(' ')[0];
       const head = heads[role];
-      this.createNPC(spawn.x, spawn.y, Phaser.Display.Color.HexStringToColor(member.color).color, firstName, head);
+      this.createNPC(role, spawn.x, spawn.y, Phaser.Display.Color.HexStringToColor(member.color).color, firstName, head);
     }
+    this.startCrewRoutines();
     this.createRobot();
 
     // Input — WASD and arrows work simultaneously. Start clean: keys held while the
@@ -193,13 +236,14 @@ export class GameScene extends Phaser.Scene {
 
     const onInteract = () => {
       if (this.frozen || this.scene.isPaused()) return;
-      if (this.isNearRobot()) {
-        gameEvents.emit(EVENTS.ROBOT_INTERACT);
+      // Keep mission selection identical for keyboard and touch controls.
+      const id = this.nearestMarker();
+      if (id) {
+        this.activeMarkerId = id;
+        gameEvents.emit(EVENTS.MISSION_START, id);
         return;
       }
-      if (this.isNearMarker()) {
-        gameEvents.emit(EVENTS.MISSION_START);
-      }
+      if (this.isNearRobot()) gameEvents.emit(EVENTS.ROBOT_INTERACT);
     };
     this.input.keyboard!.on('keydown-E', onInteract);
     const onTouchMove = (movement: { x: number; y: number }) => {
@@ -216,16 +260,14 @@ export class GameScene extends Phaser.Scene {
 
     // Mission events from React (MissionOverlay / GameScreen). Removed when the scene ends:
     // otherwise a destroyed scene from an earlier visit keeps reacting after "Continue mission".
-    const onShowMarker = (room: RoomId, critical?: boolean) => this.showMissionMarker(room, critical);
-    const onRemoveMarker = () => this.removeMissionMarker();
+    const onSetMarkers = (markers: MissionMarkerSpec[]) => this.setMissionMarkers(markers);
     const onShowSpeech = (text: string) => this.showSpeechBubble(text);
     const onHideSpeech = () => this.hideSpeechBubble();
     const onZoomIn = () => {
       this.frozen = true;
       const cam = this.cameras.main;
-      const target = this.missionMarker
-        ? { x: this.missionMarker.x, y: this.missionMarker.y + 30 }
-        : { x: this.player.x, y: this.player.y };
+      const marker = this.activeMarkerId ? this.missionMarkers.get(this.activeMarkerId) : undefined;
+      const target = marker ? { x: marker.x, y: marker.y } : { x: this.player.x, y: this.player.y };
       cam.pan(target.x, target.y, 600, 'Sine.easeInOut');
       cam.zoomTo(this.baseZoom() * MISSION_ZOOM, 600, 'Sine.easeInOut');
     };
@@ -236,15 +278,13 @@ export class GameScene extends Phaser.Scene {
       cam.pan(this.player.x, this.player.y - 16, 500, 'Sine.easeInOut');
       cam.zoomTo(this.baseZoom(), 500, 'Sine.easeInOut');
     };
-    gameEvents.on('SHOW_MISSION_MARKER', onShowMarker);
-    gameEvents.on('REMOVE_MISSION_MARKER', onRemoveMarker);
+    gameEvents.on(EVENTS.SET_MISSION_MARKERS, onSetMarkers);
     gameEvents.on('CAMERA_ZOOM_IN', onZoomIn);
     gameEvents.on('CAMERA_ZOOM_OUT', onZoomOut);
     gameEvents.on(EVENTS.SHOW_SPEECH_BUBBLE, onShowSpeech);
     gameEvents.on(EVENTS.HIDE_SPEECH_BUBBLE, onHideSpeech);
     const removeMissionListeners = () => {
-      gameEvents.off('SHOW_MISSION_MARKER', onShowMarker);
-      gameEvents.off('REMOVE_MISSION_MARKER', onRemoveMarker);
+      gameEvents.off(EVENTS.SET_MISSION_MARKERS, onSetMarkers);
       gameEvents.off('CAMERA_ZOOM_IN', onZoomIn);
       gameEvents.off('CAMERA_ZOOM_OUT', onZoomOut);
       gameEvents.off(EVENTS.SHOW_SPEECH_BUBBLE, onShowSpeech);
@@ -256,10 +296,9 @@ export class GameScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, removeMissionListeners);
     this.events.once(Phaser.Scenes.Events.DESTROY, removeMissionListeners);
 
-    // React may have sent SHOW_MISSION_MARKER before this scene existed (e.g. "Continue mission"
-    // while the map was still loading): draw the marker from the saved state too.
-    const mission = useMissionStore.getState().currentMission;
-    if (useGameStore.getState().phase === 'decision' && mission) this.showMissionMarker(mission.room as RoomId);
+    // React may have sent the markers before this scene existed (e.g. "Continue mission"
+    // while the map was still loading): draw them from the saved state too.
+    if (useGameStore.getState().phase === 'decision') this.setMissionMarkers(markerSpecs(useMissionStore.getState().openEvents));
   }
 
   /** ISS-style station (modules, nodes, truss, radiators, solar wings) over the Mars-orbit backdrop. */
@@ -433,15 +472,18 @@ export class GameScene extends Phaser.Scene {
     this.player.add([body, this.directionDot]);
   }
 
-  private createNPC(x: number, y: number, color: number, name: string, head: HeadId | null) {
+  private createNPC(role: CrewRole, x: number, y: number, color: number, name: string, head: HeadId | null) {
     const npc = this.add.container(x, y).setDepth(9);
     if (this.stationMask) npc.setMask(this.stationMask);
+    const walker: CrewWalker = { role, node: npc, sprite: null, head, path: [], facing: 'down', goalKey: '', stroll: false, nextStrollAt: null };
+    this.crewWalkers.push(walker);
 
     if (head && this.textures.exists(astronautTextureKey(head))) {
       const sprite = this.add.sprite(0, 0, astronautTextureKey(head), 0).setOrigin(0.5, ASTRO_ORIGIN_Y);
       sprite.anims.play(astronautAnim(head, 'idle', 'down'));
       npc.add([sprite, this.npcLabel(name, -50)]);
       npc.setData('name', name);
+      walker.sprite = sprite;
       return;
     }
 
@@ -455,6 +497,108 @@ export class GameScene extends Phaser.Scene {
 
     npc.add([circle, this.npcLabel(name, -28)]);
     npc.setData('name', name);
+  }
+
+  /**
+   * Where a crew member should be right now, from their duty (src/stores/useDutyStore.ts):
+   * on a job -> the mission's room; sick or resting -> the crew quarters; free -> strolling;
+   * gone back to Earth -> not on the station.
+   */
+  private crewGoal(role: CrewRole): CrewGoal {
+    const duty = useDutyStore.getState().crew[role];
+    switch (availability(duty, useGameStore.getState().day)) {
+      case 'away':
+        return { mode: 'away' };
+      case 'sick':
+      case 'resting':
+        return { mode: 'rest', room: 'quarters' };
+      case 'busy': {
+        const room = duty.task?.room as RoomId | undefined;
+        return room && ROOM_CENTERS[room] ? { mode: 'work', room } : { mode: 'stroll' };
+      }
+      default:
+        return { mode: 'stroll' };
+    }
+  }
+
+  /** Sends each crew member where their duty says (called when a job, a sickness or the day changes). */
+  private refreshCrewGoals = () => {
+    for (const w of this.crewWalkers) {
+      const goal = this.crewGoal(w.role);
+      const key = goal.mode === 'work' || goal.mode === 'rest' ? `${goal.mode}:${goal.room}` : goal.mode;
+      if (key === w.goalKey) continue;
+      w.goalKey = key;
+      w.node.setVisible(goal.mode !== 'away');
+      w.stroll = goal.mode === 'stroll';
+      w.nextStrollAt = null;
+      w.path = [];
+      if (goal.mode === 'work' || goal.mode === 'rest') {
+        const spot = nudged(ROOM_CENTERS[goal.room], CREW_OFFSETS[w.role]);
+        w.path = findPath({ x: w.node.x, y: w.node.y }, spot) ?? [];
+      } else if (goal.mode === 'stroll') {
+        // Just freed (or the game just started): a short pause, then off they go.
+        w.nextStrollAt = this.time.now + Phaser.Math.Between(500, 2500);
+      }
+    }
+  };
+
+  private startCrewRoutines() {
+    this.refreshCrewGoals();
+    const offDuty = useDutyStore.subscribe(this.refreshCrewGoals);
+    const offDay = useGameStore.subscribe((s, prev) => {
+      if (s.day !== prev.day) this.refreshCrewGoals();
+    });
+    const stop = () => {
+      offDuty();
+      offDay();
+      this.crewWalkers = [];
+    };
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, stop);
+    this.events.once(Phaser.Scenes.Events.DESTROY, stop);
+  }
+
+  /** Walks each crew member along their path; free ones pick a new spot after a pause. */
+  private updateCrew(delta: number) {
+    const now = this.time.now;
+    const dt = Math.min(delta, 50) / 1000;
+    for (const w of this.crewWalkers) {
+      if (!w.node.visible) continue;
+      if (w.path.length === 0 && w.stroll) {
+        if (w.nextStrollAt === null) {
+          w.nextStrollAt = now + Phaser.Math.Between(...CREW_STROLL_PAUSE);
+        } else if (now >= w.nextStrollAt) {
+          const spot = randomFloorPoint();
+          w.path = (spot && findPath({ x: w.node.x, y: w.node.y }, spot)) || [];
+          w.nextStrollAt = null;
+        }
+      }
+
+      let moving = false;
+      let budget = CREW_SPEED * dt;
+      while (budget > 0 && w.path.length > 0) {
+        const next = w.path[0];
+        const dx = next.x - w.node.x;
+        const dy = next.y - w.node.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 0.01) {
+          w.facing = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : dy < 0 ? 'up' : 'down';
+          moving = true;
+        }
+        if (dist <= budget) {
+          w.node.setPosition(next.x, next.y);
+          w.path.shift();
+          budget -= dist;
+        } else {
+          w.node.setPosition(w.node.x + (dx / dist) * budget, w.node.y + (dy / dist) * budget);
+          budget = 0;
+        }
+      }
+
+      if (w.sprite && w.head) {
+        w.sprite.setFlipX(w.facing === 'left');
+        w.sprite.anims.play(astronautAnim(w.head, moving ? 'walk' : 'idle', w.facing), true);
+      }
+    }
   }
 
   /** AUR-1 roams the main pressurised corridor until it is deployed to Mars. */
@@ -478,7 +622,10 @@ export class GameScene extends Phaser.Scene {
       .setDepth(9)
       .setInteractive({ useHandCursor: true });
     this.robot.anims.play('robot-idle');
-    this.robot.on('pointerdown', () => {
+    this.robot.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      // Phaser also hears clicks on HTML windows drawn over the canvas (a crew card, a button):
+      // only a click really on the game canvas, with no window open, talks to the robot.
+      if (this.frozen || pointer.event?.target !== this.game.canvas) return;
       if (useExplorationStore.getState().status === 'aboard') gameEvents.emit(EVENTS.ROBOT_INTERACT);
     });
 
@@ -546,67 +693,63 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(0.5));
   }
 
-  showMissionMarker(room: RoomId, critical = false) {
-    this.removeMissionMarker();
-    const center = ROOM_CENTERS[room];
-    if (!center) return;
-
-    const color = critical ? 0xe74c3c : 0xf59e0b;
-
-    const glow = this.add.graphics().setDepth(15).setAlpha(0.6);
-    glow.fillStyle(color, 0.35);
-    glow.fillCircle(center.x, center.y, 55);
-    glow.fillStyle(color, 0.15);
-    glow.fillCircle(center.x, center.y, 80);
-    this.missionGlow = glow;
-
-    this.tweens.add({
-      targets: glow,
-      alpha: { from: 0.4, to: 1 },
-      duration: critical ? 500 : 800,
-      yoyo: true,
-      repeat: -1,
-      ease: 'Sine.easeInOut',
-    });
-
-    const container = this.add.container(center.x, center.y - 30).setDepth(20);
-
-    const bg = this.add.graphics();
-    bg.fillStyle(color, 1);
-    bg.fillRoundedRect(-14, -18, 28, 36, 6);
-    bg.fillTriangle(-8, 18, 8, 18, 0, 28);
-
-    const text = smoothText(this.add.text(0, 0, '!', {
-      fontSize: '22px',
-      fontStyle: 'bold',
-      color: critical ? '#ffffff' : '#1a1a2e',
-      fontFamily: GAME_FONT,
-      resolution: 4,
-    }).setOrigin(0.5));
-
-    container.add([bg, text]);
-    this.missionMarker = container;
-
-    this.tweens.add({
-      targets: container,
-      y: center.y - 40,
-      duration: critical ? 350 : 500,
-      yoyo: true,
-      repeat: -1,
-      ease: 'Sine.easeInOut',
-    });
-  }
-
-  removeMissionMarker() {
-    if (this.missionMarker) {
-      this.missionMarker.destroy();
-      this.missionMarker = null;
+  /** Draws one "!" per open problem; problems in the same room stand side by side. */
+  setMissionMarkers(markers: MissionMarkerSpec[]) {
+    for (const parts of this.missionMarkers.values()) {
+      parts.container.destroy();
+      parts.glow.destroy();
     }
-    if (this.missionGlow) {
-      this.missionGlow.destroy();
-      this.missionGlow = null;
+    this.missionMarkers.clear();
+
+    const perRoom = new Map<string, number>();
+    for (const m of markers) {
+      const center = ROOM_CENTERS[m.room as RoomId];
+      if (!center) continue;
+      const index = perRoom.get(m.room) ?? 0;
+      perRoom.set(m.room, index + 1);
+      const x = center.x + index * 70;
+      const y = center.y;
+      const color = m.critical ? 0xe74c3c : 0xf59e0b;
+
+      const glow = this.add.graphics().setDepth(15).setAlpha(0.6);
+      glow.fillStyle(color, 0.35);
+      glow.fillCircle(x, y, 55);
+      glow.fillStyle(color, 0.15);
+      glow.fillCircle(x, y, 80);
+      this.tweens.add({
+        targets: glow,
+        alpha: { from: 0.4, to: 1 },
+        duration: m.critical ? 500 : 800,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+
+      const container = this.add.container(x, y - 30).setDepth(20);
+      const bg = this.add.graphics();
+      bg.fillStyle(color, 1);
+      bg.fillRoundedRect(-14, -18, 28, 36, 6);
+      bg.fillTriangle(-8, 18, 8, 18, 0, 28);
+      const text = smoothText(this.add.text(0, 0, '!', {
+        fontSize: '22px',
+        fontStyle: 'bold',
+        color: m.critical ? '#ffffff' : '#1a1a2e',
+        fontFamily: GAME_FONT,
+        resolution: 4,
+      }).setOrigin(0.5));
+      container.add([bg, text]);
+      this.tweens.add({
+        targets: container,
+        y: y - 40,
+        duration: m.critical ? 350 : 500,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+      this.missionMarkers.set(m.id, { container, glow, x, y });
     }
   }
+
 
   private showSpeechBubble(fullText: string) {
     this.hideSpeechBubble();
@@ -701,11 +844,18 @@ export class GameScene extends Phaser.Scene {
     this.frozen = false;
   }
 
-  private isNearMarker(): boolean {
-    if (!this.missionMarker) return false;
-    const dx = this.player.x - this.missionMarker.x;
-    const dy = this.player.y - (this.missionMarker.y + 30);
-    return Math.sqrt(dx * dx + dy * dy) < INTERACT_DISTANCE;
+  /** The open problem the player is standing next to (closest one), if any. */
+  private nearestMarker(): string | null {
+    let best: string | null = null;
+    let bestDist = INTERACT_DISTANCE;
+    for (const [id, m] of this.missionMarkers) {
+      const dist = Math.hypot(this.player.x - m.x, this.player.y - m.y);
+      if (dist < bestDist) {
+        best = id;
+        bestDist = dist;
+      }
+    }
+    return best;
   }
 
   private isNearRobot(): boolean {
@@ -777,6 +927,8 @@ export class GameScene extends Phaser.Scene {
   update(_time: number, delta: number) {
     // The mission zoom (CAMERA_ZOOM_IN/OUT) tweens the zoom over several frames: keep the backdrop covering the screen.
     this.fitBackdrop();
+    // The crew keeps walking while a mission window is open: those just sent head to the job.
+    this.updateCrew(delta);
     if (this.frozen) return;
 
     const up = this.cursors.up.isDown || this.wasd.W.isDown || this.touchMovement.y < 0;

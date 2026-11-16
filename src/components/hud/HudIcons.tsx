@@ -63,6 +63,15 @@ export function RadiationIcon({ size = 16 }: IconProps) {
   );
 }
 
+/** Heart: the crew's health. */
+export function HealthIcon({ size = 16 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 20.5s-7.5-4.6-9.2-9.4C1.6 7.6 3.9 4 7.4 4c2 0 3.5 1.1 4.6 2.7C13.1 5.1 14.6 4 16.6 4c3.5 0 5.8 3.6 4.6 7.1-1.7 4.8-9.2 9.4-9.2 9.4Z" fill="currentColor" />
+    </svg>
+  );
+}
+
 /** Warning triangle with "!" (low/high resource alert). */
 export function WarningIcon({ size = 16 }: IconProps) {
   return (

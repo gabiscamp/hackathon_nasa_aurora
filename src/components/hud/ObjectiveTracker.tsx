@@ -4,16 +4,16 @@ import { useMissionStore } from '../../stores/useMissionStore';
 import { getAct } from '../panels/DayTracker';
 import { gameEvents, EVENTS } from '../../game/events';
 import { ROOM_NAMES } from './LocationHint';
-import { useMissionTarget } from './useMissionTarget';
+import { useMissionTargets } from './useMissionTarget';
 
-const MISSION_DAYS = 90;
+import { MISSION_DAYS } from '../../data/missionLength';
 
-/** Top-right HUD: what to do now (same words as the banner), plus how far the 90-day mission has gone. */
+/** Top-right HUD: what to do now (same words as the banner), plus how far the mission has gone. */
 export function ObjectiveTracker() {
   const day = useGameStore((s) => s.day);
   const phase = useGameStore((s) => s.phase);
   const mission = useMissionStore((s) => s.currentMission);
-  const target = useMissionTarget();
+  const targets = useMissionTargets();
   const { label: actLabel } = getAct(day);
 
   // Once the player reaches the "!" and the mission window opens, the task becomes "choose".
@@ -27,12 +27,17 @@ export function ObjectiveTracker() {
     if (phase !== 'decision') setAtMission(false);
   }, [phase]);
 
-  const title = mission && phase !== 'summary' ? mission.title : actLabel;
+  const title =
+    mission && phase !== 'summary' ? mission.title : targets.length === 1 ? targets[0].title : targets.length > 1 ? 'Several problems!' : actLabel;
   const objective =
     phase === 'decision'
-      ? target && !atMission
-        ? `Go to ${ROOM_NAMES[target.room]} and press E`
-        : 'Choose what the crew should do'
+      ? mission && atMission
+        ? 'Choose what the crew should do'
+        : targets.length === 1
+          ? `Go to ${ROOM_NAMES[targets[0].room]} and press E`
+          : targets.length > 1
+            ? `${targets.length} problems: walk to each ! and press E`
+            : 'Explore the ship'
       : phase === 'result'
         ? 'Listen to Mission Control'
         : phase === 'summary'

@@ -828,3 +828,55 @@ i. Satisfação −5.
 ii. Se essa escolha for feita 2 vezes, ativa o problema 48 (O tédio chegou).
 
 
+Dicas para identificar os comodos e atribuir a missao correta:
+
+Cada missão tem um room: '...'. É ali que aparece o "!" e o jogador aperta E. Use o código entre crases.
+
+quarters: Crew Quarters (dormitório)
+Onde a tripulação dorme e descansa.
+Palavras-chave: sono, cansaço, descanso, sonhos, insônia, privacidade, objetos pessoais, rotina da noite, saúde mental.
+
+common: Kitchen (cozinha)
+Onde a tripulação prepara as refeições e come junta à mesa.
+Palavras-chave: comida, refeição, cardápio, quem come mais, aniversário, festa, conversa, briga, amizade, moral da equipe, mensagem da família.
+
+greenhouse: Greenhouse (estufa)
+Onde se cultivam plantas com luz especial e água, sem terra.
+Palavras-chave: plantas, colheita, cultivo, sementes, comida fresca, luz, rega, hidroponia, plantas doentes.
+
+lab: Science Lab (laboratório)
+Onde se fazem experimentos e análises. Tem bancadas, centrífuga e um pequeno canteiro de pesquisa.
+Palavras-chave: experimento, ciência, amostras, análise, microscópio, DNA, dados, descoberta, pesquisa sobre Marte, testes com plantas.
+
+gym: Gym (academia)
+Onde a tripulação se exercita (esteira, bicicleta, pesos) para manter os ossos e os músculos fortes. A médica fica aqui.
+Palavras-chave: exercício, músculos, ossos, saúde física, treino, check-up médico, lesão, primeiros socorros.
+
+bathroom: Bathroom (banheiro)
+Vaso sanitário espacial, higiene e reciclagem.
+Palavras-chave: banheiro quebrado, higiene, banho, lavar, reciclar água, lixo reciclável, cheiro.
+
+storage: Cargo Bay (cápsulas de carga)
+Onde atracam as naves de carga e ficam os suprimentos. As cápsulas também servem de fuga em emergência.
+Palavras-chave: carga, suprimentos, estoque de comida, despensa, comida velha/nova, comida acabando, peças de reposição, lixo, nave de carga chegando, colisão com nave de carga, evacuação.
+
+bridge: Command Node (nó de comando)
+Centro de comunicação e navegação da estação.
+Palavras-chave: rádio, mensagem da Terra, comunicação, silêncio de rádio, navegação, alerta, tempestade solar, sombra de Marte, detritos e meteoros (alerta), radiação, contagem regressiva, último dia, decisões de energia.
+
+engineering: Life Support Node (nó de suporte à vida)
+As máquinas que mantêm todos vivos: ar, água, energia e temperatura.
+Palavras-chave: oxigênio, CO₂, filtro de ar, ar tóxico, água suja, purificação, bateria, energia, fogo, vazamento, temperatura, máquina quebrada, conserto interno.
+
+airlock: Airlock & Suits (câmara de descompressão e trajes)
+A porta para o espaço, onde ficam os trajes espaciais.
+Palavras-chave: caminhada espacial, traje, capacete, água no capacete, conserto do lado de fora, painel solar, radiador, buraco de micrometeorito no casco.
+
+corridor: Connection Node (nó de conexão)
+São só passagens entre os módulos. Melhor não colocar missões aqui.
+
+Dicas para a associação
+
+Quando a missão fala do problema dentro de uma sala específica, a sala ganha. Por exemplo, "The Bathroom Broke" vai para bathroom, e não para engineering.
+Se a missão for sobre consertar algo do lado de fora da estação, use airlock, mesmo que o problema seja de energia ou de ar.
+Só existem esses códigos. Um código fora da lista faz o "!" não aparecer no mapa

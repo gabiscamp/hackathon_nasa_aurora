@@ -2,7 +2,7 @@
 
 **A space station game for kids aged 7 to 12, built for the NASA Space Apps Challenge 2026.**
 
-You are the commander of a space station orbiting Mars for 90 days. Walk through the station, meet a crew of real astronauts, and decide what to do when something goes wrong: a broken CO₂ filter, a fire, an air leak, a solar storm. Every choice changes the station's food, water, oxygen, radiation and energy, and every mission ends with a real NASA fact.
+You are the commander of a space station orbiting Mars for 45 days. Walk through the station, meet a crew of real astronauts, and decide what to do when something goes wrong: a broken CO₂ filter, a fire, an air leak, a solar storm. Every choice changes the station's food, water, oxygen, radiation and energy, and every mission ends with a real NASA fact.
 
 <!-- TODO(team): add the live demo link (Vercel) here, e.g. **[▶ Play it in your browser](https://...)** -->
 
@@ -14,7 +14,7 @@ You are the commander of a space station orbiting Mars for 90 days. Walk through
 2. **Walk there and press E.** The mission window explains the problem in simple words.
 3. **Choose what the crew should do.** Each choice has a cost: there is no perfect answer.
 4. **See what happened** and learn a **real NASA fact** behind the story.
-5. **Review the day** and start the next one. The mission lasts 90 days in three acts: *All Systems Go*, *Things Get Complicated* and *Survive*.
+5. **Review the day** and start the next one. The mission lasts 45 days in three acts: *All Systems Go*, *Things Get Complicated* and *Survive*.
 
 | Choose your commander | Meet your crew |
 |---|---|

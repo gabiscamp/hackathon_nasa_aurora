@@ -14,6 +14,6 @@ The soundtrack is the user-supplied `audioatlant-total-war-epic-action-cinematic
 Only the arrival scene uses the whole station. Mission responsibilities use the existing greenhouse, life-support node and lab artwork; the final scene closes the transmission and fades into the crew presentation.
 The cockpit overlays only the crowns of the selected crew's rear-facing heads above the four seat backs, using the existing `back` atlas frames. The six-to-nine-month journey has its own dark title card at 28.6 seconds.
 
-The opening currently announces 45 days at the user's request. The gameplay calendar is still 90 days and will be adapted separately.
+The opening reads the mission duration from `src/data/missionLength.ts` (45 days), matching the gameplay calendar integrated from main.
 
 Accessibility: the start screen offers built-in English narration with music capped at 10%, including short scene descriptions. Reducing the cutscene music slider to 10% or below also enables narration. The audio clock pauses at scene boundaries until speech finishes; narration therefore may extend the total runtime. Narration depends on the browser's installed voices. Full captions remain available to the existing Read button.
