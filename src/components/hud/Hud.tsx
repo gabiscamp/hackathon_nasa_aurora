@@ -4,6 +4,7 @@ import { ObjectiveTracker } from './ObjectiveTracker';
 import { Minimap } from './Minimap';
 import { LocationHint } from './LocationHint';
 import { ShipMapOverlay } from './ShipMapOverlay';
+import { gameEvents, EVENTS } from '../../game/events';
 import './Hud.css';
 
 /** In-game HUD overlay, laid out like references/wireframe/spaceship-reference-02.png. */
@@ -24,6 +25,14 @@ export function Hud() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [mapOpen]);
+
+  useEffect(() => {
+    const openMap = () => {
+      if (!document.querySelector('[role="dialog"], [role="alertdialog"]')) setMapOpen(true);
+    };
+    gameEvents.on(EVENTS.OPEN_MAP, openMap);
+    return () => void gameEvents.off(EVENTS.OPEN_MAP, openMap);
+  }, []);
 
   return (
     <div className="hud">

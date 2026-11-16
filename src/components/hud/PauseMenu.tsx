@@ -4,6 +4,7 @@ import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { HowToPlay } from './HowToPlay';
 import { OptionsPanel } from '../ui/OptionsPanel';
 import { GearIcon } from '../ui/A11yDock';
+import { MenuIcon } from '../ui/MenuIcon';
 import '../ui/GameMenus.css';
 
 interface PauseMenuProps {
@@ -116,34 +117,42 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
 
       {open && (
         <div className="gm-backdrop" role="dialog" aria-modal="true" aria-labelledby="gm-pause-title">
-          <div className={`gm-card ${view === 'help' ? 'gm-card--help' : view === 'options' ? 'gm-card--options' : ''}`}>
+          <div className={`gm-card ${view === 'help' ? 'gm-card--help' : view === 'options' ? 'gm-card--options' : 'gm-card--pause'}`}>
             {view === 'menu' ? (
               <>
-                <h2 id="gm-pause-title" className="gm-title">
+                <h2 id="gm-pause-title" className="gm-title gm-title--icon">
+                  <MenuIcon name="pause" />
                   Game paused
                 </h2>
                 <p className="gm-text">The station is waiting for you, Commander.</p>
                 <div className="gm-list">
-                  <button ref={resumeRef} type="button" className="gm-btn gm-btn--primary gm-btn--wide" onClick={closeMenu}>
-                    Back to the game <kbd className="gm-kbd">Esc</kbd>
+                  <button ref={resumeRef} type="button" className="gm-btn gm-btn--primary gm-btn--wide gm-btn--resume" onClick={closeMenu}>
+                    <span className="gm-btn__icon"><MenuIcon name="play" /></span>
+                    <span className="gm-btn__copy"><span>Back to the game</span><small>Continue your mission</small></span>
+                    <kbd className="gm-kbd">Esc</kbd>
                   </button>
                   <button type="button" className="gm-btn gm-btn--wide" onClick={() => setView('help')}>
-                    How to play
+                    <span className="gm-btn__icon"><MenuIcon name="book" /></span>
+                    <span className="gm-btn__copy"><span>How to play</span><small>Controls and mission guide</small></span>
                   </button>
                   <button type="button" className="gm-btn gm-btn--wide" onClick={() => setView('options')}>
-                    Settings &amp; accessibility
+                    <span className="gm-btn__icon"><MenuIcon name="accessibility" /></span>
+                    <span className="gm-btn__copy"><span>Settings</span><small>Text, voice and sound</small></span>
                   </button>
                   <button type="button" className="gm-btn gm-btn--wide" onClick={onOpenCredits}>
-                    Credits &amp; NASA sources
+                    <span className="gm-btn__icon"><MenuIcon name="credits" /></span>
+                    <span className="gm-btn__copy"><span>Credits</span><small>Team and NASA sources</small></span>
                   </button>
-                  <button type="button" className="gm-btn gm-btn--wide" onClick={() => setConfirmHome(true)}>
-                    Main menu
+                  <button type="button" className="gm-btn gm-btn--wide gm-btn--leave" onClick={() => setConfirmHome(true)}>
+                    <span className="gm-btn__icon"><MenuIcon name="home" /></span>
+                    <span className="gm-btn__copy"><span>Main menu</span><small>Your mission stays saved</small></span>
                   </button>
                 </div>
               </>
             ) : view === 'options' ? (
               <>
-                <h2 id="gm-pause-title" className="gm-title">
+                <h2 id="gm-pause-title" className="gm-title gm-title--icon">
+                  <MenuIcon name="settings" />
                   Settings
                 </h2>
                 <OptionsPanel />
@@ -153,12 +162,14 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
                   className="gm-btn gm-btn--primary gm-btn--wide"
                   onClick={direct ? closeMenu : () => setView('menu')}
                 >
+                  <MenuIcon name={direct ? 'play' : 'back'} />
                   {direct ? 'Back to the game' : 'Back'} <kbd className="gm-kbd">Esc</kbd>
                 </button>
               </>
             ) : (
               <>
-                <h2 id="gm-pause-title" className="gm-title">
+                <h2 id="gm-pause-title" className="gm-title gm-title--icon">
+                  <MenuIcon name="book" />
                   How to play
                 </h2>
                 <HowToPlay />
@@ -168,6 +179,7 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
                   className="gm-btn gm-btn--primary gm-btn--wide"
                   onClick={direct ? closeMenu : () => setView('menu')}
                 >
+                  <MenuIcon name={direct ? 'play' : 'back'} />
                   {direct ? 'Back to the game' : 'Back'} <kbd className="gm-kbd">Esc</kbd>
                 </button>
               </>

@@ -43,6 +43,14 @@ export function ObjectiveTracker() {
         : phase === 'summary'
           ? 'Review the day'
           : 'Explore the ship';
+  const touchObjective =
+    phase === 'decision' && !(mission && atMission)
+      ? targets.length === 1
+        ? `Go to ${ROOM_NAMES[targets[0].room]} and tap USE`
+        : targets.length > 1
+          ? `${targets.length} problems: walk to each ! and tap USE`
+          : objective
+      : objective;
   const pct = Math.min(100, (day / MISSION_DAYS) * 100);
 
   return (
@@ -53,7 +61,10 @@ export function ObjectiveTracker() {
           Day {day}/{MISSION_DAYS}
         </span>
       </div>
-      <p className="hud-objective__task">{objective}</p>
+      <p className="hud-objective__task">
+        <span className="game-hint-desktop">{objective}</span>
+        <span className="game-hint-touch">{touchObjective}</span>
+      </p>
       <span
         className="hud-objective__track"
         role="meter"

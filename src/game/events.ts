@@ -18,6 +18,12 @@ export const EVENTS = {
   ROBOT_INTERACT: 'robot-interact',
   SHOW_SPEECH_BUBBLE: 'show-speech-bubble',
   HIDE_SPEECH_BUBBLE: 'hide-speech-bubble',
+  /** React touch controls -> Phaser movement state. */
+  TOUCH_MOVE: 'touch-move',
+  /** React touch controls -> the same action as the E key. */
+  TOUCH_INTERACT: 'touch-interact',
+  /** React touch controls -> open the full station map. */
+  OPEN_MAP: 'open-map',
   /** React → Phaser: the "!" of every open problem (MissionMarkerSpec[]). */
   SET_MISSION_MARKERS: 'set-mission-markers',
 } as const;
@@ -32,4 +38,11 @@ export interface MissionMarkerSpec {
 export interface PlayerMovedPayload {
   x: number;
   y: number;
+}
+
+export interface TouchMovePayload {
+  up: boolean;
+  down: boolean;
+  left: boolean;
+  right: boolean;
 }

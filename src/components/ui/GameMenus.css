@@ -38,6 +38,22 @@
   color: #4dc9f6;
 }
 
+.gm-title--icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.gm-title--icon .menu-icon {
+  color: #f5a623;
+}
+
+.menu-icon {
+  display: block;
+  flex: none;
+}
+
 .gm-card--warn .gm-title {
   color: #f5a623;
 }
@@ -50,9 +66,79 @@
 }
 
 .gm-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.gm-card--pause {
+  width: min(620px, 100%);
+}
+
+.gm-card--pause .gm-text {
+  text-align: center;
+}
+
+.gm-card--pause .gm-btn {
+  justify-content: flex-start;
+  min-width: 0;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.gm-card--pause .gm-btn--resume {
+  grid-column: 1 / -1;
+}
+
+.gm-btn__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  color: #4dc9f6;
+  background: rgba(77, 201, 246, 0.12);
+  border: 1px solid rgba(77, 201, 246, 0.35);
+  border-radius: 10px;
+}
+
+.gm-btn--primary .gm-btn__icon {
+  color: #0a0e27;
+  background: rgba(10, 14, 39, 0.12);
+  border-color: rgba(10, 14, 39, 0.28);
+}
+
+.gm-btn__copy {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  gap: 14px;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.gm-btn__copy small {
+  margin-top: 3px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #b8c2d6;
+}
+
+.gm-btn--primary .gm-btn__copy small {
+  color: rgba(10, 14, 39, 0.72);
+}
+
+.gm-card--pause .gm-kbd {
+  margin-left: auto;
+}
+
+.gm-btn--leave {
+  border-color: rgba(245, 166, 35, 0.72);
+}
+
+.gm-btn--leave .gm-btn__icon {
+  color: #f5a623;
+  border-color: rgba(245, 166, 35, 0.38);
+  background: rgba(245, 166, 35, 0.1);
 }
 
 .gm-actions {
@@ -193,6 +279,14 @@
 }
 
 @media (max-width: 560px) {
+  .gm-list {
+    grid-template-columns: 1fr;
+  }
+
+  .gm-card--pause .gm-btn--resume {
+    grid-column: auto;
+  }
+
   .gm-screen-nav {
     top: 12px;
     left: 12px;
@@ -285,10 +379,17 @@
 }
 
 .gm-help h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
   font-size: 21px;
   font-weight: 700;
   color: #f5a623;
+}
+
+.gm-help h3 .menu-icon {
+  color: #4dc9f6;
 }
 
 .gm-help p,
@@ -389,7 +490,7 @@
 
 /* ---------- Options ---------- */
 .gm-card--options {
-  width: min(760px, 100%);
+  width: min(1040px, 100%);
   max-height: calc(100vh - 48px);
   overflow-y: auto;
   text-align: left;
@@ -400,10 +501,15 @@
 }
 
 .opt-panel {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
   gap: 18px;
   margin: 8px 0 20px;
+}
+
+.opt-note {
+  grid-column: 1 / -1;
 }
 
 .opt-section {
@@ -418,11 +524,18 @@
 
 .opt-section__title {
   grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
   font-size: 18px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #4dc9f6;
+}
+
+.opt-section__title .menu-icon {
+  color: #f5a623;
 }
 
 .opt-read-btn {
@@ -444,11 +557,18 @@
 }
 
 .opt-row__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin-bottom: 4px;
   padding: 0;
   font-size: 20px;
   font-weight: 700;
   color: #f5a623;
+}
+
+.opt-row__title .menu-icon {
+  color: #4dc9f6;
 }
 
 .opt-row__hint {
@@ -485,6 +605,11 @@
   border-color: #4dc9f6;
 }
 
+.opt-seg__check {
+  display: none;
+  margin-left: 2px;
+}
+
 /* The real radio stays in the page for keyboard and screen readers, just invisible. */
 .opt-seg__item input {
   position: absolute;
@@ -498,6 +623,10 @@
   color: #0a0e27;
   background: #4dc9f6;
   border-color: #4dc9f6;
+}
+
+.opt-seg__item.is-on .opt-seg__check {
+  display: inline-grid;
 }
 
 .opt-seg__item:has(input:focus-visible) {
@@ -529,6 +658,28 @@
 
   .gm-top-actions .gm-kbd {
     display: none;
+  }
+}
+
+/* Phone play view: one menu entry stays reachable without occupying either thumb zone. */
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 520px) {
+  .gm-top-actions {
+    top: 70px;
+    right: max(8px, env(safe-area-inset-right));
+    bottom: auto;
+    left: auto;
+  }
+
+  .gm-top-actions .gm-menu-btn:not(:first-child) {
+    display: none;
+  }
+
+  .gm-top-actions .gm-menu-btn:first-child {
+    width: 48px;
+    min-width: 48px;
+    height: 48px;
+    min-height: 48px;
+    padding: 0;
   }
 }
 
@@ -575,6 +726,10 @@
 
 /* Small screens: icon-only round buttons (they keep their aria-label), dock moves to the bottom-right corner. */
 @media (max-width: 760px) {
+  .opt-panel {
+    grid-template-columns: 1fr;
+  }
+
   .a11y-dock {
     top: auto;
     bottom: 12px;
@@ -623,6 +778,26 @@
     gap: 6px;
   }
 
+  .gm-card--pause {
+    width: min(640px, 100%);
+  }
+
+  .gm-card--pause .gm-btn {
+    min-height: 48px;
+    padding: 4px 8px;
+  }
+
+  .gm-btn__icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+  }
+
+  .gm-btn__copy small {
+    margin-top: 1px;
+    font-size: 10px;
+  }
+
   .gm-btn {
     min-height: 44px;
     padding: 5px 12px;
@@ -649,7 +824,7 @@
 
   .opt-panel {
     display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(180px, 0.8fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: stretch;
     gap: 8px;
     min-height: 0;
@@ -660,17 +835,22 @@
   .opt-section {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-content: start;
-    gap: 6px 8px;
-    padding: 8px;
+    gap: 4px 6px;
+    padding: 6px;
     border-radius: 10px;
   }
 
   .opt-section:last-of-type {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .opt-section__title {
     font-size: 13px;
+  }
+
+  .opt-section__title .menu-icon {
+    width: 16px;
+    height: 16px;
   }
 
   .opt-row__title {
@@ -678,10 +858,13 @@
     font-size: 14px;
   }
 
+  .opt-row__title .menu-icon {
+    width: 15px;
+    height: 15px;
+  }
+
   .opt-row__hint {
-    margin-bottom: 3px;
-    font-size: 11px;
-    line-height: 1.25;
+    display: none;
   }
 
   .opt-seg {

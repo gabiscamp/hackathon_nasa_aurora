@@ -21,6 +21,7 @@ import { ROOM_NAMES } from '../hud/LocationHint';
 import { PauseMenu } from '../hud/PauseMenu';
 import './GameScreen.css';
 import { ExplorationSystem } from '../exploration/ExplorationSystem';
+import { MobileControls } from '../hud/MobileControls';
 
 
 /** Missions that will open on `day` (preview for the "Begin Day" panel). */
@@ -158,6 +159,7 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
       <div className="game-stage">
         <PhaserGame className="station-view" />
         <Hud />
+        {phase === 'decision' && !missionOpen && !skipInfo && <MobileControls />}
         <ExplorationSystem />
         <PauseMenu onMainMenu={onMainMenu} onOpenCredits={onOpenCredits} suspended={creditsOpen} />
 
@@ -165,13 +167,13 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
           <div className={`game-hint-banner ${anyEmergency ? 'game-hint-banner--critical' : ''}`} data-read>
             {openMissions.length === 1 ? (
               <span>
-                {openMissions[0].icon} {anyEmergency ? 'EMERGENCY! ' : ''}Go to {roomList} and press <kbd>E</kbd> to
+                {openMissions[0].icon} {anyEmergency ? 'EMERGENCY! ' : ''}Go to {roomList} and <span className="game-hint-desktop">press <kbd>E</kbd> to </span><span className="game-hint-touch">tap USE to </span>
                 investigate!
               </span>
             ) : (
               <span>
                 {anyEmergency ? 'EMERGENCY! ' : ''}
-                {openMissions.length} problems today: {roomList}. Walk to each <strong>!</strong> and press <kbd>E</kbd>.
+                {openMissions.length} problems today: {roomList}. Walk to each <strong>!</strong> and <span className="game-hint-desktop">press <kbd>E</kbd></span><span className="game-hint-touch">tap USE</span>.
               </span>
             )}
           </div>

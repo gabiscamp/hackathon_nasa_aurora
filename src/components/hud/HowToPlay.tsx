@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { EnergyIcon, FoodIcon, OxygenIcon, RadiationIcon, WarningIcon, WaterIcon } from './HudIcons';
+import { MenuIcon } from '../ui/MenuIcon';
 
 const CONTROLS: { keys: string[]; action: string }[] = [
   { keys: ['W', 'A', 'S', 'D'], action: 'Walk (arrow keys work too)' },
@@ -49,12 +50,12 @@ export function HowToPlay() {
     <div className="gm-help">
       <div className="gm-help__col">
         <section>
-          <h3>Your goal</h3>
+          <h3><MenuIcon name="mission" /> Your goal</h3>
           <p>Keep the station and the crew safe for 45 days near Mars.</p>
         </section>
 
         <section>
-          <h3>Missions</h3>
+          <h3><MenuIcon name="resources" /> Missions</h3>
           <ol>
             <li>
               An alarm rings and a red <span className="gm-help__bang">!</span> shows where to go (on the map too).
@@ -67,7 +68,7 @@ export function HowToPlay() {
         </section>
 
         <section>
-          <h3>How you can lose</h3>
+          <h3><MenuIcon name="warning" /> How you can lose</h3>
           <p>
             If <strong>oxygen</strong> reaches 0, <strong>radiation</strong> reaches 100, or the crew gets too sick, the
             station is lost and the crew escapes in the capsule. One bad bar pulls the others down: no energy stops the
@@ -76,7 +77,7 @@ export function HowToPlay() {
         </section>
 
         <section>
-          <h3>Keys</h3>
+          <h3><MenuIcon name="controls" /> Keys</h3>
           <ul className="gm-controls">
             {CONTROLS.map((c) => (
               <li key={c.action}>
@@ -95,7 +96,7 @@ export function HowToPlay() {
       </div>
 
       <section>
-        <h3>Station bars</h3>
+        <h3><MenuIcon name="resources" /> Station bars</h3>
         <ul className="gm-help__bars">
           {BARS.map((b) => (
             <li key={b.name}>

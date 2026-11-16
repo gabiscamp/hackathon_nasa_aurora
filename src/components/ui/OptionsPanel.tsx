@@ -3,6 +3,7 @@ import './GameMenus.css';
 import { useSettingsStore, VOLUME_LEVELS, type TextSize, type TextSpeed } from '../../stores/useSettingsStore';
 import { speak, speechSupported, toggleReadScreen, useSpeaking } from '../../utils/speech';
 import { playChoiceSound } from '../../utils/sounds';
+import { MenuIcon, type MenuIconName } from './MenuIcon';
 
 interface Choice<T> {
   label: string;
@@ -16,23 +17,26 @@ function Segmented<T extends string | number | boolean>({
   choices,
   value,
   onChange,
+  icon,
 }: {
   title: string;
   hint?: string;
   choices: readonly Choice<T>[];
   value: T;
   onChange: (v: T) => void;
+  icon: MenuIconName;
 }) {
   const name = useId();
   return (
     <fieldset className="opt-row">
-      <legend className="opt-row__title">{title}</legend>
+      <legend className="opt-row__title"><MenuIcon name={icon} size={18} /> <span>{title}</span></legend>
       {hint && <p className="opt-row__hint">{hint}</p>}
       <div className="opt-seg">
         {choices.map((c) => (
           <label key={String(c.value)} className={`opt-seg__item ${c.value === value ? 'is-on' : ''}`}>
             <input type="radio" name={name} checked={c.value === value} onChange={() => onChange(c.value)} />
-            {c.label}
+            <span>{c.label}</span>
+            <span className="opt-seg__check"><MenuIcon name="check" size={16} /></span>
           </label>
         ))}
       </div>
@@ -64,9 +68,10 @@ export function OptionsPanel() {
   return (
     <div className="opt-panel">
       <section className="opt-section" aria-labelledby="opt-accessibility-title">
-        <h3 className="opt-section__title" id="opt-accessibility-title">Accessibility</h3>
-        <Segmented title="Text size" choices={SIZES} value={textSize} onChange={(v) => set({ textSize: v })} />
+        <h3 className="opt-section__title" id="opt-accessibility-title"><MenuIcon name="accessibility" /> <span>Accessibility</span></h3>
+        <Segmented icon="text" title="Text size" choices={SIZES} value={textSize} onChange={(v) => set({ textSize: v })} />
         <Segmented
+          icon="speed"
           title="Text speed"
           hint="How fast the messages appear."
           choices={SPEEDS}
@@ -76,6 +81,7 @@ export function OptionsPanel() {
         {speechSupported && (
           <>
             <Segmented
+              icon="narration"
               title="Automatic narration"
               hint="A voice reads new mission messages as they appear."
               choices={ON_OFF}
@@ -97,9 +103,10 @@ export function OptionsPanel() {
         )}
       </section>
       <section className="opt-section" aria-labelledby="opt-audio-title">
-        <h3 className="opt-section__title" id="opt-audio-title">Audio</h3>
+        <h3 className="opt-section__title" id="opt-audio-title"><MenuIcon name="audio" /> <span>Audio</span></h3>
         <Segmented
-          title="Sound volume"
+          icon="volume"
+          title="Master volume"
           choices={VOLUME_LEVELS}
           value={volume}
           onChange={(v) => {
@@ -131,12 +138,13 @@ export function OptionsDialog({ onClose }: { onClose: () => void }) {
   return (
     <div className="gm-backdrop gm-backdrop--top" role="dialog" aria-modal="true" aria-labelledby="opt-title">
       <div className="gm-card gm-card--options">
-        <h2 id="opt-title" className="gm-title">
+        <h2 id="opt-title" className="gm-title gm-title--icon">
+          <MenuIcon name="settings" />
           Settings
         </h2>
         <OptionsPanel />
         <button ref={doneRef} type="button" className="gm-btn gm-btn--primary gm-btn--wide" onClick={onClose}>
-          Done <kbd className="gm-kbd">Esc</kbd>
+          <MenuIcon name="check" /> Done <kbd className="gm-kbd">Esc</kbd>
         </button>
       </div>
     </div>

@@ -19,7 +19,7 @@ function smoothText(t: Phaser.GameObjects.Text): Phaser.GameObjects.Text {
   t.texture.setFilter(Phaser.Textures.FilterMode.LINEAR);
   return t;
 }
-import { gameEvents, EVENTS, type MissionMarkerSpec } from '../events';
+import { gameEvents, EVENTS, type MissionMarkerSpec, type TouchMovePayload } from '../events';
 import { markerSpecs } from '../missionMarkers';
 import { useCrewStore } from '../../stores/useCrewStore';
 import { CREW_ROLES } from '../../data/crew';
@@ -100,6 +100,7 @@ export class GameScene extends Phaser.Scene {
   private facing: SpriteDirection = 'down';
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<string, Phaser.Input.Keyboard.Key>;
+  private touchMove: TouchMovePayload = { up: false, down: false, left: false, right: false };
   private walkableDebug: Phaser.GameObjects.Graphics | null = null;
   private currentRoom: RoomId | null = null;
   private lastPositionEmit = 0;
@@ -134,6 +135,7 @@ export class GameScene extends Phaser.Scene {
     let openWindows = 0;
     const onMenuOpened = () => {
       openWindows += 1;
+      this.touchMove = { up: false, down: false, left: false, right: false };
       if (!this.scene.isPaused()) this.scene.pause();
     };
     const onMenuClosed = () => {
@@ -198,7 +200,7 @@ export class GameScene extends Phaser.Scene {
     this.updateRoom();
     this.emitPosition(true);
 
-    this.input.keyboard!.on('keydown-E', () => {
+    const onInteract = () => {
       if (this.frozen) return;
       // A mission "!" comes first: the robot walking by must never block a problem.
       const id = this.nearestMarker();
@@ -208,7 +210,21 @@ export class GameScene extends Phaser.Scene {
         return;
       }
       if (this.isNearRobot()) gameEvents.emit(EVENTS.ROBOT_INTERACT);
-    });
+    };
+    const onTouchMove = (move: TouchMovePayload) => {
+      this.touchMove = move;
+    };
+    this.input.keyboard!.on('keydown-E', onInteract);
+    gameEvents.on(EVENTS.TOUCH_INTERACT, onInteract);
+    gameEvents.on(EVENTS.TOUCH_MOVE, onTouchMove);
+
+    const removeTouchListeners = () => {
+      gameEvents.off(EVENTS.TOUCH_INTERACT, onInteract);
+      gameEvents.off(EVENTS.TOUCH_MOVE, onTouchMove);
+      this.touchMove = { up: false, down: false, left: false, right: false };
+    };
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, removeTouchListeners);
+    this.events.once(Phaser.Scenes.Events.DESTROY, removeTouchListeners);
 
     // Mission events from React (MissionOverlay / GameScreen). Removed when the scene ends:
     // otherwise a destroyed scene from an earlier visit keeps reacting after "Continue mission".
@@ -776,10 +792,10 @@ export class GameScene extends Phaser.Scene {
     this.fitBackdrop();
     if (this.frozen) return;
 
-    const up = this.cursors.up.isDown || this.wasd.W.isDown;
-    const down = this.cursors.down.isDown || this.wasd.S.isDown;
-    const left = this.cursors.left.isDown || this.wasd.A.isDown;
-    const right = this.cursors.right.isDown || this.wasd.D.isDown;
+    const up = this.cursors.up.isDown || this.wasd.W.isDown || this.touchMove.up;
+    const down = this.cursors.down.isDown || this.wasd.S.isDown || this.touchMove.down;
+    const left = this.cursors.left.isDown || this.wasd.A.isDown || this.touchMove.left;
+    const right = this.cursors.right.isDown || this.wasd.D.isDown || this.touchMove.right;
 
     let vx = 0;
     let vy = 0;
