@@ -22,7 +22,9 @@ function smoothText(t: Phaser.GameObjects.Text): Phaser.GameObjects.Text {
 import { gameEvents, EVENTS, type MissionMarkerSpec } from '../events';
 import { markerSpecs } from '../missionMarkers';
 import { useCrewStore } from '../../stores/useCrewStore';
-import { CREW_ROLES } from '../../data/crew';
+import { CREW_ROLES, type CrewRole } from '../../data/crew';
+import { availability, useDutyStore } from '../../stores/useDutyStore';
+import { findPath, nudged, randomFloorPoint, type Point } from '../world/crewPaths';
 import { useGameStore } from '../../stores/useGameStore';
 import { useMissionStore } from '../../stores/useMissionStore';
 import { useExplorationStore } from '../../stores/useExplorationStore';
@@ -85,6 +87,33 @@ const ROBOT_SCALE = 0.24;
 /** Smaller than INTERACT_DISTANCE: AUR-1 wanders the station and must be walked right up to
  *  (R and a click on it open its panel from anywhere). */
 const ROBOT_INTERACT_DISTANCE = 55;
+/** Crew walking speed in world px/s (the player walks at 160). */
+const CREW_SPEED = 55;
+/** Pause between two strolls of a free crew member (ms). */
+const CREW_STROLL_PAUSE: [number, number] = [2500, 7000];
+/** Where each one stands in a room, so two crew members sent to the same room don't overlap. */
+const CREW_OFFSETS: Record<CrewRole, Point> = {
+  engineer: { x: -16, y: 4 },
+  medic: { x: 16, y: 4 },
+  scientist: { x: 0, y: 16 },
+};
+
+type CrewGoal = { mode: 'work' | 'rest'; room: RoomId } | { mode: 'stroll' } | { mode: 'away' };
+
+/** A crew member walking around the station by themselves. */
+interface CrewWalker {
+  role: CrewRole;
+  node: Phaser.GameObjects.Container;
+  sprite: Phaser.GameObjects.Sprite | null;
+  head: HeadId | null;
+  path: Point[];
+  facing: 'down' | 'up' | 'left' | 'right';
+  /** Mode + room it is heading to; a new goal (new job, sick, free) re-routes it. */
+  goalKey: string;
+  stroll: boolean;
+  /** Free crew: when the next stroll starts (null = not planned yet). */
+  nextStrollAt: number | null;
+}
 
 export class GameScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Container;
@@ -111,6 +140,7 @@ export class GameScene extends Phaser.Scene {
   private activeMarkerId: string | null = null;
   private frozen = false;
   private robot: Phaser.GameObjects.Sprite | null = null;
+  private crewWalkers: CrewWalker[] = [];
   private robotPatrol: Phaser.Tweens.Tween | null = null;
   private speechBubble: Phaser.GameObjects.Container | null = null;
   private speechTimer: Phaser.Time.TimerEvent | null = null;
@@ -163,8 +193,9 @@ export class GameScene extends Phaser.Scene {
       const spawn = NPC_SPAWNS[role];
       const firstName = member.name.replace(/^Dr\.\s*/, '').split(' ')[0];
       const head = heads[role];
-      this.createNPC(spawn.x, spawn.y, Phaser.Display.Color.HexStringToColor(member.color).color, firstName, head);
+      this.createNPC(role, spawn.x, spawn.y, Phaser.Display.Color.HexStringToColor(member.color).color, firstName, head);
     }
+    this.startCrewRoutines();
     this.createRobot();
 
     // Input — WASD and arrows work simultaneously. Start clean: keys held while the
@@ -426,15 +457,18 @@ export class GameScene extends Phaser.Scene {
     this.player.add([body, this.directionDot]);
   }
 
-  private createNPC(x: number, y: number, color: number, name: string, head: HeadId | null) {
+  private createNPC(role: CrewRole, x: number, y: number, color: number, name: string, head: HeadId | null) {
     const npc = this.add.container(x, y).setDepth(9);
     if (this.stationMask) npc.setMask(this.stationMask);
+    const walker: CrewWalker = { role, node: npc, sprite: null, head, path: [], facing: 'down', goalKey: '', stroll: false, nextStrollAt: null };
+    this.crewWalkers.push(walker);
 
     if (head && this.textures.exists(astronautTextureKey(head))) {
       const sprite = this.add.sprite(0, 0, astronautTextureKey(head), 0).setOrigin(0.5, ASTRO_ORIGIN_Y);
       sprite.anims.play(astronautAnim(head, 'idle', 'down'));
       npc.add([sprite, this.npcLabel(name, -50)]);
       npc.setData('name', name);
+      walker.sprite = sprite;
       return;
     }
 
@@ -448,6 +482,108 @@ export class GameScene extends Phaser.Scene {
 
     npc.add([circle, this.npcLabel(name, -28)]);
     npc.setData('name', name);
+  }
+
+  /**
+   * Where a crew member should be right now, from their duty (src/stores/useDutyStore.ts):
+   * on a job -> the mission's room; sick or resting -> the crew quarters; free -> strolling;
+   * gone back to Earth -> not on the station.
+   */
+  private crewGoal(role: CrewRole): CrewGoal {
+    const duty = useDutyStore.getState().crew[role];
+    switch (availability(duty, useGameStore.getState().day)) {
+      case 'away':
+        return { mode: 'away' };
+      case 'sick':
+      case 'resting':
+        return { mode: 'rest', room: 'quarters' };
+      case 'busy': {
+        const room = duty.task?.room as RoomId | undefined;
+        return room && ROOM_CENTERS[room] ? { mode: 'work', room } : { mode: 'stroll' };
+      }
+      default:
+        return { mode: 'stroll' };
+    }
+  }
+
+  /** Sends each crew member where their duty says (called when a job, a sickness or the day changes). */
+  private refreshCrewGoals = () => {
+    for (const w of this.crewWalkers) {
+      const goal = this.crewGoal(w.role);
+      const key = goal.mode === 'work' || goal.mode === 'rest' ? `${goal.mode}:${goal.room}` : goal.mode;
+      if (key === w.goalKey) continue;
+      w.goalKey = key;
+      w.node.setVisible(goal.mode !== 'away');
+      w.stroll = goal.mode === 'stroll';
+      w.nextStrollAt = null;
+      w.path = [];
+      if (goal.mode === 'work' || goal.mode === 'rest') {
+        const spot = nudged(ROOM_CENTERS[goal.room], CREW_OFFSETS[w.role]);
+        w.path = findPath({ x: w.node.x, y: w.node.y }, spot) ?? [];
+      } else if (goal.mode === 'stroll') {
+        // Just freed (or the game just started): a short pause, then off they go.
+        w.nextStrollAt = this.time.now + Phaser.Math.Between(500, 2500);
+      }
+    }
+  };
+
+  private startCrewRoutines() {
+    this.refreshCrewGoals();
+    const offDuty = useDutyStore.subscribe(this.refreshCrewGoals);
+    const offDay = useGameStore.subscribe((s, prev) => {
+      if (s.day !== prev.day) this.refreshCrewGoals();
+    });
+    const stop = () => {
+      offDuty();
+      offDay();
+      this.crewWalkers = [];
+    };
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, stop);
+    this.events.once(Phaser.Scenes.Events.DESTROY, stop);
+  }
+
+  /** Walks each crew member along their path; free ones pick a new spot after a pause. */
+  private updateCrew(delta: number) {
+    const now = this.time.now;
+    const dt = Math.min(delta, 50) / 1000;
+    for (const w of this.crewWalkers) {
+      if (!w.node.visible) continue;
+      if (w.path.length === 0 && w.stroll) {
+        if (w.nextStrollAt === null) {
+          w.nextStrollAt = now + Phaser.Math.Between(...CREW_STROLL_PAUSE);
+        } else if (now >= w.nextStrollAt) {
+          const spot = randomFloorPoint();
+          w.path = (spot && findPath({ x: w.node.x, y: w.node.y }, spot)) || [];
+          w.nextStrollAt = null;
+        }
+      }
+
+      let moving = false;
+      let budget = CREW_SPEED * dt;
+      while (budget > 0 && w.path.length > 0) {
+        const next = w.path[0];
+        const dx = next.x - w.node.x;
+        const dy = next.y - w.node.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 0.01) {
+          w.facing = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : dy < 0 ? 'up' : 'down';
+          moving = true;
+        }
+        if (dist <= budget) {
+          w.node.setPosition(next.x, next.y);
+          w.path.shift();
+          budget -= dist;
+        } else {
+          w.node.setPosition(w.node.x + (dx / dist) * budget, w.node.y + (dy / dist) * budget);
+          budget = 0;
+        }
+      }
+
+      if (w.sprite && w.head) {
+        w.sprite.setFlipX(w.facing === 'left');
+        w.sprite.anims.play(astronautAnim(w.head, moving ? 'walk' : 'idle', w.facing), true);
+      }
+    }
   }
 
   /** AUR-1 roams the main pressurised corridor until it is deployed to Mars. */
@@ -776,6 +912,8 @@ export class GameScene extends Phaser.Scene {
   update(_time: number, delta: number) {
     // The mission zoom (CAMERA_ZOOM_IN/OUT) tweens the zoom over several frames: keep the backdrop covering the screen.
     this.fitBackdrop();
+    // The crew keeps walking while a mission window is open: those just sent head to the job.
+    this.updateCrew(delta);
     if (this.frozen) return;
 
     const up = this.cursors.up.isDown || this.wasd.W.isDown;
