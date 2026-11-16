@@ -57,7 +57,8 @@
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.7);
-  z-index: 10;
+  /* Above HUD extras such as the robot widget: modal screens must never be obstructed. */
+  z-index: 30;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -144,6 +145,40 @@
 }
 
 @media (pointer: coarse) and (orientation: landscape) and (max-height: 520px) {
+  .game-overlay {
+    align-items: flex-start;
+    padding:
+      max(6px, env(safe-area-inset-top))
+      max(6px, env(safe-area-inset-right))
+      max(6px, env(safe-area-inset-bottom))
+      max(6px, env(safe-area-inset-left));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Always keep the primary action inside the browser's usable viewport. */
+  .day-briefing {
+    width: min(720px, 100%);
+    max-height: calc(100dvh - 12px);
+    gap: 6px;
+    padding: 10px 12px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .day-briefing > h2,
+  .day-briefing > p {
+    margin: 0;
+  }
+
+  .day-briefing > .btn {
+    flex: none;
+    min-height: 44px;
+    padding: 6px 14px;
+    font-size: 16px;
+  }
+
   .game-hint-banner {
     left: 166px;
     right: 180px;
@@ -163,6 +198,91 @@
     overflow-y: auto;
     padding: 8px 12px;
     font-size: 14px;
+  }
+}
+
+/* Very short phone viewports (browser bars visible): briefing becomes a compact dashboard. */
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 360px) {
+  .day-briefing {
+    display: grid;
+    grid-template-columns: minmax(180px, 0.72fr) minmax(330px, 1.28fr);
+    grid-auto-rows: min-content;
+    align-content: center;
+    align-items: center;
+    column-gap: 14px;
+    row-gap: 4px;
+    text-align: left;
+  }
+
+  .day-briefing > h2,
+  .day-briefing > p,
+  .day-briefing > .btn {
+    grid-column: 1;
+  }
+
+  .day-briefing > h2 {
+    font-size: 20px !important;
+  }
+
+  .day-briefing > p {
+    font-size: 14px;
+    line-height: 1.2;
+  }
+
+  .day-briefing > .crew-status {
+    grid-column: 2;
+    grid-row: 1 / span 20;
+    align-self: center;
+    gap: 4px;
+  }
+
+  .day-briefing .crew-status__title {
+    font-size: 14px;
+  }
+
+  .day-briefing .crew-status__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 10px;
+  }
+
+  .day-briefing .crew-status__row {
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+    grid-template-areas: 'face who tired';
+    column-gap: 6px;
+    min-width: 0;
+    font-size: 14px;
+  }
+
+  .day-briefing .crew-status__face {
+    width: 30px;
+    height: 30px;
+  }
+
+  .day-briefing .crew-status__who {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Keep these details available to assistive technology without spending scarce visual space. */
+  .day-briefing .crew-status__role,
+  .day-briefing .crew-status__what {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .day-briefing .crew-status__tired {
+    padding: 1px 5px;
+    font-size: 11px;
   }
 }
 
