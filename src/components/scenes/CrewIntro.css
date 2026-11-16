@@ -2,6 +2,7 @@
    Kid UI rules (team briefing): text ≥18px, targets ≥44px, never color-only. Mobile first. */
 
 .crew-screen {
+  animation: crew-screen-arrive 1.4s ease both;
   --cs-panel: rgba(20, 27, 45, 0.92);
   --cs-border: rgba(77, 201, 246, 0.28);
   --cs-blue: #4dc9f6;
@@ -18,6 +19,9 @@
   color: var(--cs-text);
   font-family: var(--font-family);
 }
+
+@keyframes crew-screen-arrive { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .crew-screen { animation: none; } }
 
 .crew-container {
   width: min(960px, 100%);

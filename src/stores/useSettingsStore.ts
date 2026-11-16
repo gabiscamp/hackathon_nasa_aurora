@@ -7,6 +7,7 @@ export type TextSpeed = 'slow' | 'normal' | 'instant';
 /** Sound levels a kid can pick; 1 = the game's original loudness. */
 export const VOLUME_LEVELS: readonly { label: string; value: number }[] = [
   { label: 'Off', value: 0 },
+  { label: 'Narration-friendly (10%)', value: 0.1 },
   { label: 'Low', value: 0.5 },
   { label: 'Normal', value: 1 },
   { label: 'High', value: 1.6 },

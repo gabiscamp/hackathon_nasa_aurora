@@ -56,6 +56,8 @@ const BLOCKS = 'p, h1, h2, h3, h4, li, button, label, legend, section, header, f
 
 /** Visible text of an element, with a pause between blocks. */
 function textOf(el: Element): string {
+  // Cinematic words are visually animated and aria-hidden; read their complete caption.
+  if (el.hasAttribute('data-read') && el.getAttribute('aria-label')) return el.getAttribute('aria-label') ?? '';
   const clone = el.cloneNode(true) as Element;
   clone.querySelectorAll(SKIP).forEach((n) => n.remove());
   clone.querySelectorAll('*').forEach((n) => n.append(' '));
