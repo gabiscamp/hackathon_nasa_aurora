@@ -36,8 +36,8 @@ export const DAILY_USE: Partial<Record<ResourceKey, number>> = {
 
 /** Oxygen at 0: the station is lost that same day. */
 export const OXYGEN_GAME_OVER = 0;
-/** Crew health at 0: the station is lost. */
-export const HEALTH_GAME_OVER = 0;
+// Crew health is NOT a game over (team decision 2026-11-15): it stays hidden and, when it is
+// low, crew members get sick (LOW_HEALTH below).
 /** Radiation at 100: the station must be left. */
 export const RADIATION_GAME_OVER = 100;
 
@@ -49,7 +49,7 @@ export const NO_ENERGY_WATER_LOSS = -25;
 
 /** Oxygen below this: everyone loses health every day. */
 export const LOW_OXYGEN = 20;
-export const LOW_OXYGEN_HEALTH_LOSS = -25;
+export const LOW_OXYGEN_HEALTH_LOSS = -8;
 
 /** Water below this: health loss and the water-saving protocol. */
 export const LOW_WATER = 30;

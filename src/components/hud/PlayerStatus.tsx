@@ -15,7 +15,7 @@ function left(n: number | null): string {
  * Top-left HUD: the station's resources (shared by everyone, not one person).
  * Radiation is the level inside the station: a full bar is bad, so it warns when HIGH.
  * A danger bar turns red, blinks AND gets a written alert line (never color only).
- * Oxygen or health at 0 (or radiation at 100) is game over, so those warnings say how long is left.
+ * Oxygen at 0 (or radiation at 100) is game over, so that warning says how long is left.
  * Health has no bar (it stays in the background, see SHOWN_RESOURCES), only this written warning.
  */
 export function PlayerStatus() {
@@ -30,7 +30,7 @@ export function PlayerStatus() {
   const alerts = [
     energy <= 0 ? 'BLACKOUT: no energy, oxygen and water drop fast!' : isDanger(energy) && 'Energy is low!',
     isDanger(oxygen) && `Oxygen is low!${left(daysLeft('oxygen'))}`,
-    isDanger(health) && `Crew health is low!${left(daysLeft('health'))}`,
+    isDanger(health) && 'The crew is weak: someone may get sick!',
     water <= 0 ? 'No water!' : isDanger(water) && 'Water is low!',
     food <= 0 ? 'No food!' : isDanger(food) && 'Food is low!',
     isDanger(radiation, true) && 'Radiation is too high!',

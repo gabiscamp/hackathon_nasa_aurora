@@ -71,7 +71,7 @@ interface MissionState {
   pendingEffects: { day: number; effects: ChoiceEffect[]; text: string; unlessFlag?: string }[];
   /** Water saving / food rationing, while they are on. */
   protocols: ProtocolId[];
-  /** Game over: set when oxygen or health reach 0, or radiation reaches 100. */
+  /** Game over: set when oxygen reaches 0 or radiation reaches 100 ('health' only in old saves). */
   collapse: Collapse | null;
 
   setMission: (mission: Mission) => void;
