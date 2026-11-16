@@ -82,7 +82,9 @@ const OVERHEAD_DEPTH = 11;
 /** Extra zoom when the camera flies to a mission spot. */
 const MISSION_ZOOM = 1.4;
 const ROBOT_SCALE = 0.24;
-const ROBOT_INTERACT_DISTANCE = 110;
+/** Smaller than INTERACT_DISTANCE: AUR-1 wanders the station and must be walked right up to
+ *  (R and a click on it open its panel from anywhere). */
+const ROBOT_INTERACT_DISTANCE = 55;
 
 export class GameScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Container;
