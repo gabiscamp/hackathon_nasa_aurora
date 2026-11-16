@@ -38,20 +38,23 @@ When a meter is in danger it turns red, blinks **and** shows a written warning (
 
 ## Real NASA science inside
 
-**Missions.** Each of the 10 missions is based on a real event or study:
+**Missions.** The game has 83 missions: 61 problems the station runs into during the trip, and 22 follow-ups that only happen because of an earlier choice (a quick fix that breaks again, a sick crew member, a leak that gets worse). Each one is based on a real event or study. Some examples:
 
 | Mission | Based on |
 |---|---|
-| The Mission Pantry | ISS life support and NASA food research |
-| CO2 Filter Failure | Apollo 13 (1970) |
+| The Mission Pantry | NASA space food research |
+| The Broken Filter | Apollo 13 (1970) |
 | Fire on the Station! | Mir space station (1997) |
-| The Bathroom Broke | ISS (2008) |
-| Mars Shadow Coming | ESA Mars Express (2006) |
-| Air Leak! | ISS (2004) |
-| Toxic Air! | ISS (2006) |
-| Solar Storm Warning | NASA DONKI space weather data |
-| Debris Field! | ISS (2021) |
-| Radio Silence | CHAPEA Mars simulation (2025) |
+| Crash! | Mir space station, Spektr module (1997) |
+| The Invisible Leak | ISS air leak (2004) |
+| Toxic Air! | ISS Elektron oxygen generator (2006) |
+| Mars' Shadow Is Coming | ESA Mars Express eclipse season (2006) |
+| The Bathroom Broke | ISS toilet and Water Recovery System (2008) |
+| Water in the Helmet! | ISS spacewalk EVA-23 (2013) |
+| The First Harvest | NASA Veggie, plants grown on the ISS (2015) |
+| Debris Storm! | ISS debris alert (2021) |
+| Total Silence | NASA CHAPEA Mars simulation (2024) |
+| A Storm Left the Sun! | NASA DONKI space weather data |
 
 **Live space weather.** The game reads real solar storms (CMEs) and geomagnetic storms from **NASA DONKI** through [api.nasa.gov](https://api.nasa.gov). The Credits screen shows which storms were heading to Mars. If NASA can't be reached, the game uses saved data and labels it **NOT LIVE**.
 
@@ -141,8 +144,17 @@ We follow the Space Apps rules on AI and declare it here and in the game's Credi
 - **Font:** [Lexend](https://fonts.google.com/specimen/Lexend) (SIL Open Font License).
 - **Audio:** procedural synthesis released under [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/), except for the restored legacy alert MP3, whose external origin is unknown. Full list: [docs/AUDIO_SOURCES.md](docs/AUDIO_SOURCES.md).
 
-<!-- TODO(team): add the team members' names (no photos of members under 18) and a license. -->
+## Team
 
-Made by our team for the **NASA Space Apps Challenge 2026**.
+Made by our team for the **NASA Space Apps Challenge 2026**:
+
+| Name | GitHub |
+|---|---|
+| Enzo Gentil Xavier Barroso | [@Gentil-sudo](https://github.com/Gentil-sudo) |
+| Gabriela Campelo Costa | [@gabiscamp](https://github.com/gabiscamp) |
+| Pamela Fernandes Nilo | [@pamelanilo](https://github.com/pamelanilo) |
+| Rafael Gomes Antunes de Oliveira | [@rafaelgantunes](https://github.com/rafaelgantunes) |
+
+<!-- TODO(team): add a license. -->
 
 *This is a student project. It is not made or endorsed by NASA. The crews use the names of real astronauts to honor their work; the astronauts are not involved with this project.*

@@ -13,8 +13,13 @@ import './CreditsScreen.css';
  * Written with help from an AI assistant (Claude, Anthropic).
  */
 
-/** TODO(team): add the names the team wants to show. Never add photos of members under 18. */
-const TEAM_MEMBERS: string[] = [];
+/** The team, in alphabetical order: name + GitHub user. Never add photos of members under 18. */
+const TEAM_MEMBERS: { name: string; github: string }[] = [
+  { name: 'Enzo Gentil Xavier Barroso', github: 'Gentil-sudo' },
+  { name: 'Gabriela Campelo Costa', github: 'gabiscamp' },
+  { name: 'Pamela Fernandes Nilo', github: 'pamelanilo' },
+  { name: 'Rafael Gomes Antunes de Oliveira', github: 'rafaelgantunes' },
+];
 
 interface Source {
   name: string;
@@ -240,7 +245,14 @@ export function CreditsScreen({ onClose }: CreditsScreenProps) {
 
           <section>
             <h2>Made by</h2>
-            {TEAM_MEMBERS.length > 0 && <p className="credits-team">{TEAM_MEMBERS.join(' · ')}</p>}
+            <ul className="credits-list">
+              {TEAM_MEMBERS.map((m) => (
+                <li key={m.github}>
+                  <span className="credits-team">{m.name}</span>
+                  {linkButton({ name: `@${m.github} on GitHub`, url: `https://github.com/${m.github}`, use: m.name })}
+                </li>
+              ))}
+            </ul>
             <p>Made by our team for the NASA Space Apps Challenge 2026.</p>
             <p className="credits-note">This is a student project. It is not made or endorsed by NASA.</p>
             <p className="credits-note">
