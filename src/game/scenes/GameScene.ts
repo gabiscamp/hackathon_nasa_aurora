@@ -136,6 +136,8 @@ export class GameScene extends Phaser.Scene {
   private walkableDebug: Phaser.GameObjects.Graphics | null = null;
   private currentRoom: RoomId | null = null;
   private lastPositionEmit = 0;
+  private lastCrewPositionEmit = 0;
+  private crewPositionsDirty = true;
   /** One "!" per open problem (several can be open at once). Keyed by mission id. */
   private missionMarkers = new Map<string, MarkerParts>();
   /** The marker the player opened last (the camera zooms on it). */
@@ -542,6 +544,8 @@ export class GameScene extends Phaser.Scene {
         w.nextStrollAt = this.time.now + Phaser.Math.Between(500, 2500);
       }
     }
+    this.crewPositionsDirty = true;
+    this.emitCrewPositions(true);
   };
 
   private startCrewRoutines() {
@@ -590,9 +594,11 @@ export class GameScene extends Phaser.Scene {
           w.node.setPosition(next.x, next.y);
           w.path.shift();
           budget -= dist;
+          this.crewPositionsDirty = true;
         } else {
           w.node.setPosition(w.node.x + (dx / dist) * budget, w.node.y + (dy / dist) * budget);
           budget = 0;
+          this.crewPositionsDirty = true;
         }
       }
 
@@ -600,6 +606,23 @@ export class GameScene extends Phaser.Scene {
         w.sprite.setFlipX(w.facing === 'left');
         w.sprite.anims.play(astronautAnim(w.head, moving ? 'walk' : 'idle', w.facing), true);
       }
+    }
+    this.emitCrewPositions();
+  }
+
+  /** Sends live NPC positions to React without making the HUD re-render every frame. */
+  private emitCrewPositions(force = false) {
+    const now = this.time.now;
+    if (!force && (!this.crewPositionsDirty || now - this.lastCrewPositionEmit < POSITION_EMIT_INTERVAL)) return;
+    this.lastCrewPositionEmit = now;
+    this.crewPositionsDirty = false;
+    for (const w of this.crewWalkers) {
+      gameEvents.emit(EVENTS.CREW_MOVED, {
+        role: w.role,
+        x: w.node.x,
+        y: w.node.y,
+        visible: w.node.visible,
+      });
     }
   }
 

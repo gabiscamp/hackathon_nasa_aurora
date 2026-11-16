@@ -1,10 +1,11 @@
-import { WALKABLE_AREAS, NPC_SPAWNS } from '../../game/world/shipLayout';
+import { WALKABLE_AREAS } from '../../game/world/shipLayout';
 import { useCrewStore } from '../../stores/useCrewStore';
 import { CREW_ROLES } from '../../data/crew';
 import { usePlayerPosition } from './usePlayerPosition';
 import { useMissionTargets } from './useMissionTarget';
 import { useRobotPosition } from './useRobotPosition';
 import { useExplorationStore } from '../../stores/useExplorationStore';
+import { useCrewPositions } from './useCrewPositions';
 
 const ROBOT_COLOR = '#9a5b32';
 
@@ -23,6 +24,7 @@ export function Minimap({ onOpen }: { onOpen: () => void }) {
   const pos = usePlayerPosition();
   const robotPos = useRobotPosition();
   const crew = useCrewStore((s) => s.crew);
+  const crewPositions = useCrewPositions();
   const targets = useMissionTargets();
   const robotAboard = useExplorationStore((s) => s.status === 'aboard');
 
@@ -36,9 +38,12 @@ export function Minimap({ onOpen }: { onOpen: () => void }) {
           ))}
         </g>
         {/* crew */}
-        {CREW_ROLES.map((role) => (
-          <circle key={role} cx={NPC_SPAWNS[role].x} cy={NPC_SPAWNS[role].y - 14} r="22" fill={crew[role].color} stroke="#0a0e27" strokeWidth="7" />
-        ))}
+        {CREW_ROLES.map((role) => {
+          const position = crewPositions[role];
+          return position.visible ? (
+            <circle key={role} cx={position.x} cy={position.y - 14} r="22" fill={crew[role].color} stroke="#0a0e27" strokeWidth="7" />
+          ) : null;
+        })}
         {/* AUR-1 uses the rover's brown body colour and disappears while exploring Mars. */}
         {robotAboard && (
           <circle cx={robotPos.x} cy={robotPos.y - 14} r="24" fill={ROBOT_COLOR} stroke="#0a0e27" strokeWidth="7" />

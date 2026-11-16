@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import type { CrewRole } from '../data/crew';
 
 export const gameEvents = new Phaser.Events.EventEmitter();
 
@@ -14,6 +15,7 @@ export const EVENTS = {
   MISSION_START: 'mission-start',
   MISSION_COMPLETE: 'mission-complete',
   PLAYER_MOVED: 'player-moved',
+  CREW_MOVED: 'crew-moved',
   ROBOT_MOVED: 'robot-moved',
   ROBOT_INTERACT: 'robot-interact',
   SHOW_SPEECH_BUBBLE: 'show-speech-bubble',
@@ -38,6 +40,11 @@ export interface MissionMarkerSpec {
 export interface PlayerMovedPayload {
   x: number;
   y: number;
+}
+
+export interface CrewMovedPayload extends PlayerMovedPayload {
+  role: CrewRole;
+  visible: boolean;
 }
 
 export interface TouchMovePayload {

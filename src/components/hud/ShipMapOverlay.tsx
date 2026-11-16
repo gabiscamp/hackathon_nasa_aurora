@@ -25,6 +25,7 @@ import { useMissionTargets } from "./useMissionTarget";
 import { useRobotPosition } from "./useRobotPosition";
 import { useExplorationStore } from "../../stores/useExplorationStore";
 import { RobotPortrait } from "../exploration/RobotPortrait";
+import { useCrewPositions } from "./useCrewPositions";
 
 const ROBOT_COLOR = "#9a5b32";
 
@@ -175,6 +176,7 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
   const pos = usePlayerPosition();
   const robotPos = useRobotPosition();
   const crew = useCrewStore((s) => s.crew);
+  const crewPositions = useCrewPositions();
   const targets = useMissionTargets();
   const robotAboard = useExplorationStore((s) => s.status === "aboard");
   const crewId = useGameStore((s) => s.crewId);
@@ -350,8 +352,8 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
 
             {CREW_ROLES.map((role) => {
               const m = crew[role];
-              const spot = NPC_SPAWNS[role];
-              return (
+              const spot = crewPositions[role];
+              return spot.visible ? (
                 <span
                   key={role}
                   className="ship-map__pin"
@@ -368,7 +370,7 @@ export function ShipMapOverlay({ onClose }: { onClose: () => void }) {
                     {m.name.replace("Dr. ", "").split(" ")[0]}
                   </span>
                 </span>
-              );
+              ) : null;
             })}
 
             {robotAboard && (

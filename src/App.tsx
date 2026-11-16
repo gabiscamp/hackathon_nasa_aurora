@@ -85,18 +85,19 @@ export default function App() {
     return () => cancelAnimationFrame(frame);
   }, [scene]);
 
-  // Web Audio may remain suspended until the first click/key press; starting here makes the
-  // original ambient pad follow the whole experience as soon as the browser allows it.
+  // The briefing owns its supplied cinematic soundtrack. Pause the procedural score there so
+  // the two tracks never overlap, then resume it smoothly for the crew and gameplay scenes.
   useEffect(() => {
-    startBackgroundMusic();
-    return stopBackgroundMusic;
-  }, []);
+    if (scene === 'briefing') {
+      stopBackgroundMusic();
+      return;
+    }
 
-  // The transmission and crew introduction act as the opening cutscene. Gameplay keeps the
-  // same D-minor tonal centre but drops the fuller chord for a calmer, suspended ambience.
-  useEffect(() => {
-    setMusicMood(scene === 'briefing' || scene === 'crew-intro' ? 'cinematic' : 'ambient');
+    startBackgroundMusic();
+    setMusicMood(scene === 'crew-intro' ? 'cinematic' : 'ambient');
   }, [scene]);
+
+  useEffect(() => stopBackgroundMusic, []);
 
   useEffect(() => {
     const onRobotInteract = () => playRobotGreeting();

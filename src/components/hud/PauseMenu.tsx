@@ -116,7 +116,15 @@ export function PauseMenu({ onMainMenu, onOpenCredits, suspended }: PauseMenuPro
       </div>
 
       {open && (
-        <div className="gm-backdrop" role="dialog" aria-modal="true" aria-labelledby="gm-pause-title">
+        <div
+          className="gm-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="gm-pause-title"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) closeMenu();
+          }}
+        >
           <div className={`gm-card ${view === 'help' ? 'gm-card--help' : view === 'options' ? 'gm-card--options' : 'gm-card--pause'}`}>
             {view === 'menu' ? (
               <>

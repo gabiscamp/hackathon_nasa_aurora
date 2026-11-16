@@ -8,7 +8,8 @@ O desenho sonoro procedural criado para o projeto é disponibilizado sob **CC0 1
 
 | Som | Como foi criado | Arquivo-fonte externo |
 |---|---|---|
-| Trilha da introdução | Acorde original em Ré menor, mais cheio, usado na transmissão e apresentação da tripulação | Nenhum |
+| Trilha da cutscene de abertura | `Total War (Epic Action Cinematic Trailer Main)`, de AudioAtlant, fornecida pela equipe e usada nos primeiros 49 segundos | [Pixabay](https://pixabay.com/music/adventure-total-war-epic-action-cinematic-trailer-main-513668/) — Pixabay Content License; a página informa registro em Content ID |
+| Trilha de transição da tripulação | Acorde original em Ré menor, mais cheio, sintetizado no navegador depois da cutscene | Nenhum |
 | Ambiente da estação | Acorde original suspenso em Ré menor com nona e filtro passa-baixa | Nenhum |
 | Alerta de missão crítica | MP3 original restaurado da primeira versão do projeto | `public/sounds/alert.mp3`; origem externa e licença desconhecidas |
 | Passos do astronauta | Ruído filtrado curto + pulso grave, com pequenas variações | Nenhum |
@@ -32,14 +33,15 @@ O desenho sonoro procedural criado para o projeto é disponibilizado sob **CC0 1
 - Controle de volume e envelopes: [GainNode — MDN](https://developer.mozilla.org/en-US/docs/Web/API/GainNode)
 - Licença do desenho sonoro: [CC0 1.0 — Creative Commons](https://creativecommons.org/publicdomain/zero/1.0/)
 
-## Referência musical não incorporada
+## Faixa externa incorporada
 
-- [Total War (Epic Action Cinematic Trailer Main), de AudioAtlant](https://pixabay.com/music/adventure-total-war-epic-action-cinematic-trailer-main-513668/) foi usada somente como referência de clima e transição.
-- A faixa não está incluída no jogo: a página informa registro em Content ID e uso sob a licença de conteúdo do Pixabay. A trilha musical final continua sendo síntese original CC0.
+- [Total War (Epic Action Cinematic Trailer Main), de AudioAtlant](https://pixabay.com/music/adventure-total-war-epic-action-cinematic-trailer-main-513668/) toca na cutscene de abertura.
+- A faixa foi fornecida pela equipe, está sob a [Pixabay Content License](https://pixabay.com/service/license-summary/) e sua página informa registro em Content ID. Ela não faz parte da declaração CC0 do desenho sonoro procedural do projeto.
 
 ## Comportamento de mixagem
 
-- O ambiente para suavemente enquanto o alerta de missão toca e retorna depois.
+- O ambiente para durante a cutscene para não se sobrepor à faixa externa, e retorna na apresentação da tripulação.
+- O ambiente também para suavemente enquanto o alerta de missão toca e retorna depois.
 - Música, sons do mundo e interface possuem controles separados, além do volume geral.
 - Com narração automática ativada, toda a mixagem é reduzida; enquanto a voz fala, música e efeitos diminuem ainda mais para preservar a inteligibilidade.
 - Passos têm intervalo mínimo de 310 ms e o robô, 420 ms. O alerta vermelho procura um vale natural entre 2,8 e 7 s do MP3, descansa 2,6 s e repete enquanto a emergência estiver pendente.

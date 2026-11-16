@@ -166,7 +166,15 @@ export function OptionsDialog({ onClose }: { onClose: () => void }) {
   }, [onClose]);
 
   return (
-    <div className="gm-backdrop gm-backdrop--top" role="dialog" aria-modal="true" aria-labelledby="opt-title">
+    <div
+      className="gm-backdrop gm-backdrop--top"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="opt-title"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
       <div className="gm-card gm-card--options">
         <h2 id="opt-title" className="gm-title gm-title--icon">
           <MenuIcon name="settings" />

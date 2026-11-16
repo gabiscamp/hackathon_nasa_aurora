@@ -31,7 +31,16 @@ export function ConfirmDialog({ title, message, confirmLabel, cancelLabel = 'Sta
   }, [onCancel]);
 
   return (
-    <div className="gm-backdrop gm-backdrop--top" role="alertdialog" aria-modal="true" aria-labelledby="gm-confirm-title" aria-describedby="gm-confirm-text">
+    <div
+      className="gm-backdrop gm-backdrop--top"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="gm-confirm-title"
+      aria-describedby="gm-confirm-text"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onCancel();
+      }}
+    >
       <div className="gm-card gm-card--warn">
         <h2 id="gm-confirm-title" className="gm-title">{title}</h2>
         <p id="gm-confirm-text" className="gm-text">{message}</p>
