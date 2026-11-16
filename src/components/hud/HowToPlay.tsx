@@ -70,7 +70,7 @@ export function HowToPlay() {
         <section>
           <h3><MenuIcon name="warning" /> How you can lose</h3>
           <p>
-            If <strong>oxygen</strong> reaches 0, <strong>radiation</strong> reaches 100, or the crew gets too sick, the
+            If <strong>oxygen</strong> reaches 0 or <strong>radiation</strong> reaches 100, the
             station is lost and the crew escapes in the capsule. One bad bar pulls the others down: no energy stops the
             air, and no air, water or food makes the crew sick a little more every day.
           </p>

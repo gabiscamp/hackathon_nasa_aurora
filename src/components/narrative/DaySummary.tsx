@@ -4,7 +4,6 @@ import { RESOURCE_KEYS, SHOWN_RESOURCES, useResourceStore, type ResourceKey, typ
 import { useMissionStore, type DecisionRecord } from '../../stores/useMissionStore';
 import { useGameStore } from '../../stores/useGameStore';
 import { getMission } from '../../data/missions';
-import { CrewStatusList } from '../panels/CrewStatusList';
 import { Button } from '../ui/Button';
 import { EnergyIcon, FoodIcon, OxygenIcon, RadiationIcon, WaterIcon } from '../hud/HudIcons';
 import './DaySummary.css';
@@ -181,10 +180,6 @@ export function DaySummary({ onNext }: { onNext: () => void }) {
           </ul>
         </section>
       )}
-
-      <section className="day-summary__section">
-        <CrewStatusList day={day + 1} title="Your crew tomorrow" />
-      </section>
 
       <Button variant="primary" onClick={onNext}>
         Next Day

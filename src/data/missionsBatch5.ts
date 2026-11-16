@@ -57,9 +57,13 @@ export const MISSIONS_BATCH_5: Mission[] = [
         time: '1 hour',
         fatigue: 0,
         effects: [],
-        onSuccess: { setFlags: ['solar-power'], delayed: SOLAR_DAYS },
+        onSuccess: {
+          setFlags: ['solar-power'],
+          delayed: SOLAR_DAYS,
+          addConditions: [{ id: 'solar-power', label: 'Solar power: energy +1 every day', daily: [{ resource: 'energy', delta: 1 }] }],
+        },
         narrative:
-          'Solar panels it is! Energy +15 in sunlight, but -15 every time the station passes into Mars\' shadow. Each shadow, you will have to choose what to turn off.',
+          'Solar panels it is! Energy +1 every day, +15 in sunlight, but -15 every time the station passes into Mars\' shadow. Each shadow, you will have to choose what to turn off.',
       },
       {
         id: 'nuclear',
@@ -71,9 +75,9 @@ export const MISSIONS_BATCH_5: Mission[] = [
         effects: [],
         onSuccess: {
           setFlags: ['nuclear-power'],
-          addConditions: [{ id: 'nuclear-power', label: 'Nuclear power: energy +5 every day', daily: [{ resource: 'energy', delta: 5 }] }],
+          addConditions: [{ id: 'nuclear-power', label: 'Nuclear power: energy +3 every day', daily: [{ resource: 'energy', delta: 3 }] }],
         },
-        narrative: 'A small nuclear power source: energy +5 every day, day and night, shadow or not.',
+        narrative: 'A small nuclear power source: energy +3 every day, day and night, shadow or not.',
       },
     ],
   },

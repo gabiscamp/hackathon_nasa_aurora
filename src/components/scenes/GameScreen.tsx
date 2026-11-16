@@ -130,7 +130,7 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
     setMissionOpen(false);
     clearMission();
     gameEvents.emit('CAMERA_ZOOM_OUT');
-    // A choice took oxygen or health to 0 (or radiation to 100): the station is lost today.
+    // A choice took oxygen to 0 (or radiation to 100): the station is lost today.
     if (checkCollapse(day)) {
       stopAlertLoop();
       useGameStore.getState().setScene('ending');

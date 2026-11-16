@@ -50,11 +50,11 @@ export const MISSIONS_BATCH_2: Mission[] = [
         effects: [],
         onSuccess: {
           addConditions: [
-            { id: 'dry-food', label: 'Freeze-dried food needs water to prepare', daily: [{ resource: 'water', delta: -0.5 }] },
+            { id: 'dry-food', label: 'Freeze-dried food needs water to prepare', daily: [{ resource: 'water', delta: -0.5 }], days: 15 },
           ],
         },
         narrative:
-          '{crew} loaded freeze-dried food. The pantry is full! But every meal needs water, so you will use a little more water every day.',
+          '{crew} loaded freeze-dried food. The pantry is full! But every meal needs water, so for the next 15 days you will use a little more water every day.',
       },
       {
         id: 'ready-meals',

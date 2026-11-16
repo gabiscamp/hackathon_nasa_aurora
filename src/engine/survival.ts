@@ -2,7 +2,6 @@ import type { ChoiceEffect } from '../data/missions';
 import {
   DAILY_USE,
   FAIL_LOSS_WEIGHT,
-  HEALTH_GAME_OVER,
   HIGH_RADIATION,
   HIGH_RADIATION_HEALTH_LOSS,
   HIGH_RADIATION_SICK_CHANCE,
@@ -138,7 +137,7 @@ export function dailyTrend(resource: ResourceKey, r: Resources = useResourceStor
 }
 
 /** Days until a vital bar reaches its game-over line at today's pace (null = not going down). */
-export function daysLeft(resource: 'oxygen' | 'health', r: Resources = useResourceStore.getState()): number | null {
+export function daysLeft(resource: 'oxygen', r: Resources = useResourceStore.getState()): number | null {
   const trend = dailyTrend(resource, r);
   if (trend >= 0) return null;
   return Math.max(0, Math.ceil(r[resource] / -trend));
@@ -172,7 +171,7 @@ export function liveOneDay(day: number): string[] {
   if (after.oxygen > 0 && after.oxygen < LOW_OXYGEN) news.push(`DANGER! Oxygen is below ${LOW_OXYGEN}: everyone loses a lot of health every day. If oxygen reaches 0, the station is lost.`);
   if (after.water <= 0) news.push('DANGER! There is no water: everyone loses a lot of health every day.');
   if (after.food <= 0) news.push('DANGER! There is no food: everyone loses a lot of health and gets very tired.');
-  if (after.health > 0 && after.health < LOW_HEALTH) news.push(`DANGER! Crew health is below ${LOW_HEALTH}. If it reaches 0, the station is lost.`);
+  if (after.health > 0 && after.health < LOW_HEALTH) news.push('The crew is weak: someone may get sick. Fix the water, food and air!');
   return news;
 }
 
@@ -181,6 +180,7 @@ let lastReasons: { day: number; reasons: string[] } = { day: 0, reasons: [] };
 
 const CAUSE_LINE: Record<CollapseCause, string> = {
   oxygen: 'The oxygen reached 0.',
+  // Only old saves: health stopped being a game over.
   health: 'Crew health reached 0.',
   radiation: 'Radiation reached 100.',
 };
@@ -190,14 +190,13 @@ export function sickChanceToday(r: Resources = useResourceStore.getState()): num
   return (r.health < LOW_HEALTH ? LOW_HEALTH_SICK_CHANCE : 0) + (r.radiation > HIGH_RADIATION ? HIGH_RADIATION_SICK_CHANCE : 0);
 }
 
-/** Game over check: oxygen or health at 0, or radiation at 100. Saves and returns the collapse. */
+/** Game over check: oxygen at 0 or radiation at 100 (health is not a game over). Saves and returns the collapse. */
 export function checkCollapse(day: number): Collapse | null {
   const existing = useMissionStore.getState().collapse;
   if (existing) return existing;
   const r = useResourceStore.getState();
   let cause: CollapseCause | null = null;
   if (r.oxygen <= OXYGEN_GAME_OVER) cause = 'oxygen';
-  else if (r.health <= HEALTH_GAME_OVER) cause = 'health';
   else if (r.radiation >= RADIATION_GAME_OVER) cause = 'radiation';
   if (!cause) return null;
   const morning = lastReasons.day === day ? lastReasons.reasons : [];
