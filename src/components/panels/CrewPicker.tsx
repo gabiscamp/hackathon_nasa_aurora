@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useEffect, useRef, useState } from 'react';
 import type { Choice, CrewSlot, Mission } from '../../data/missions';
 import { getMission } from '../../data/missions';
@@ -60,28 +61,24 @@ export function CrewPicker({ mission, choice, day, lockedSlot, chanceFor, onBack
 
   return (
     <div className="mission-overlay__body crew-picker" data-voice-options>
-      <p className="mission-overlay__prompt">
-        Who goes? <strong>{choice.label}</strong> needs {need.min === 0 ? `up to ${max}` : need.min}
-        {need.max && need.max > need.min ? `–${need.max}` : ''} {max === 1 ? 'person' : 'people'}
-        {need.best ? `. Best: ${need.best.map(slotTitle).join(' or ')}${chanceFor([]) !== null ? ` (+${SPECIALIST_BONUS}% chance)` : ''}` : ''}.
+      <p className="mission-overlay__prompt">{localize(" Who goes? ")}<strong>{localize(choice.label)}</strong>{localize(" needs ")}{localize(need.min === 0 ? `up to ${max}` : need.min)}
+        {localize(need.max && need.max > need.min ? `–${need.max}` : '')} {localize(max === 1 ? 'person' : 'people')}
+        {localize(need.best ? `. Best: ${need.best.map(slotTitle).join(' or ')}${chanceFor([]) !== null ? ` (+${SPECIALIST_BONUS}% chance)` : ''}` : '')}.
       </p>
-      {freeOthers < need.min && (
-        <p className="crew-picker__warn" role="status">
-          Not enough free crew! You can pull someone off a job, {need.allowFewer ? 'try with fewer people, ' : ''}or go back and deal
-          with it tomorrow.
-        </p>
-      )}
+      {localize(freeOthers < need.min && (
+        <p className="crew-picker__warn" role="status">{localize(" Not enough free crew! You can pull someone off a job, ")}{localize(need.allowFewer ? 'try with fewer people, ' : '')}{localize("or go back and deal with it tomorrow. ")}</p>
+      ))}
 
-      <ul ref={listRef} className="crew-picker__list" aria-label={`Crew for ${mission.title}`}>
-        {lockedSlot && (
+      <ul ref={listRef} className="crew-picker__list" aria-label={localize(`Crew for ${mission.title}`)}>
+        {localize(lockedSlot && (
           <li>
             <div className="crew-card crew-card--locked">
-              {cardBody(lockedSlot)}
-              <span className="crew-card__note">Already outside: part of every choice</span>
+              {localize(cardBody(lockedSlot))}
+              <span className="crew-card__note">{localize("Already outside: part of every choice")}</span>
             </div>
           </li>
-        )}
-        {CREW_SLOTS.filter((s) => s !== lockedSlot).map((slot) => {
+        ))}
+        {localize(CREW_SLOTS.filter((s) => s !== lockedSlot).map((slot) => {
           const d = duty[slot];
           const state = availability(d, day);
           const selected = picked.includes(slot);
@@ -103,46 +100,43 @@ export function CrewPicker({ mission, choice, day, lockedSlot, chanceFor, onBack
                 disabled={state === 'resting' || state === 'sick' || state === 'away' || notAllowed || noEva}
                 onClick={() => toggle(slot)}
               >
-                {cardBody(slot)}
-                {isBest && !notAllowed && <span className="crew-card__best">Best for this job</span>}
-                {notAllowed && <span className="crew-card__note">Only the {need.only!.map(slotTitle).join(' or ')} can do this</span>}
-                {noEva && !notAllowed && <span className="crew-card__note">No more spacewalks (radiation dose)</span>}
-                {state === 'busy' && selected && (
-                  <span className="crew-card__note crew-card__note--warn">
-                    This stops "{task?.label}". {stopText ?? 'Progress is lost.'}
+                {localize(cardBody(slot))}
+                {localize(isBest && !notAllowed && <span className="crew-card__best">{localize("Best for this job")}</span>)}
+                {localize(notAllowed && <span className="crew-card__note">{localize("Only the ")}{localize(need.only!.map(slotTitle).join(' or '))}{localize(" can do this")}</span>)}
+                {localize(noEva && !notAllowed && <span className="crew-card__note">{localize("No more spacewalks (radiation dose)")}</span>)}
+                {localize(state === 'busy' && selected && (
+                  <span className="crew-card__note crew-card__note--warn">{localize(" This stops \"")}{localize(task?.label)}". {localize(stopText ?? 'Progress is lost.')}
                   </span>
-                )}
-                {d.fatigue >= FATIGUE_TIRED && state !== 'resting' && (
-                  <span className="crew-card__note crew-card__note--warn">Tired: more likely to make mistakes.</span>
-                )}
+                ))}
+                {localize(d.fatigue >= FATIGUE_TIRED && state !== 'resting' && (
+                  <span className="crew-card__note crew-card__note--warn">{localize("Tired: more likely to make mistakes.")}</span>
+                ))}
               </button>
             </li>
           );
-        })}
+        }))}
       </ul>
 
       <p className="crew-picker__summary" aria-live="polite">
-        {picked.length === 0 && !lockedSlot
+        {localize(picked.length === 0 && !lockedSlot
           ? 'Tap a crew member to send them.'
           : chance === null
             ? enough || lockedSlot
               ? 'This will work for sure.'
               : `Pick ${need.min - picked.length} more.`
-            : `Chance of success: ${chance}%${!enough && need.allowFewer ? ' (fewer people: harder)' : ''}`}
-        {pulled.length > 0 && ` · ${pulled.length} job${pulled.length > 1 ? 's' : ''} will stop`}
+            : `Chance of success: ${chance}%${!enough && need.allowFewer ? ' (fewer people: harder)' : ''}`)}
+        {localize(pulled.length > 0 && ` · ${pulled.length} job${pulled.length > 1 ? 's' : ''} will stop`)}
       </p>
 
       <div className="crew-picker__actions">
-        <button type="button" className="mission-btn" onClick={onBack}>
-          Back
-        </button>
+        <button type="button" className="mission-btn" onClick={onBack}>{localize(" Back ")}</button>
         <button
           type="button"
           className="mission-btn mission-btn--primary"
           disabled={!(enough || canTryFewer || (lockedSlot && need.min === 0 && picked.length > 0))}
           onClick={() => onSend(picked)}
         >
-          {canTryFewer ? 'Try with fewer people' : `Send ${picked.length === 1 ? '1 person' : `${picked.length} people`}`}
+          {localize(canTryFewer ? 'Try with fewer people' : `Send ${picked.length === 1 ? '1 person' : `${picked.length} people`}`)}
         </button>
       </div>
     </div>
@@ -154,12 +148,12 @@ export function CrewPicker({ mission, choice, day, lockedSlot, chanceFor, onBack
     return (
       <>
         <span className="crew-card__face" style={{ borderColor: r.color }}>
-          {r.photo ? <img src={r.photo} alt="" /> : r.firstName.charAt(0)}
+          {localize(r.photo ? <img src={r.photo} alt={localize("")} /> : r.firstName.charAt(0))}
         </span>
-        <span className="crew-card__name">{r.firstName}</span>
-        <span className="crew-card__role">{slotTitle(slot)}</span>
-        <span className="crew-card__state">{dutyText(d, day)}</span>
-        <span className={`crew-card__tired crew-card__tired--${Math.min(d.fatigue, 4)}`}>{fatigueLabel(d.fatigue)}</span>
+        <span className="crew-card__name">{localize(r.firstName)}</span>
+        <span className="crew-card__role">{localize(slotTitle(slot))}</span>
+        <span className="crew-card__state">{localize(dutyText(d, day))}</span>
+        <span className={`crew-card__tired crew-card__tired--${Math.min(d.fatigue, 4)}`}>{localize(fatigueLabel(d.fatigue))}</span>
       </>
     );
   }

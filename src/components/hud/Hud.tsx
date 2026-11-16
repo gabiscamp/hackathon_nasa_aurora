@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useCallback, useEffect, useState } from 'react';
 import { PlayerStatus } from './PlayerStatus';
 import { ObjectiveTracker } from './ObjectiveTracker';
@@ -44,8 +45,8 @@ export function Hud() {
       <LocationHint />
       <Minimap onOpen={() => setMapOpen(true)} />
       {/* The station image is AI-generated: team briefing rule = visible watermark while it is on screen. */}
-      <span className="hud-ai-mark">AI-generated map</span>
-      {mapOpen && <ShipMapOverlay onClose={closeMap} />}
+      <span className="hud-ai-mark">{localize("AI-generated map")}</span>
+      {localize(mapOpen && <ShipMapOverlay onClose={closeMap} />)}
     </div>
   );
 }

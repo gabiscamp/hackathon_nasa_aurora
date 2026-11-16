@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useEffect, useState } from 'react';
 import { useGameStore } from '../../stores/useGameStore';
 import { useMissionStore } from '../../stores/useMissionStore';
@@ -160,49 +161,45 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
 
   return (
     <main className="game-screen">
-      <h1 className="sr-only">Aurora Station</h1>
+      <h1 className="sr-only">{localize("Aurora Station")}</h1>
       <div className="game-stage">
         <PhaserGame className="station-view" />
         <Hud />
-        {phase === 'decision' && !missionOpen && !skipInfo && <MobileControls />}
+        {localize(phase === 'decision' && !missionOpen && !skipInfo && <MobileControls />)}
         <ExplorationSystem />
         <PauseMenu onMainMenu={onMainMenu} onOpenCredits={onOpenCredits} suspended={creditsOpen} />
 
-        {phase === 'decision' && !missionOpen && !skipInfo && openMissions.length > 0 && (
+        {localize(phase === 'decision' && !missionOpen && !skipInfo && openMissions.length > 0 && (
           <div className={`game-hint-banner ${anyEmergency ? 'game-hint-banner--critical' : ''}`} data-read>
-            {openMissions.length === 1 ? (
+            {localize(openMissions.length === 1 ? (
               <span>
-                {openMissions[0].icon} {anyEmergency ? 'EMERGENCY! ' : ''}Go to {roomList} and <span className="game-hint-desktop">press <kbd>E</kbd> to </span><span className="game-hint-touch">tap USE to </span>
-                investigate!
-              </span>
+                {localize(openMissions[0].icon)} {localize(anyEmergency ? 'EMERGENCY! ' : '')}{localize("Go to ")}{localize(roomList)}{localize(" and ")}<span className="game-hint-desktop">{localize("press ")}<kbd>{localize("E")}</kbd>{localize(" to ")}</span><span className="game-hint-touch">{localize("tap USE to ")}</span>{localize(" investigate! ")}</span>
             ) : (
               <span>
-                {anyEmergency ? 'EMERGENCY! ' : ''}
-                {openMissions.length} problems today: {roomList}. Walk to each <strong>!</strong> and <span className="game-hint-desktop">press <kbd>E</kbd></span><span className="game-hint-touch">tap USE</span>.
+                {localize(anyEmergency ? 'EMERGENCY! ' : '')}
+                {localize(openMissions.length)}{localize(" problems today: ")}{localize(roomList)}{localize(". Walk to each ")}<strong>!</strong>{localize(" and ")}<span className="game-hint-desktop">{localize("press ")}<kbd>{localize("E")}</kbd></span><span className="game-hint-touch">{localize("tap USE")}</span>.
               </span>
-            )}
+            ))}
           </div>
-        )}
+        ))}
 
-        {phase === 'decision' && !missionOpen && !skipInfo && news.length > 0 && newsSeenDay !== day && (
-          <section className="game-news" role="status" aria-label="Station news" data-read data-voice-story>
-            <h2 className="game-news__title">Station news</h2>
+        {localize(phase === 'decision' && !missionOpen && !skipInfo && news.length > 0 && newsSeenDay !== day && (
+          <section className="game-news" role="status" aria-label={localize("Station news")} data-read data-voice-story>
+            <h2 className="game-news__title">{localize("Station news")}</h2>
             <ul>
-              {news.map((n) => (
-                <li key={n}>{n}</li>
-              ))}
+              {localize(news.map((n) => (
+                <li key={n}>{localize(n)}</li>
+              )))}
             </ul>
-            <button type="button" className="game-news__ok" onClick={() => setNewsSeenDay(day)}>
-              Got it
-            </button>
+            <button type="button" className="game-news__ok" onClick={() => setNewsSeenDay(day)}>{localize(" Got it ")}</button>
           </section>
-        )}
+        ))}
 
-        {missionOpen && currentMission && (
+        {localize(missionOpen && currentMission && (
           <MissionOverlay key={currentMission.id} onComplete={handleMissionClosed} />
-        )}
+        ))}
 
-        {skipInfo && (
+        {localize(skipInfo && (
           <DaySkipOverlay
             daysSkipped={skipInfo.daysSkipped}
             targetDay={skipInfo.targetDay}
@@ -210,44 +207,39 @@ export function GameScreen({ onMainMenu, onOpenCredits, creditsOpen }: GameScree
             commanderName={playerName}
             onContinue={handleSkipDone}
           />
-        )}
+        ))}
       </div>
 
-      {phase === 'briefing' && !skipInfo && (
+      {localize(phase === 'briefing' && !skipInfo && (
         <div className="game-overlay">
           <div className="panel day-briefing" role="dialog" aria-modal="true" aria-labelledby="day-briefing-title" data-voice-story>
-            <h2 id="day-briefing-title" style={{ fontSize: 'var(--font-size-xl)' }}>Day {briefingDay}</h2>
-            <p style={{ color: 'var(--accent-amber)' }}>{actLabel}</p>
-            {incomingTitles(briefingDay).map((t) => (
-              <p key={t} style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                Incoming: {t}
+            <h2 id="day-briefing-title" style={{ fontSize: 'var(--font-size-xl)' }}>{localize("Day ")}{localize(briefingDay)}</h2>
+            <p style={{ color: 'var(--accent-amber)' }}>{localize(actLabel)}</p>
+            {localize(incomingTitles(briefingDay).map((t) => (
+              <p key={t} style={{ color: 'var(--text-secondary)', margin: 0 }}>{localize(" Incoming: ")}{localize(t)}
               </p>
-            ))}
-            <CrewStatusList day={briefingDay} title="Your crew today" />
-            <Button variant="primary" icon="▶️" onClick={handleBeginDay} autoFocus>
-              Begin Day
-            </Button>
+            )))}
+            <CrewStatusList day={briefingDay} title={localize("Your crew today")} />
+            <Button variant="primary" icon="▶️" onClick={handleBeginDay} autoFocus>{localize(" Begin Day ")}</Button>
           </div>
         </div>
-      )}
+      ))}
 
-      {phase === 'summary' && (
+      {localize(phase === 'summary' && (
         <div className="game-overlay">
           <DaySummary onNext={handleEndDay} />
         </div>
-      )}
+      ))}
 
-      {phase === 'result' && !currentMission && (
+      {localize(phase === 'result' && !currentMission && (
         <div className="game-overlay">
           <div className="panel day-briefing" role="dialog" aria-modal="true" aria-labelledby="quiet-day-title" data-voice-story>
-            <h2 id="quiet-day-title">Quiet Day</h2>
-            <p style={{ color: 'var(--text-secondary)' }}>No events today. Resources ticked down as usual.</p>
-            <Button variant="primary" onClick={() => setPhase('summary')} autoFocus>
-              Continue to Summary
-            </Button>
+            <h2 id="quiet-day-title">{localize("Quiet Day")}</h2>
+            <p style={{ color: 'var(--text-secondary)' }}>{localize("No events today. Resources ticked down as usual.")}</p>
+            <Button variant="primary" onClick={() => setPhase('summary')} autoFocus>{localize(" Continue to Summary ")}</Button>
           </div>
         </div>
-      )}
+      ))}
     </main>
   );
 }

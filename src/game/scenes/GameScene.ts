@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { t } from '../../i18n/translate';
 import { GAME_FONT } from '../../styles/theme';
 import { useSettingsStore } from '../../stores/useSettingsStore';
 import { speak } from '../../utils/speech';
@@ -781,7 +782,8 @@ export class GameScene extends Phaser.Scene {
   }
 
 
-  private showSpeechBubble(fullText: string) {
+  private showSpeechBubble(sourceText: string) {
+    const fullText = t(sourceText);
     this.hideSpeechBubble();
     this.frozen = true;
 

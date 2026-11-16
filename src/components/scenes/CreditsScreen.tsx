@@ -1,3 +1,5 @@
+import { t as localize } from '../../i18n/translate';
+import { LANGUAGE_LOCALES, useLanguage } from '../../i18n/language';
 import { useEffect, useRef, useState } from 'react';
 import { useSpaceWeatherStore, type SpaceWeatherStatus } from '../../stores/useSpaceWeatherStore';
 import { travelDays } from '../../services/donki';
@@ -51,21 +53,19 @@ const TOOLS: Source[] = [
 const MAX_CMES_SHOWN = 5;
 
 function formatDay(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+  return new Date(iso).toLocaleDateString(LANGUAGE_LOCALES[useLanguage.getState().language], { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 }
 
 function DataBadge({ status, fetchedAt }: { status: SpaceWeatherStatus; fetchedAt: string }) {
   if (status === 'live') {
-    return <p className="credits-badge credits-badge--live">LIVE from NASA DONKI · checked {formatDay(fetchedAt)}</p>;
+    return <p className="credits-badge credits-badge--live">{localize("LIVE from NASA DONKI · checked ")}{localize(formatDay(fetchedAt))}</p>;
   }
   if (status === 'offline') {
     return (
-      <p className="credits-badge credits-badge--offline">
-        NOT LIVE · saved NASA data from {formatDay(fetchedAt)} (we could not reach NASA right now)
-      </p>
+      <p className="credits-badge credits-badge--offline">{localize(" NOT LIVE · saved NASA data from ")}{localize(formatDay(fetchedAt))}{localize(" (we could not reach NASA right now) ")}</p>
     );
   }
-  return <p className="credits-badge">Asking NASA for new data…</p>;
+  return <p className="credits-badge">{localize("Asking NASA for new data…")}</p>;
 }
 
 interface CreditsScreenProps {
@@ -104,7 +104,7 @@ export function CreditsScreen({ onClose }: CreditsScreenProps) {
 
   const linkButton = (source: Source) => (
     <button type="button" className="credits-link" onClick={() => setPendingLink(source)}>
-      {source.name}
+      {localize(source.name)}
     </button>
   );
 
@@ -120,138 +120,110 @@ export function CreditsScreen({ onClose }: CreditsScreenProps) {
     >
       <div className="credits-panel">
         <header className="credits-header">
-          <h1 id="credits-title">Credits &amp; Sources</h1>
-          <button ref={closeRef} type="button" className="credits-btn" onClick={onClose}>
-            Back
-          </button>
+          <h1 id="credits-title">{localize("Credits & Sources")}</h1>
+          <button ref={closeRef} type="button" className="credits-btn" onClick={onClose}>{localize(" Back ")}</button>
         </header>
 
         <div className="credits-body">
           <section>
-            <h2>For parents and teachers</h2>
-            <p>This game uses real space weather data from NASA. Here you can see what we used and why.</p>
+            <h2>{localize("For parents and teachers")}</h2>
+            <p>{localize("This game uses real space weather data from NASA. Here you can see what we used and why.")}</p>
           </section>
 
           <section>
-            <h2>Solar storms heading to Mars</h2>
+            <h2>{localize("Solar storms heading to Mars")}</h2>
             <DataBadge status={status} fetchedAt={data.fetchedAt} />
-            <p>
-              A <strong>CME</strong> is a giant cloud of hot gas thrown out by the Sun. Astronauts must hide from it, because it brings
-              extra radiation.
-            </p>
-            {data.marsCmes.length === 0 ? (
-              <p>No solar storms were heading to Mars in the last 30 days.</p>
+            <p>{localize(" A ")}<strong>{localize("CME")}</strong>{localize(" is a giant cloud of hot gas thrown out by the Sun. Astronauts must hide from it, because it brings extra radiation. ")}</p>
+            {localize(data.marsCmes.length === 0 ? (
+              <p>{localize("No solar storms were heading to Mars in the last 30 days.")}</p>
             ) : (
               <ul className="credits-cmes">
-                {data.marsCmes.slice(0, MAX_CMES_SHOWN).map((cme) => (
+                {localize(data.marsCmes.slice(0, MAX_CMES_SHOWN).map((cme) => (
                   <li key={cme.id} className="credits-cme">
-                    <span className="credits-cme__route">
-                      Left the Sun <strong>{formatDay(cme.leftSunAt)}</strong> → reaches Mars <strong>{formatDay(cme.arrivesAt)}</strong>
+                    <span className="credits-cme__route">{localize(" Left the Sun ")}<strong>{localize(formatDay(cme.leftSunAt))}</strong>{localize(" → reaches Mars ")}<strong>{localize(formatDay(cme.arrivesAt))}</strong>
                     </span>
                     <span className="credits-cme__facts">
-                      {travelDays(cme)} days · {cme.speedKmS.toLocaleString('en-US')} km/s ·{' '}
-                      {cme.glancingBlow ? 'Glancing blow (just grazes Mars)' : 'Direct hit'}
+                      {localize(travelDays(cme))}{localize(" days · ")}{localize(cme.speedKmS.toLocaleString(LANGUAGE_LOCALES[useLanguage.getState().language]))}{localize(" km/s ·")}{localize(' ')}
+                      {localize(cme.glancingBlow ? 'Glancing blow (just grazes Mars)' : 'Direct hit')}
                     </span>
                   </li>
-                ))}
+                )))}
               </ul>
-            )}
-            <p className="credits-note">
-              DONKI found {data.totalCmes} CMEs in total; {data.marsCmes.length} of them were predicted to reach Mars.
-              {strongest && ` The strongest storm at Earth reached Kp ${strongest.maxKp} on ${formatDay(strongest.startedAt)} (Kp goes from 0 to 9).`}
+            ))}
+            <p className="credits-note">{localize(" DONKI found ")}{localize(data.totalCmes)}{localize(" CMEs in total; ")}{localize(data.marsCmes.length)}{localize(" of them were predicted to reach Mars. ")}{localize(strongest && ` The strongest storm at Earth reached Kp ${strongest.maxKp} on ${formatDay(strongest.startedAt)} (Kp goes from 0 to 9).`)}
             </p>
-            <p className="credits-note">
-              DONKI data is for research. Official space weather forecasts come from NOAA's Space Weather Prediction Center.
-            </p>
+            <p className="credits-note">{localize(" DONKI data is for research. Official space weather forecasts come from NOAA's Space Weather Prediction Center. ")}</p>
           </section>
 
           <section>
-            <h2>NASA data we used</h2>
+            <h2>{localize("NASA data we used")}</h2>
             <ul className="credits-list">
-              {NASA_SOURCES.map((s) => (
+              {localize(NASA_SOURCES.map((s) => (
                 <li key={s.url}>
-                  {linkButton(s)}
-                  <span>{s.use}</span>
+                  {localize(linkButton(s))}
+                  <span>{localize(s.use)}</span>
                 </li>
-              ))}
+              )))}
             </ul>
           </section>
 
           <section>
-            <h2>Astronaut photos</h2>
-            <p>Official portraits by NASA photographers, in the public domain, from Wikimedia Commons.</p>
+            <h2>{localize("Astronaut photos")}</h2>
+            <p>{localize("Official portraits by NASA photographers, in the public domain, from Wikimedia Commons.")}</p>
             <ul className="credits-list">
-              {ASTRONAUTS.filter((a) => ASTRONAUT_PHOTOS[a.id]).map((a) => {
+              {localize(ASTRONAUTS.filter((a) => ASTRONAUT_PHOTOS[a.id]).map((a) => {
                 const photo = ASTRONAUT_PHOTOS[a.id];
                 return (
                   <li key={a.id}>
-                    {linkButton({ name: a.name, url: photo.sourceUrl, use: '' })}
-                    <span>
-                      Photo: {photo.author} · {photo.license}
+                    {localize(linkButton({ name: a.name, url: photo.sourceUrl, use: '' }))}
+                    <span>{localize(" Photo: ")}{localize(photo.author)} · {localize(photo.license)}
                     </span>
                   </li>
                 );
-              })}
+              }))}
             </ul>
           </section>
 
           <section>
-            <h2>Music and sound</h2>
-            <p>
-              The opening cutscene uses "Total War (Epic Action Cinematic Trailer Main)" by AudioAtlant, supplied by the team
-              under the Pixabay Content License. The ambient music, footsteps, robot and interface tones are generated by the
-              game with the browser Web Audio API and released under CC0 1.0. The critical alarm uses the legacy alert MP3
-              restored from the project's first version; its original external source is not documented.
-            </p>
-            {linkButton({
+            <h2>{localize("Music and sound")}</h2>
+            <p>{localize(" The opening cutscene uses \"Total War (Epic Action Cinematic Trailer Main)\" by AudioAtlant, supplied by the team under the Pixabay Content License. The ambient music, footsteps, robot and interface tones are generated by the game with the browser Web Audio API and released under CC0 1.0. The critical alarm uses the legacy alert MP3 restored from the project's first version; its original external source is not documented. ")}</p>
+            {localize(linkButton({
               name: 'Opening soundtrack on Pixabay',
               url: 'https://pixabay.com/music/adventure-total-war-epic-action-cinematic-trailer-main-513668/',
               use: 'Opening cutscene soundtrack.',
-            })}
+            }))}
           </section>
 
           <section>
-            <h2>Use of AI</h2>
-            <p>
-              All the creative work is ours: our team came up with the idea, the game rules, the story, the missions and the
-              design documents. No AI wrote them. An AI assistant (Claude, by Anthropic) only helped us write the code.
-            </p>
-            <p>
-              The station map was made with an AI image tool (ChatGPT, by OpenAI). We started from a floor plan of the International Space
-              Station and guided the tool step by step. In the game, the map shows an "AI-generated map" mark.
-            </p>
-            <p>
-              Our team drew the astronaut characters by hand in Aseprite. We also tried ChatGPT to clean up the
-              character art.
-            </p>
+            <h2>{localize("Use of AI")}</h2>
+            <p>{localize(" All the creative work is ours: our team came up with the idea, the game rules, the story, the missions and the design documents. No AI wrote them. An AI assistant (Claude, by Anthropic) only helped us write the code. ")}</p>
+            <p>{localize(" The station map was made with an AI image tool (ChatGPT, by OpenAI). We started from a floor plan of the International Space Station and guided the tool step by step. In the game, the map shows an \"AI-generated map\" mark. ")}</p>
+            <p>{localize(" Our team drew the astronaut characters by hand in Aseprite. We also tried ChatGPT to clean up the character art. ")}</p>
           </section>
 
           <section>
-            <h2>Built with</h2>
+            <h2>{localize("Built with")}</h2>
             <ul className="credits-list">
-              {TOOLS.map((s) => (
+              {localize(TOOLS.map((s) => (
                 <li key={s.url}>
-                  {linkButton(s)}
-                  <span>{s.use}</span>
+                  {localize(linkButton(s))}
+                  <span>{localize(s.use)}</span>
                 </li>
-              ))}
+              )))}
             </ul>
           </section>
 
           <section>
-            <h2>Made by</h2>
-            {TEAM_MEMBERS.length > 0 && <p className="credits-team">{TEAM_MEMBERS.join(' · ')}</p>}
-            <p>Made by our team for the NASA Space Apps Challenge 2026.</p>
-            <p className="credits-note">This is a student project. It is not made or endorsed by NASA.</p>
-            <p className="credits-note">
-              The astronaut crews use the names of real astronauts to honor their work. The events in the game are made up, and the
-              astronauts are not involved with this project.
-            </p>
+            <h2>{localize("Made by")}</h2>
+            {localize(TEAM_MEMBERS.length > 0 && <p className="credits-team">{localize(TEAM_MEMBERS.join(' · '))}</p>)}
+            <p>{localize("Made by our team for the NASA Space Apps Challenge 2026.")}</p>
+            <p className="credits-note">{localize("This is a student project. It is not made or endorsed by NASA.")}</p>
+            <p className="credits-note">{localize(" The astronaut crews use the names of real astronauts to honor their work. The events in the game are made up, and the astronauts are not involved with this project. ")}</p>
           </section>
         </div>
       </div>
 
-      {pendingLink && (
+      {localize(pendingLink && (
         <div
           className="credits-confirm"
           role="alertdialog"
@@ -262,20 +234,14 @@ export function CreditsScreen({ onClose }: CreditsScreenProps) {
           }}
         >
           <div className="credits-confirm__box">
-            <p id="credits-confirm-text">
-              This opens a website outside the game: <strong>{pendingLink.name}</strong>. Ask a grown-up first.
-            </p>
+            <p id="credits-confirm-text">{localize(" This opens a website outside the game: ")}<strong>{localize(pendingLink.name)}</strong>{localize(". Ask a grown-up first. ")}</p>
             <div className="credits-confirm__actions">
-              <button type="button" className="credits-btn" onClick={() => setPendingLink(null)}>
-                Stay here
-              </button>
-              <button type="button" className="credits-btn credits-btn--primary" onClick={openPending}>
-                Open website
-              </button>
+              <button type="button" className="credits-btn" onClick={() => setPendingLink(null)}>{localize(" Stay here ")}</button>
+              <button type="button" className="credits-btn credits-btn--primary" onClick={openPending}>{localize(" Open website ")}</button>
             </div>
           </div>
         </div>
-      )}
+      ))}
     </div>
   );
 }

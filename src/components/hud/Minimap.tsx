@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { WALKABLE_AREAS } from '../../game/world/shipLayout';
 import { useCrewStore } from '../../stores/useCrewStore';
 import { CREW_ROLES } from '../../data/crew';
@@ -29,38 +30,38 @@ export function Minimap({ onOpen }: { onOpen: () => void }) {
   const robotAboard = useExplorationStore((s) => s.status === 'aboard');
 
   return (
-    <button type="button" className="hud-panel hud-minimap" onClick={onOpen} aria-label="Open the full ship map (M)" title="Open the full ship map (M)">
+    <button type="button" className="hud-panel hud-minimap" onClick={onOpen} aria-label={localize("Open the full ship map (M)")} title={localize("Open the full ship map (M)")}>
       <svg viewBox={`${VIEW.x} ${VIEW.y} ${VIEW.w} ${VIEW.h}`} className="hud-minimap__map" aria-hidden="true">
         {/* floors */}
         <g fill="#b9c3d6">
-          {WALKABLE_AREAS.map((a, i) => (
+          {localize(WALKABLE_AREAS.map((a, i) => (
             <rect key={i} x={a.x} y={a.y} width={a.w} height={a.h} />
-          ))}
+          )))}
         </g>
         {/* crew */}
-        {CREW_ROLES.map((role) => {
+        {localize(CREW_ROLES.map((role) => {
           const position = crewPositions[role];
           return position.visible ? (
             <circle key={role} cx={position.x} cy={position.y - 14} r="22" fill={crew[role].color} stroke="#0a0e27" strokeWidth="7" />
           ) : null;
-        })}
+        }))}
         {/* AUR-1 uses the rover's brown body colour and disappears while exploring Mars. */}
-        {robotAboard && (
+        {localize(robotAboard && (
           <circle cx={robotPos.x} cy={robotPos.y - 14} r="24" fill={ROBOT_COLOR} stroke="#0a0e27" strokeWidth="7" />
-        )}
+        ))}
         {/* mission spot: same "!" as in the ship */}
-        {targets.map((target) => (
+        {localize(targets.map((target) => (
           <g key={target.id} className="hud-minimap__mission">
             <circle cx={target.x} cy={target.y} r="60" fill="rgba(231, 76, 60, 0.35)" className="hud-minimap__ping" />
             <circle cx={target.x} cy={target.y} r="38" fill="#e74c3c" stroke="#0a0e27" strokeWidth="8" />
             <text x={target.x} y={target.y + 18} textAnchor="middle" fontSize="54" fontWeight="800" fill="#f0ece4">!</text>
           </g>
-        ))}
+        )))}
         {/* player */}
         <circle cx={pos.x} cy={pos.y - 14} r="48" fill="rgba(245, 166, 35, 0.35)" className="hud-minimap__ping" />
         <circle cx={pos.x} cy={pos.y - 14} r="28" fill="#f5a623" stroke="#0a0e27" strokeWidth="8" />
       </svg>
-      <kbd className="hud-minimap__key">M</kbd>
+      <kbd className="hud-minimap__key">{localize("M")}</kbd>
     </button>
   );
 }

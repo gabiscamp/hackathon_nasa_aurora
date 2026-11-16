@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useEffect, useRef } from 'react';
 import './GameMenus.css';
 
@@ -42,14 +43,14 @@ export function ConfirmDialog({ title, message, confirmLabel, cancelLabel = 'Sta
       }}
     >
       <div className="gm-card gm-card--warn">
-        <h2 id="gm-confirm-title" className="gm-title">{title}</h2>
-        <p id="gm-confirm-text" className="gm-text">{message}</p>
+        <h2 id="gm-confirm-title" className="gm-title">{localize(title)}</h2>
+        <p id="gm-confirm-text" className="gm-text">{localize(message)}</p>
         <div className="gm-actions">
           <button ref={cancelRef} type="button" className="gm-btn" onClick={onCancel}>
-            {cancelLabel}
+            {localize(cancelLabel)}
           </button>
           <button type="button" className="gm-btn gm-btn--primary" onClick={onConfirm}>
-            {confirmLabel}
+            {localize(confirmLabel)}
           </button>
         </div>
       </div>

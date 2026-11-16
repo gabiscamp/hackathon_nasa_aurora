@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useEffect, useRef, type PointerEvent } from 'react';
 import { EVENTS, gameEvents } from '../../game/events';
 
@@ -48,19 +49,19 @@ export function TouchControls({ onOpenMap }: { onOpenMap: () => void }) {
   };
 
   return (
-    <div className="touch-controls" aria-label="Touch controls">
-      <div className="touch-controls__directions" aria-label="Movement">
-        {DIRECTIONS.map(({ direction, label, symbol }) => (
+    <div className="touch-controls" aria-label={localize("Touch controls")}>
+      <div className="touch-controls__directions" aria-label={localize("Movement")}>
+        {localize(DIRECTIONS.map(({ direction, label, symbol }) => (
           <button key={direction} type="button" className={`touch-controls__direction touch-controls__direction--${direction}`}
-            aria-label={label} onPointerDown={(event) => start(event, direction)}
+            aria-label={localize(label)} onPointerDown={(event) => start(event, direction)}
             onPointerUp={stop} onPointerCancel={stop} onLostPointerCapture={stop}>
-            {symbol}
+            {localize(symbol)}
           </button>
-        ))}
+        )))}
       </div>
       <div className="touch-controls__actions">
-        <button type="button" className="touch-controls__map" onClick={onOpenMap}>Map</button>
-        <button type="button" className="touch-controls__interact" onClick={() => gameEvents.emit(EVENTS.INTERACT)}>Interact</button>
+        <button type="button" className="touch-controls__map" onClick={onOpenMap}>{localize("Map")}</button>
+        <button type="button" className="touch-controls__interact" onClick={() => gameEvents.emit(EVENTS.INTERACT)}>{localize("Interact")}</button>
       </div>
     </div>
   );

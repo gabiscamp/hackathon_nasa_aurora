@@ -11,6 +11,9 @@ import { useMissionStore } from './stores/useMissionStore';
 import { checkpointDay, clearCheckpoint, restoreCheckpoint } from './engine/checkpoint';
 import { useDutyStore } from './stores/useDutyStore';
 import { useExplorationStore } from './stores/useExplorationStore';
+import { LanguageSwitcher } from './components/ui/LanguageSwitcher';
+import { useLanguage } from './i18n/language';
+import { t } from './i18n/translate';
 import { gameEvents, EVENTS } from './game/events';
 import { playRobotGreeting, setMusicMood, startBackgroundMusic, stopBackgroundMusic } from './utils/sounds';
 
@@ -32,12 +35,14 @@ function LoadingScreen() {
       color: '#e2e8f0',
       fontSize: '1.5rem',
     }}>
-      Loading... 🚀
+      {t('Loading...')} 🚀
     </div>
   );
 }
 
 export default function App() {
+  // Rerender presentation strings without remounting Phaser or resetting any stores.
+  useLanguage((s) => s.language);
   useReadShortcut();
   useAutomaticOptionReader();
   const scene = useGameStore((s) => s.scene);
@@ -137,7 +142,7 @@ export default function App() {
   };
 
   return (
-    <Suspense fallback={<LoadingScreen />}>
+    <><LanguageSwitcher /><Suspense fallback={<LoadingScreen />}>
       <OrientationGuard />
       {/* Settings on story screens (title and game have their own entry points). */}
       {(scene === 'briefing' || scene === 'crew-intro' || scene === 'ending') && <A11yDock />}
@@ -171,6 +176,6 @@ export default function App() {
       <Suspense fallback={null}>
         {showCredits && <CreditsScreen onClose={() => setShowCredits(false)} />}
       </Suspense>
-    </Suspense>
+    </Suspense></>
   );
 }

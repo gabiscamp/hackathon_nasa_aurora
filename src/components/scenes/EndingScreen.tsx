@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { Button } from '../ui/Button';
 import { COLLAPSE_ENDINGS, ENDINGS } from '../../data/endings';
 import { getMission } from '../../data/missions';
@@ -67,84 +68,76 @@ export function EndingScreen({ playerName, resources, onReplay, onOpenCredits, r
   return (
     <main className={`ending-screen ${lost ? 'ending-screen--lost' : ''}`}>
       <div className="ending-container animate-fadeIn" data-read data-voice-story>
-        <div className="ending-icon" aria-hidden="true">{ENDING_ICONS[endingType]}</div>
-        {lost && <p className="ending-gameover">Game over</p>}
-        <h1 className="ending-title">{title}</h1>
-        <p className="ending-desc">{description}</p>
+        <div className="ending-icon" aria-hidden="true">{localize(ENDING_ICONS[endingType])}</div>
+        {localize(lost && <p className="ending-gameover">{localize("Game over")}</p>)}
+        <h1 className="ending-title">{localize(title)}</h1>
+        <p className="ending-desc">{localize(description)}</p>
 
-        {lost && (
+        {localize(lost && (
           <section className="ending-lost">
-            {collapse && collapse.reasons.length > 0 && (
+            {localize(collapse && collapse.reasons.length > 0 && (
               <>
-                <h2>What was hurting the station</h2>
+                <h2>{localize("What was hurting the station")}</h2>
                 <ul>
-                  {collapse.reasons.map((r) => (
-                    <li key={r}>{r}</li>
-                  ))}
+                  {localize(collapse.reasons.map((r) => (
+                    <li key={r}>{localize(r)}</li>
+                  )))}
                 </ul>
               </>
-            )}
-            {worst.length > 0 && (
+            ))}
+            {localize(worst.length > 0 && (
               <>
-                <h2>Decisions that cost the most</h2>
+                <h2>{localize("Decisions that cost the most")}</h2>
                 <ul>
-                  {worst.map((w) => (
-                    <li key={w}>{w}</li>
-                  ))}
+                  {localize(worst.map((w) => (
+                    <li key={w}>{localize(w)}</li>
+                  )))}
                 </ul>
               </>
-            )}
+            ))}
             <p className="ending-tip">
-              <strong>Next time:</strong> {lost.tip}
+              <strong>{localize("Next time:")}</strong> {localize(lost.tip)}
             </p>
           </section>
-        )}
+        ))}
 
         <div className="ending-stats">
-          {ENDING_STATS.map((stat) => (
+          {localize(ENDING_STATS.map((stat) => (
             <div key={stat.key} className="ending-stat">
-              <span className="ending-stat-icon" aria-hidden="true">{stat.icon}</span>
-              <span className="ending-stat-label">{stat.label}</span>
-              <span className="ending-stat-value">{Math.round(resources[stat.key])}%</span>
+              <span className="ending-stat-icon" aria-hidden="true">{localize(stat.icon)}</span>
+              <span className="ending-stat-label">{localize(stat.label)}</span>
+              <span className="ending-stat-value">{localize(Math.round(resources[stat.key]))}%</span>
             </div>
-          ))}
-          {!lost && (
+          )))}
+          {localize(!lost && (
             <div className="ending-stat overall">
               <span className="ending-stat-icon" aria-hidden="true">📊</span>
-              <span className="ending-stat-label">Overall</span>
-              <span className="ending-stat-value">{avg}%</span>
+              <span className="ending-stat-label">{localize("Overall")}</span>
+              <span className="ending-stat-value">{localize(avg)}%</span>
             </div>
-          )}
+          ))}
         </div>
 
         <div className="ending-nasa-box">
-          {lost ? (
-            <p>{lost.fact}</p>
+          {localize(lost ? (
+            <p>{localize(lost.fact)}</p>
           ) : (
             <>
-              <h3>🚀 You just lived what real astronauts face!</h3>
-              <p>
-                Everything in this game was based on real events from NASA missions:
-                Apollo 13, MIR, the International Space Station, and the CHAPEA Mars simulation.
-              </p>
+              <h3>{localize("🚀 You just lived what real astronauts face!")}</h3>
+              <p>{localize(" Everything in this game was based on real events from NASA missions: Apollo 13, MIR, the International Space Station, and the CHAPEA Mars simulation. ")}</p>
             </>
-          )}
-          <p className="ending-source">
-            Data sources: NASA DONKI, NASA ECLSS, NASA OSDR
-          </p>
-          <button type="button" className="ending-credits" onClick={onOpenCredits}>
-            See credits &amp; NASA sources
-          </button>
+          ))}
+          <p className="ending-source">{localize(" Data sources: NASA DONKI, NASA ECLSS, NASA OSDR ")}</p>
+          <button type="button" className="ending-credits" onClick={onOpenCredits}>{localize(" See credits & NASA sources ")}</button>
         </div>
 
         <div className="ending-actions">
-          {lost && retryDay !== null && (
-            <Button variant="primary" size="lg" icon="⏪" onClick={onRetry}>
-              Try again from Day {retryDay}
+          {localize(lost && retryDay !== null && (
+            <Button variant="primary" size="lg" icon="⏪" onClick={onRetry}>{localize(" Try again from Day ")}{localize(retryDay)}
             </Button>
-          )}
+          ))}
           <Button variant={lost && retryDay !== null ? 'secondary' : 'primary'} size="lg" icon="🔄" onClick={onReplay}>
-            {endingType === 'good' ? 'Play Again' : lost ? 'Start a new mission' : 'Try a Different Strategy'}
+            {localize(endingType === 'good' ? 'Play Again' : lost ? 'Start a new mission' : 'Try a Different Strategy')}
           </Button>
         </div>
       </div>

@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useEffect } from 'react';
 import './GameMenus.css';
 
@@ -22,22 +23,22 @@ export function ScreenNav({ backLabel, onBack, skipLabel, onSkip }: ScreenNavPro
   }, [onBack]);
 
   return (
-    <nav className="gm-screen-nav" aria-label="Screen navigation">
+    <nav className="gm-screen-nav" aria-label={localize("Screen navigation")}>
       <button type="button" className="gm-btn gm-btn--ghost" onClick={onBack}>
         <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M15 5l-7 7 7 7" />
         </svg>
-        {backLabel}
-        <kbd className="gm-kbd">Esc</kbd>
+        {localize(backLabel)}
+        <kbd className="gm-kbd">{localize("Esc")}</kbd>
       </button>
-      {onSkip && skipLabel && (
+      {localize(onSkip && skipLabel && (
         <button type="button" className="gm-btn gm-btn--ghost" onClick={onSkip}>
-          {skipLabel}
+          {localize(skipLabel)}
           <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M6 5l7 7-7 7M13 5l7 7-7 7" />
           </svg>
         </button>
-      )}
+      ))}
     </nav>
   );
 }

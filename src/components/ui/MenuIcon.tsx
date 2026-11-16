@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import type { ReactNode } from 'react';
 
 export type MenuIconName =
@@ -53,7 +54,7 @@ export function MenuIcon({ name, size = 22 }: { name: MenuIconName; size?: numbe
 
   return (
     <svg className="menu-icon" width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      {paths[name]}
+      {localize(paths[name])}
     </svg>
   );
 }

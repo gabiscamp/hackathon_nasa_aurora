@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 interface ProgressBarProps {
   value: number;
   max?: number;
@@ -23,12 +24,12 @@ export function ProgressBar({
 
   return (
     <div className={`progress-container progress-${size}`}>
-      {(icon || label) && (
+      {localize((icon || label) && (
         <div className="progress-label">
-          {icon && <span className="progress-icon">{icon}</span>}
-          {label && <span className="progress-text">{label}</span>}
+          {localize(icon && <span className="progress-icon">{localize(icon)}</span>)}
+          {localize(label && <span className="progress-text">{localize(label)}</span>)}
         </div>
-      )}
+      ))}
       <div className="progress-track">
         <div
           className={`progress-fill ${isLow ? 'progress-low' : ''} ${isCritical ? 'progress-critical' : ''}`}
@@ -38,11 +39,11 @@ export function ProgressBar({
           }}
         />
       </div>
-      {showValue && (
+      {localize(showValue && (
         <span className={`progress-value ${isCritical ? 'text-critical' : ''}`}>
-          {Math.round(value)}
+          {localize(Math.round(value))}
         </span>
-      )}
+      ))}
     </div>
   );
 }

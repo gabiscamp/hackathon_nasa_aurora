@@ -1,0 +1,10 @@
+.language-switcher { position: fixed; top: max(8px, env(safe-area-inset-top)); right: max(8px, env(safe-area-inset-right)); display: flex; gap: 3px; padding: 3px; border: 1px solid #46546f; border-radius: 10px; background: #0a0e27; z-index: 20000; }
+.language-switcher button { min-width: 44px; min-height: 44px; padding: 4px 7px; border-radius: 6px; border: 1px solid transparent; background: transparent; color: #f0ece4; font-size: 14px; font-weight: 600; }
+.language-switcher button[aria-pressed="true"] { background: #315780; border-color: #4dc9f6; }
+.language-switcher button:hover { transform: none; background: #263a58; }
+/* Keep existing top-right scene navigation clear of the persistent language choices. */
+.gm-screen-nav { padding-right: 160px; }
+.title-screen .title-topbar { right: 170px; }
+.hud .hud-objective { top: calc(var(--hud-edge) + 52px); }
+.intro-ai-credit { top: 110px; }
+@media (max-width: 600px) { .language-switcher { gap: 1px; } .language-switcher button { min-width: 40px; } }

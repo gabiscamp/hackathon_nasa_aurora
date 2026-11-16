@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import type { ReactNode } from 'react';
 import { EnergyIcon, FoodIcon, OxygenIcon, RadiationIcon, WarningIcon, WaterIcon } from './HudIcons';
 import { MenuIcon } from '../ui/MenuIcon';
@@ -50,69 +51,62 @@ export function HowToPlay() {
     <div className="gm-help">
       <div className="gm-help__col">
         <section>
-          <h3><MenuIcon name="mission" /> Your goal</h3>
-          <p>Keep the station and the crew safe for 45 days near Mars.</p>
+          <h3><MenuIcon name="mission" />{localize(" Your goal")}</h3>
+          <p>{localize("Keep the station and the crew safe for 45 days near Mars.")}</p>
         </section>
 
         <section>
-          <h3><MenuIcon name="resources" /> Missions</h3>
+          <h3><MenuIcon name="resources" />{localize(" Missions")}</h3>
           <ol>
-            <li>
-              An alarm rings and a red <span className="gm-help__bang">!</span> shows where to go (on the map too).
+            <li>{localize(" An alarm rings and a red ")}<span className="gm-help__bang">!</span>{localize(" shows where to go (on the map too). ")}</li>
+            <li>{localize(" Walk there and press ")}<kbd className="gm-kbd">{localize("E")}</kbd>.
             </li>
-            <li>
-              Walk there and press <kbd className="gm-kbd">E</kbd>.
-            </li>
-            <li>Choose what the crew should do. Every choice changes the station bars.</li>
+            <li>{localize("Choose what the crew should do. Every choice changes the station bars.")}</li>
           </ol>
         </section>
 
         <section>
-          <h3><MenuIcon name="warning" /> How you can lose</h3>
-          <p>
-            If <strong>oxygen</strong> reaches 0 or <strong>radiation</strong> reaches 100, the
-            station is lost and the crew escapes in the capsule. One bad bar pulls the others down: no energy stops the
-            air, and no air, water or food makes the crew sick a little more every day.
-          </p>
+          <h3><MenuIcon name="warning" />{localize(" How you can lose")}</h3>
+          <p>{localize(" If ")}<strong>{localize("oxygen")}</strong>{localize(" reaches 0 or ")}<strong>{localize("radiation")}</strong>{localize(" reaches 100, the station is lost and the crew escapes in the capsule. One bad bar pulls the others down: no energy stops the air, and no air, water or food makes the crew sick a little more every day. ")}</p>
         </section>
 
         <section>
-          <h3><MenuIcon name="controls" /> Keys</h3>
+          <h3><MenuIcon name="controls" />{localize(" Keys")}</h3>
           <ul className="gm-controls">
-            {CONTROLS.map((c) => (
+            {localize(CONTROLS.map((c) => (
               <li key={c.action}>
                 <span className="gm-controls__keys">
-                  {c.keys.map((k) => (
+                  {localize(c.keys.map((k) => (
                     <kbd key={k} className="gm-kbd">
-                      {k}
+                      {localize(k)}
                     </kbd>
-                  ))}
+                  )))}
                 </span>
-                {c.action}
+                {localize(c.action)}
               </li>
-            ))}
+            )))}
           </ul>
         </section>
       </div>
 
       <section>
-        <h3><MenuIcon name="resources" /> Station bars</h3>
+        <h3><MenuIcon name="resources" />{localize(" Station bars")}</h3>
         <ul className="gm-help__bars">
-          {BARS.map((b) => (
+          {localize(BARS.map((b) => (
             <li key={b.name}>
               <span className="gm-help__icon" style={{ color: b.color }}>
-                {b.icon}
+                {localize(b.icon)}
               </span>
               <span>
-                <strong>{b.name}:</strong> {b.text}
+                <strong>{localize(b.name)}:</strong> {localize(b.text)}
               </span>
             </li>
-          ))}
+          )))}
           <li>
             <span className="gm-help__icon" style={{ color: '#e74c3c' }}>
               <WarningIcon size={22} />
             </span>
-            <span>A bar in danger turns red, blinks and shows a warning.</span>
+            <span>{localize("A bar in danger turns red, blinks and shows a warning.")}</span>
           </li>
         </ul>
       </section>

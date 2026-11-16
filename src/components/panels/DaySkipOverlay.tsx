@@ -1,3 +1,4 @@
+import { t as localize } from '../../i18n/translate';
 import { useState, useEffect, useCallback } from 'react';
 import { gameEvents, EVENTS } from '../../game/events';
 import './DaySkipOverlay.css';
@@ -67,13 +68,13 @@ export function DaySkipOverlay({
       <div className="dayskip-overlay__backdrop" />
       <div className="dayskip-hud">
         {/* The bubble is drawn on the canvas; this copy lets "Read" (L) and screen readers hear it. */}
-        <p className="sr-only" data-read aria-live="polite">{text}</p>
-        <span className="dayskip-hud__day">{dayLabel}</span>
-        {bubbleDone && (
+        <p className="sr-only" data-read aria-live="polite">{localize(text)}</p>
+        <span className="dayskip-hud__day">{localize(dayLabel)}</span>
+        {localize(bubbleDone && (
           <button className="mission-btn mission-btn--primary" onClick={handleContinue}>
-            {phase === 'skip' ? 'Continue' : 'Begin Mission'}
+            {localize(phase === 'skip' ? 'Continue' : 'Begin Mission')}
           </button>
-        )}
+        ))}
       </div>
     </div>
   );
