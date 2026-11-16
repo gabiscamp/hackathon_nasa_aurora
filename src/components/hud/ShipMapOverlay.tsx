@@ -9,6 +9,7 @@ import {
   WORLD_HEIGHT,
   WORLD_WIDTH,
   placedCenter,
+  pieceScale,
   type Placement,
 } from "../../game/world/shipLayout";
 import { PIECES } from "../../game/world/stationLayout";
@@ -32,8 +33,8 @@ function placedSize(p: Placement): { w: number; h: number } {
   const { width, height } = PIECES[p.piece];
   const sideways = p.angle === 90 || p.angle === -90;
   return {
-    w: (sideways ? height : width) * STATION_SCALE,
-    h: (sideways ? width : height) * STATION_SCALE,
+    w: (sideways ? height : width) * STATION_SCALE * pieceScale(p.piece),
+    h: (sideways ? width : height) * STATION_SCALE * pieceScale(p.piece),
   };
 }
 
@@ -146,8 +147,8 @@ function StationDrawing({ view }: { view: Box }) {
         .sort((a, b) => a.depth - b.depth)
         .map((p, i) => {
           const c = placedCenter(p);
-          const w = PIECES[p.piece].width * STATION_SCALE;
-          const h = PIECES[p.piece].height * STATION_SCALE;
+          const w = PIECES[p.piece].width * STATION_SCALE * pieceScale(p.piece);
+          const h = PIECES[p.piece].height * STATION_SCALE * pieceScale(p.piece);
           return (
             <image
               key={i}

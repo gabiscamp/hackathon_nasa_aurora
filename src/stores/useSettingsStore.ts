@@ -7,6 +7,7 @@ export type TextSpeed = 'slow' | 'normal' | 'instant';
 /** Gentle, capped sound levels. No option amplifies a sound above its designed loudness. */
 export const VOLUME_LEVELS: readonly { label: string; value: number }[] = [
   { label: 'Off', value: 0 },
+  { label: 'Narration-friendly (10%)', value: 0.1 },
   { label: 'Low', value: 0.35 },
   { label: 'Normal', value: 0.7 },
   { label: 'Full', value: 1 },

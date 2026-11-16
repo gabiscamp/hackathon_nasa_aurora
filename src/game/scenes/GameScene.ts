@@ -51,6 +51,7 @@ import {
   NPC_SPAWNS,
   ROOM_CENTERS,
   placedCenter,
+  pieceScale,
   isBoxWalkable,
   roomAt,
   type RoomId,
@@ -234,7 +235,7 @@ export class GameScene extends Phaser.Scene {
     this.emitPosition(true);
 
     const onInteract = () => {
-      if (this.frozen) return;
+      if (this.frozen || this.scene.isPaused()) return;
       // A mission "!" comes first: the robot walking by must never block a problem.
       const id = this.nearestMarker();
       if (id) {
@@ -316,7 +317,7 @@ export class GameScene extends Phaser.Scene {
       this.textures.get(key).setFilter(Phaser.Textures.FilterMode.LINEAR);
       const c = placedCenter(p);
       const piece = () =>
-        this.add.image(c.x, c.y, key).setScale(STATION_SCALE).setAngle(p.angle).setFlip(p.flipX, p.flipY);
+        this.add.image(c.x, c.y, key).setScale(STATION_SCALE * pieceScale(p.piece)).setAngle(p.angle).setFlip(p.flipX, p.flipY);
       // Pieces stack between the backdrop (0) and the debug overlay (5).
       piece().setDepth(1 + p.depth / 10);
 
@@ -374,7 +375,7 @@ export class GameScene extends Phaser.Scene {
       const c = placedCenter(p);
       const img = this.make
         .image({ x: c.x, y: c.y, key: stationTextureKey(p.piece) }, false)
-        .setScale(STATION_SCALE)
+        .setScale(STATION_SCALE * pieceScale(p.piece))
         .setAngle(p.angle)
         .setFlip(p.flipX, p.flipY);
       rt.draw(img);

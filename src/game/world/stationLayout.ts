@@ -37,6 +37,11 @@ export type RoomId =
 /** World pixels per art pixel. */
 export const STATION_SCALE = 0.45;
 
+/** Individual module scale, in addition to the station-wide scale. */
+export function pieceScale(piece: PieceKey): number {
+  return piece === 'lab' ? 1.2 : 1;
+}
+
 export type PieceKey =
   | 'greenhouse'
   | 'lab'
@@ -313,7 +318,7 @@ const GREENHOUSE = place('greenhouse', hatchX(0) - 377, HANG_Y, DEPTH.room);
 const KITCHEN = place('kitchen', hatchX(0) - (743 - 377), HANG_Y + PIECES.greenhouse.height - 25, DEPTH.room, {
   angle: 180,
 });
-const LAB = place('lab', hatchX(2) - 375, HANG_Y, DEPTH.room);
+const LAB = place('lab', hatchX(2) - 375 * pieceScale('lab'), HANG_Y, DEPTH.room);
 const BATHROOM = place('bathroom', hatchX(3) - 197, HANG_Y, DEPTH.room);
 const GYM = place('gym', hatchX(4) - 377, HANG_Y, DEPTH.room);
 const CAPSULES = place('capsules', hatchX(4) - 410, HANG_Y + PIECES.gym.height - 25, DEPTH.room);
@@ -379,7 +384,8 @@ export const WORLD_HEIGHT = Math.ceil((LOWEST_ROOM_BOTTOM + 130) * STATION_SCALE
 /** Size of a placement's bounding box after rotation (art px). */
 function placedSize(p: Placement): { w: number; h: number } {
   const def = PIECES[p.piece];
-  return p.angle === 90 || p.angle === -90 ? { w: def.height, h: def.width } : { w: def.width, h: def.height };
+  const scale = pieceScale(p.piece);
+  return p.angle === 90 || p.angle === -90 ? { w: def.height * scale, h: def.width * scale } : { w: def.width * scale, h: def.height * scale };
 }
 
 /** Art-px center of the placement. */
@@ -398,8 +404,8 @@ function toWorld(p: Placement, u: number, v: number): { x: number; y: number } {
   const def = PIECES[p.piece];
   const lu = p.flipX ? def.width - u : u;
   const lv = p.flipY ? def.height - v : v;
-  const du = lu - def.width / 2;
-  const dv = lv - def.height / 2;
+  const du = (lu - def.width / 2) * pieceScale(p.piece);
+  const dv = (lv - def.height / 2) * pieceScale(p.piece);
   let rx: number;
   let ry: number;
   switch (p.angle) {

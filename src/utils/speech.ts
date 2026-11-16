@@ -90,6 +90,8 @@ function controlText(el: Element): string | null {
 
 /** Accessible text of a visible element, with natural pauses between UI blocks. */
 function rawText(el: Element): string {
+  // Cinematic captions animate visually under aria-hidden children; their label is canonical.
+  if (el.hasAttribute('data-read') && el.getAttribute('aria-label')) return el.getAttribute('aria-label') ?? '';
   if (hidden(el)) return '';
   const canonical = el.getAttribute('data-read-text');
   if (canonical !== null) return canonical;
